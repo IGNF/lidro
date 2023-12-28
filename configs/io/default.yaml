@@ -1,0 +1,10 @@
+# Folder containing the input tiles (filtered and potentially with buffer added).
+# (set to `--output_dir` if not provided).
+input_dir: /path/to/origin/las/folder
+input_filename: filename.las
+
+# Spatial reference to use to override the one from input las.
+spatial_reference: EPSG:2154
+srid : 2154
+
+output_dir: /path/to/output/folder  # Directory folder for saving the outputs

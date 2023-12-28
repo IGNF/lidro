@@ -1,0 +1,2 @@
+pixel_size: 1  # pixel size (in metres) for calculate
+no_data_value: -9999
