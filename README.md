@@ -7,3 +7,12 @@ pré-requis: installer Mamba
 mamba env update -n lidro -f environment.yml
 conda activate lidro
 ```
+
+
+
+
+## Tests
+
+```
+python -m pytest -s
+```
