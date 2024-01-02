@@ -3,7 +3,7 @@ from lidro.tasks.filter_las import read_point_cloud
 import numpy as  np
 from pathlib import Path
 
-las_file = "./data/LHD_FXX_0706_6627_PTS_C_LAMB93_IGN69_TEST.las"
+las_file = "./data/pointcloud/LHD_FXX_0706_6627_PTS_C_LAMB93_IGN69_TEST.las"
 
 
 def test_input_exist():
