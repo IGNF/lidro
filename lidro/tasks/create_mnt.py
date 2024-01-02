@@ -2,8 +2,8 @@
 """ Create digital model of terrain/surface/height
 """
 from typing import List
-import pdal
 
+import pdal
 
 
 class CreateRaster:
@@ -72,25 +72,21 @@ class CreateRaster:
                 fpath(str):  input file for the pdal pipeliine
                 output_file(str): output file for the pdal pipeliine
             """
-            # Read pointcloud
-            if not isinstance(self.classes, list):
-                raise TypeError("This function's parameter is not good caracter")
-            elif not isinstance(self.spatial_ref, str):
-                raise TypeError("This function's parameter is not good caracter")
-            else:
-                pipeline = pdal.Reader.las(filename=fpath, override_srs=self.spatial_ref, nosrs=True)
-                if self.classes:
-                    pipeline |= pdal.Filter.range(limits=",".join(f"Classification[{c}:{c}]" for c in self.classes))
+            pipeline = pdal.Reader.las(filename=fpath, override_srs=self.spatial_ref, nosrs=True)
+            if self.classes:
+                pipeline |= pdal.Filter.range(limits=",".join(f"Classification[{c}:{c}]" for c in self.classes))
 
-                pipeline |= pdal.Filter.delaunay()
+            pipeline |= pdal.Filter.delaunay()
 
-                pipeline |= pdal.Filter.faceraster(
-                        resolution=str(self.pixel_size),
-                        origin_x=str(self.origin[0] - self.pixel_size / 2),  # lower left corner
-                        origin_y=str(self.origin[1] + self.pixel_size / 2 - self.tile_width),  # lower left corner
-                        width=str(self.nb_pixels[0]),
-                        height=str(self.nb_pixels[1]),
-                )
-                pipeline |= pdal.Writer.raster(
-                    gdaldriver="GTiff", nodata=self.no_data_value, data_type="float32", filename=output_file
-                )
+            pipeline |= pdal.Filter.faceraster(
+                resolution=str(self.pixel_size),
+                origin_x=str(self.origin[0] - self.pixel_size / 2),  # lower left corner
+                origin_y=str(self.origin[1] + self.pixel_size / 2 - self.tile_width),  # lower left corner
+                width=str(self.nb_pixels[0]),
+                height=str(self.nb_pixels[1]),
+            )
+            pipeline |= pdal.Writer.raster(
+                gdaldriver="GTiff", nodata=self.no_data_value, data_type="float32", filename=output_file
+            )
+
+            pipeline.execute()
