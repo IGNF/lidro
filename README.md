@@ -8,8 +8,15 @@ mamba env update -n lidro -f environment.yml
 conda activate lidro
 ```
 
+## Données de test
 
+Les données de test se trouvent dans un autre projet ici : http://gitlab.forge-idi.ign.fr/Lidar/lidro-data
 
+Ce projet est un sous module git, qui sera téléchargé dans le dossier `data`, via la commande:
+
+```
+git submodule update --init --recursive
+```
 
 ## Tests
 
