@@ -1,6 +1,6 @@
 import pytest
 import os
-from lidro.tasks.create_mnt import CreateRaster
+from lidro.rasters.create_raster import CreateRaster
 import rasterio
 import numpy as np
 
@@ -34,11 +34,11 @@ def create_raster_instance():
 
 def test_unexisting_input_las(create_raster_instance):
     with pytest.raises(RuntimeError):
-        create_raster_instance.execute_pdal_tin("./test_unuexisting.las", "")
+        create_raster_instance.create_dtm("./test_unuexisting.las", "")
 
-def test_execute_pdal_tin(create_raster_instance):
-    create_raster_instance.execute_pdal_tin(input_file, raster_file)
-
+def test_create_dtm(create_raster_instance):
+    create_raster_instance.create_dtm(input_file, raster_file)
+    # Check if raster exists
     assert os.path.isfile(raster_file)
 
     with rasterio.open(raster_file) as src:

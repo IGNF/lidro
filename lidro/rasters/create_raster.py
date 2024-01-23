@@ -47,7 +47,7 @@ class CreateRaster:
             self.tile_coord_scale = tile_coord_scale
             self.classes = classes
 
-        def execute_pdal_tin(self, fpath: str, output_file: str):
+        def create_dtm(self, fpath: str, output_file: str):
             """Sets up a PDAL pipeline that reads a ground filtered LAS
             file, and interpolates either using "Delaunay", then " Faceraster" and writes it via RASTER. Uses a no-data
             value set in commons.
@@ -87,6 +87,52 @@ class CreateRaster:
             )
             pipeline |= pdal.Writer.raster(
                 gdaldriver="GTiff", nodata=self.no_data_value, data_type="float32", filename=output_file
+            )
+
+            pipeline.execute()
+
+        def create_mask_raster(self, fpath: str, output_file: str, method: str):
+            """Sets up a PDAL pipeline that reads a ground filtered LAS
+            file, and writes it via GDAL. The GDAL writer has interpolation
+            options, exposing the radius, power and a fallback kernel width
+            to be configured. More about these in the readme on GitHub.
+
+            The GDAL writer creates rasters using the data specified in the dimension option (defaults to Z).
+            The writer creates up to six rasters based on different statistics in the output dataset.
+            The order of the layers in the dataset is as follows:
+                - min : Give the cell the minimum value of all points within the given radius.
+                - max : Give the cell the maximum value of all points within the given radius.
+                - mean : Give the cell the mean value of all points within the given radius.
+                - idw: Cells are assigned a value based on Shepard’s inverse distance weighting algorithm, considering all
+                points within the given radius.
+
+            Args:
+                fpath(str):  input file for the pdal pipeliine
+                output_file(str): output file for the pdal pipeliine
+                method(str): Chose of the method = min / max / mean / idw
+
+                rad(float): Radius about cell center bounding points to use to calculate a cell value.
+                [Default: resolution * sqrt(2)]
+                pwr(float): Exponent of the distance when computing IDW. Close points have higher significance than far
+                points. [Default: 1.0]
+                wnd(float): The maximum distance from donor cell to a target cell when applying the fallback interpolation
+                method. [default:0]
+            """
+            pipeline = pdal.Reader.las(filename=fpath, override_srs=self.spatial_ref, nosrs=True)
+            if self.classes:
+                pipeline |= pdal.Filter.range(limits=",".join(f"Classification[{c}:{c}]" for c in self.classes))
+            pipeline |= pdal.Writer.gdal(
+                output_type=method,
+                resolution=str(self.pixel_size),
+                origin_x=str(self.origin[0] - self.pixel_size / 2),  # lower left corner
+                origin_y=str(self.origin[1] + self.pixel_size / 2 - self.tile_width),  # lower left corner
+                width=str(self.nb_pixels[0]),
+                height=str(self.nb_pixels[1]),
+                power=2,
+                window_size=5,
+                nodata=self.no_data_value,
+                data_type="float32",
+                filename=output_file,
             )
 
             pipeline.execute()
