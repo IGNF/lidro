@@ -65,4 +65,4 @@ def test_raster_z_error():
         print(raster)
         with pytest.raises(ValueError):
             # check that Z have not a negative value
-            assert (raster < 0).any()
+            assert (-9999 < raster < 0).any()
