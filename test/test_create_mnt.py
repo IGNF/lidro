@@ -2,7 +2,7 @@ import pytest
 import os
 from lidro.tasks.create_mnt import CreateRaster
 import rasterio
-from pathlib import Path
+import numpy as np
 
 input_file = "./data/pointcloud/LHD_FXX_0706_6627_PTS_C_LAMB93_IGN69_TEST.las"
 raster_file = "./tmp/test_mnt_0706_6627_LAMB93_IGN69_50CM_TIN.tif"
@@ -38,31 +38,15 @@ def test_unexisting_input_las(create_raster_instance):
 
 def test_execute_pdal_tin(create_raster_instance):
     create_raster_instance.execute_pdal_tin(input_file, raster_file)
-    # Check if raster exists
+
     assert os.path.isfile(raster_file)
 
-def test_raster_resolution():
-     with rasterio.open(raster_file) as src:
-        if src is not None:
-            resolution = src.res
-            assert resolution == (0.5, 0.5)
+    with rasterio.open(raster_file) as src:
+        assert src is not None
+        assert src.res == (0.5, 0.5) # resolution
+        assert src.count == 1 # num_band
 
-def test_raster_band():
-     with rasterio.open(raster_file) as src:
-        if src is not None:
-            num_bands = src.count
-            assert num_bands == 1
-
-def test_raster_z_nodata():
-     with rasterio.open(raster_file) as src:
         raster = src.read(1)
-        # check that Z have a nodata value
-        assert (raster == -9999).any()
 
-def test_raster_z_error():
-     with rasterio.open(raster_file) as src:
-        raster = src.read(1)
-        print(raster)
-        with pytest.raises(ValueError):
-            # check that Z have not a negative value
-            assert (-9999 < raster < 0).any()
+        # raster value must be positif, or no data (-9999)
+        assert np.bitwise_or(raster > 0, raster == -9999).all()
