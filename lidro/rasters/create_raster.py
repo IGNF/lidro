@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-""" Create digital model of terrain/surface/height
+""" Create a raster from pointcloud with severals methods
 """
 from typing import List
 
@@ -92,7 +92,7 @@ class CreateRaster:
             pipeline.execute()
 
         def create_mask_raster(self, fpath: str, output_file: str, method: str):
-            """Sets up a PDAL pipeline that reads a ground filtered LAS
+            """Sets up a PDAL pipeline that reads a filtered LAS
             file, and writes it via GDAL. The GDAL writer has interpolation
             options, exposing the radius, power and a fallback kernel width
             to be configured. More about these in the readme on GitHub.
