@@ -7,11 +7,14 @@ from pathlib import Path
 input_file = "./data/pointcloud/LHD_FXX_0706_6627_PTS_C_LAMB93_IGN69_TEST.las"
 raster_file = "./tmp/test_mask_1_0706_6627_LAMB93_IGN69.tif"
 
+input_file = "./data/pointcloud/LHD_FXX_0706_6627_PTS_C_LAMB93_IGN69_TEST.las"
+raster_file = "./tmp/test_mnt_0706_6627_LAMB93_IGN69_50CM_TIN.tif"
+
 def setup_module(module):
     os.makedirs('tmp', exist_ok = True)
 
 @pytest.fixture
-def create_raster_1_instance():
+def create_raster_instance():
     # Create instance from "CreateRatser" for the tests
     nb_pixels = [2000, 2000]
     origin = [706000.0, 6627000.0]
@@ -20,7 +23,7 @@ def create_raster_1_instance():
     no_data_value = -9999
     tile_width = 1000
     tile_coord_scale = 1000
-    classes = [1, 2, 3, 4, 5, 6, 17, 64]
+    classes = [2, 66]
     return CreateRaster(
         nb_pixels=nb_pixels,
         origin=origin,
@@ -32,33 +35,21 @@ def create_raster_1_instance():
         classes=classes
     )
 
-def test_create_mask_raster_1(create_raster_1_instance):
-    create_raster_1_instance.create_mask_raster(input_file, raster_file, "min")
+def test_unexisting_input_las(create_raster_instance):
+    with pytest.raises(RuntimeError):
+        create_raster_instance.create_mask_raster("./test_unuexisting.las", "")
+
+def test_create_mask_raster(create_raster_instance):
+    create_raster_instance.create_mask_raster(input_file, raster_file)
     # Check if raster exists
     assert os.path.isfile(raster_file)
 
-def test_raster_resolution():
-     with rasterio.open(raster_file) as src:
-        if src is not None:
-            resolution = src.res
-            assert resolution == (0.5, 0.5)
+    with rasterio.open(raster_file) as src:
+        assert src is not None
+        assert src.res == (0.5, 0.5) # resolution
+        assert src.count == 1 # num_band
 
-def test_raster_band():
-     with rasterio.open(raster_file) as src:
-        if src is not None:
-            num_bands = src.count
-            assert num_bands == 1
-
-def test_raster_z_nodata():
-     with rasterio.open(raster_file) as src:
         raster = src.read(1)
-        # check that Z have a nodata value
-        assert (raster == -9999).any()
 
-def test_raster_z_error():
-     with rasterio.open(raster_file) as src:
-        raster = src.read(1)
-        print(raster)
-        with pytest.raises(ValueError):
-            # check that Z have not a negative value
-            assert (-9999 < raster < 0).any()
+        # raster value must be positif, or no data (-9999)
+        assert np.bitwise_or(raster > 0, raster == -9999).all()
