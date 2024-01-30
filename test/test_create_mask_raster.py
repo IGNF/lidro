@@ -3,12 +3,11 @@ import os
 from lidro.rasters.create_raster import CreateRaster
 import rasterio
 from pathlib import Path
+import numpy as np
 
 input_file = "./data/pointcloud/LHD_FXX_0706_6627_PTS_C_LAMB93_IGN69_TEST.las"
 raster_file = "./tmp/test_mask_1_0706_6627_LAMB93_IGN69.tif"
 
-input_file = "./data/pointcloud/LHD_FXX_0706_6627_PTS_C_LAMB93_IGN69_TEST.las"
-raster_file = "./tmp/test_mnt_0706_6627_LAMB93_IGN69_50CM_TIN.tif"
 
 def setup_module(module):
     os.makedirs('tmp', exist_ok = True)
@@ -37,10 +36,10 @@ def create_raster_instance():
 
 def test_unexisting_input_las(create_raster_instance):
     with pytest.raises(RuntimeError):
-        create_raster_instance.create_mask_raster("./test_unuexisting.las", "")
+        create_raster_instance.create_mask_raster("./test_unuexisting.las", "", "min")
 
 def test_create_mask_raster(create_raster_instance):
-    create_raster_instance.create_mask_raster(input_file, raster_file)
+    create_raster_instance.create_mask_raster(input_file, raster_file, "min")
     # Check if raster exists
     assert os.path.isfile(raster_file)
 

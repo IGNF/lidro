@@ -1,5 +1,5 @@
 import pytest
-from lidro.tasks.filter_las import read_point_cloud
+from lidro.filter.filter_las import read_point_cloud
 import numpy as  np
 from pathlib import Path
 
