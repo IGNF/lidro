@@ -4,6 +4,8 @@
 from typing import List
 
 import pdal
+from osgeo import gdal
+import numpy as np
 
 
 class CreateRaster:
