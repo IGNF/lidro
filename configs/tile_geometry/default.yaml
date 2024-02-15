@@ -1,2 +1,3 @@
 pixel_size: 1  # pixel size (in metres) for calculate
+nb_pixels: (1000, 1000)
 no_data_value: -9999
