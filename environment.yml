@@ -16,3 +16,5 @@ dependencies:
     # --------- hydra configs --------- #
   - hydra-core
   - hydra-colorlog
+  - pip:
+   - -r requirements.txt
