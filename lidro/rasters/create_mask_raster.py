@@ -10,43 +10,90 @@ from lidro.pointcloud.filter_las import filter_pointcloud
 from lidro.utils.get_pointcloud_origin import get_pointcloud_origin
 
 
-def create_mask(
-    filename: str,
-    pixel_size: float,
-    nb_pixels: Tuple[int, int] = (1000, 1000),
-    classes: List[int] = [0, 1, 2, 3, 4, 5, 6, 17, 66 ]
-    ):
-    """Create 2d binary occupancy map from points coordinates:
-    boolean 2d map with 1 where at least one point falls in the pixel, 0 everywhere else.
+class CreateMask:
+        """Create aa maks from pointcloud
+        """
 
-    Args:
-        filename(str): input pointcloud
-        pixel_size (float): pixel size (in meters) of the output map
-        nb_pixels (float, optional): number of pixels on each axis in format (x, y). Defaults to (1000, 1000).
+        def __init__(
+        self,
+        tile_size: int,
+        pixel_size: float,
+        spatial_ref: str,
+        no_data_value: int,
+        ):
+            """Initialize the create mask
 
-    Returns:
-        np.array: Boolean output map
-    """
-    # Read pointcloud, and extract vector of X / Y coordinates of all points 
-    points = read_pointcloud(filename) 
-    # Extract spatial coordinate of the upper-left corner of the raster (center of the upper-left pixel)
-    x_min, y_max = get_pointcloud_origin(points)
+            Args:
+                tile_size (int): tile of the raster grid (in meters)
+                pixel_size (float): distance between each node of the raster grid (in meters)
+                spatial_ref (str): spatial reference of the input LAS file
+                no_data_value (int): no-data value for the output raster
+            """
+            self.tile_size = tile_size
+            self.pixel_size = pixel_size
+            self.spatial_ref = spatial_ref
+            self.no_data_value = no_data_value
 
-    # Filter pointcloud by classes [0, 1, 2, 3, 4, 5, 6, 17, 66 ] 
-    points_filter = filter_pointcloud(filename, classes) 
-    x = points_filter[:, 0]
-    y = points_filter[:, 1]
+        def binarisation(self, points: np.array, origin: Tuple[int, int]):
+            """" Binarisation
+            
+            Args:
+                points (np.array): array from pointcloud
+                origin (Tuple[int, int]): spatial coordinate of the upper-left corner of the raster
+                    (center of the upper-left pixel)
 
-    # numpy array is filled with (y, x) instead of (x, y)
-    grid = np.zeros((nb_pixels[1], nb_pixels[0]), dtype=bool)
+            Returns:
+                bins (np.array): bins
+            """
+            # Compute number of points per bin
+            bins_x = np.arange(origin[0], origin[0] + self.tile_size + self.pixel_size, self.pixel_size)
+            bins_y = np.arange(origin[1] - self.tile_size, origin[1] + self.pixel_size, self.pixel_size)
+            _bins, _, _ = np.histogram2d(points[:, 1], points[:, 0], bins=[bins_y, bins_x])
+            bins = np.flipud(_bins)
+            bins = np.where(bins > 0, 0, 1)
+            
+            return bins
+        
+        def morphology_math_closing(self, input):
+            """ Apply a mathematical morphology operations: closing (dilation + erosion)
 
-    for x, y in zip(x, y):
-        grid_x = min(int((x - (x_min - pixel_size / 2)) / pixel_size), nb_pixels[0] - 1)  # x_min is left pixel center
-        grid_y = min(int(((y_max + pixel_size / 2) - y) / pixel_size), nb_pixels[1] - 1)  # y_max is upper pixel center
-        grid[grid_y, grid_x] = True
-    
-    # Apply a mathematical morphology operations: clonsg (dilation + erosion)
-    output = scipy.ndimage.binary_closing(grid)
+            Args:
+                input(np.array): bins array
+            
+            Returns:
+                output(np.array): bins array with closing
 
-    return output
+            """
+            output = scipy.ndimage.binary_closing(input, structure=np.ones((5,5))).astype(np.uint8)
+
+            return output
+
+        def create_mask(self, filename: str, classes: List[int]):
+            """ Create a mask 
+
+            Args:
+                filename(str): input pointcloud
+                classes (List[int]): List of classes to use for the binarisation (points with other
+                    classification values are ignored).
+
+            Returns:
+                bins (np.array): array from pointcloud
+            """
+            # Read pointcloud, and extract vector of X / Y coordinates of all points 
+            array = read_pointcloud(filename) 
+            # Extracts parameters for binarisation
+            pcd_origin_x, pcd_origin_y = get_pointcloud_origin(array, self.tile_size, 0)
+
+            raster_origin = (pcd_origin_x - self.pixel_size / 2, pcd_origin_y + self.pixel_size / 2)
+
+            # Filter pointcloud by classes [0, 1, 2, 3, 4, 5, 6, 17, 66 ] 
+            array_filter = filter_pointcloud(filename, classes) 
+
+            # Binarisation
+            _bins = self.binarisation(array_filter, raster_origin)
+
+            # Apply a mathematical morphology operations: clonsing 
+            closing_bins = self.morphology_math_closing(_bins)
+
+            return closing_bins
 
