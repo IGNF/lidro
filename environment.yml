@@ -9,10 +9,12 @@ dependencies:
   - laspy
   - numpy
   - scipy
+  - geojson
   - rasterio
   - pyproj
   - pdal>=2.6
   - python-pdal>=3.2.1
+  - shapely>=2.0.3
     # --------- hydra configs --------- #
   - hydra-core
   - hydra-colorlog
