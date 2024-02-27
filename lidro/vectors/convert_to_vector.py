@@ -1,92 +1,56 @@
 # -*- coding: utf-8 -*-
-""" Convert a raster (array) to vector
+""" Vectorize
 """
-import rasterio
-from rasterio.features import shapes
-from geojson import FeatureCollection, dump
-from shapely.geometry import shape
-from rasterio.transform import from_origin
+import geopandas as gpd
+import pandas as pd
 import numpy as np
+from rasterio.transform import from_origin
+from rasterio.features import shapes as rasterio_shapes
+from shapely.geometry import shape as shapely_shape
 
-from lidro.pointcloud.read_las import read_pointcloud
-from lidro.utils.get_pointcloud_origin import get_pointcloud_origin
 
-class ConvertVector:
-        """Convert numpy.array to vector (GeoJSON)
-        """
+from lidro.rasters.create_mask_raster import detect_hydro_by_tile
 
-        def __init__(
-        self,
-        input_pointcloud : str,
-        tile_size: int,
-        pixel_size: float,
-        spatial_ref: str
-        ):
-            """Initialize the create mask
 
-            Args:
-                input_pointcloud (str): las file
-                tile_size (int): tile of the raster grid (in meters)
-                pixel_size (float): distance between each node of the raster grid (in meters)
-                spatial_ref (str): spatial reference of the input LAS file
-            """
-            self.input_pointcloud = input_pointcloud
-            self.tile_size = tile_size
-            self.pixel_size = pixel_size
-            self.spatial_ref = spatial_ref
+def vectorize_bins(filename: str, output: str, tile_size: int, pixel_size: float, classes: list, crs: str):
+    """ Converts a binary array to GeoJSON (multipolygon), with polygon smoothing.
 
-        def extract_origin(self):
-            """
-            Extract a spatial coordinate of the upper-left corner of the raster
+        Args:
+            - filename(str): input pointcloud
+            - output(str): path to output
+            - tile_size (int): tile of the raster grid (in meters)
+            - pixel_size (float): distance between each node of the raster grid (in meters)
+            - classes (List[int]): List of classes to use for the binarisation (points with other
+                    classification values are ignored).
+            - crs (dict): a pyproj CRS object
+    """
+    # Read a binary image representing hydrographic surface(s)
+    binary_image, pcd_origin = detect_hydro_by_tile(filename, tile_size, pixel_size, classes)
+    
+    # Extract origin
+    origin_x = pcd_origin[0]
+    origin_y = pcd_origin[1]
+    # Calculate "transform"
+    transform = from_origin(origin_x, origin_y, pixel_size, pixel_size)
 
-            Returns :
-                - raster_origin List[int]: spatial coordinate of the upper-left corner of the raster
-            """
-            # Read pointcloud, and extract vector of X / Y coordinates of all points 
-            array = read_pointcloud(self.input_pointcloud) 
-            # Extracts parameters for binarisation
-            pcd_origin_x, pcd_origin_y = get_pointcloud_origin(array, self.tile_size, 0)
+    # Convert binary image to vector
+    geometry = [shapely_shape(shapedict) for ii, (shapedict, value) in enumerate(rasterio_shapes(
+                    binary_image.astype(np.int16), mask=None, connectivity=8, transform=transform)) 
+                if value != 0]
+    # keep only water's area > 1000 m²
+    filter_geometry = [geom for geom in geometry if geom.area > 1000]
+    nb_filter_geometry = len(filter_geometry)
 
-            raster_origin = (pcd_origin_x - self.pixel_size / 2, pcd_origin_y + self.pixel_size / 2)
+    gdf = gpd.GeoDataFrame(
+            {"layer": [ii for ii, geom in enumerate(filter_geometry)] * np.ones(nb_filter_geometry), "dalles": filename, "geometry": filter_geometry},
+            geometry="geometry",
+            crs=crs, 
+            )
+   
+    # save the result
+    gdf.to_file(output, driver='GeoJSON', crs=crs)
 
-            return raster_origin
+    
 
-        def raster_to_geojson(self, binary_image, output_geojson):
-            """
-            Converts a numpy.array representing a binary raster to GeoJSON (multipolygon), with polygon smoothing.
 
-            Args:
-            - binary_image (numpy.array): Numpy array representing the binary raster.
-            - output_geojson (str): Path to the output GeoJSON file.
-            """
-            # Read a binary image
-            image = binary_image
-            # Extract origin
-            origin = self.extract_origin()
-            origin_x = origin[0]
-            origin_y = origin[1]
-            # Transform
-            transform = from_origin(origin_x, origin_y, self.pixel_size, self.pixel_size)
-
-            results = ({"properties": {"raster_val": v}, "geometry": s}
-                            for i, (s, v) in enumerate(shapes(image.astype(np.int16), mask=None, transform=transform)) if v != 0)
-            geoms = list(results)
-
-            # filter water's zone : keep only water's area > 1 000 m²
-            _json = []
-            for i in enumerate(geoms):
-                poly  = i[:][1]['geometry']
-                area = shape(poly).area
-                if area > 1000 :
-                    result = {"geometry": poly}
-                    _json.append(result)
-            
-            # Create JSON
-            _geojson = ({"type": "Feature", "geometry": i[1]['geometry'], "properties": {"id": i[0], "cls": "0"}}
-                    for i in enumerate(_json, 1))
-            information = list(_geojson)
-            feature_collection = FeatureCollection(information)
-
-            with open(output_geojson, 'w') as f:
-                dump(feature_collection, f)
-            
+    

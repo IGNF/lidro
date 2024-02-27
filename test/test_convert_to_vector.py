@@ -1,53 +1,23 @@
-# import pytest
-# import os
-# from lidro.vectors.convert_to_vector import ConvertVector
-# from lidro.rasters.create_mask_raster import CreateMask
-# from pathlib import Path
-# import numpy as np
-# import rasterio
+import pytest
+import os
 
-# las_file= "./data/pointcloud/Semis_2021_0830_6291_LA93_IGN69.laz"
+from lidro.vectors.convert_to_vector import vectorize_bins
+from pathlib import Path
 
-# #las_file = "./data/pointcloud/LHD_FXX_0706_6627_PTS_C_LAMB93_IGN69_TEST.las"
-# output_geojson = "./tmp/Semis_2021_0830_6291_LA93_IGN69.geojson"
 
-# @pytest.fixture
-# def create_vector_instance():
-#     # Create instance from "ConvertVector" for the tests
-#     input_pointcloud = las_file
-#     tile_size = 1000
-#     pixel_size = 1
-#     spatial_ref = 'EPSG:2154'
-#     return ConvertVector(
-#         input_pointcloud=las_file,
-#         tile_size=tile_size,
-#         pixel_size=pixel_size,
-#         spatial_ref=spatial_ref,
-#     )
+las_file= "./data/pointcloud/Semis_2021_0830_6291_LA93_IGN69.laz"
+#las_file = "./data/pointcloud/LHD_FXX_0706_6627_PTS_C_LAMB93_IGN69_TEST.las"
+output = "./tmp/MaskHydro_1_2021_0830_6291.geojson"
 
-# @pytest.fixture
-# def create_raster_instance():
-#     # Create instance from "CreateRatser" for the tests
-#     tile_size = 1000
-#     pixel_size = 1
-#     spatial_ref = 'EPSG:2154'
-#     no_data_value = -9999
-#     return CreateMask(
-#         tile_size=tile_size,
-#         pixel_size=pixel_size,
-#         spatial_ref=spatial_ref,
-#         no_data_value=no_data_value,
-#     )
+crs = 'PROJCS["RGF93 v1 / Lambert-93",GEOGCS["RGF93 v1",DATUM["Reseau_Geodesique_Francais_1993_v1",SPHEROID["GRS 1980",6378137,298.257222101,AUTHORITY["EPSG","7019"]],\
+        AUTHORITY["EPSG","6171"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],\
+        UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4171"]],PROJECTION["Lambert_Conformal_Conic_2SP"],PARAMETER["latitude_of_origin",46.5],PARAMETER["central_meridian",3],\
+        PARAMETER["standard_parallel_1",49],PARAMETER["standard_parallel_2",44],PARAMETER["false_easting",700000],PARAMETER["false_northing",6600000],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","2154"]]'
 
-# def setup_module(module):
-#     os.makedirs('tmp', exist_ok = True)
+def test_input_exist():
+    assert Path(las_file).exists()
 
-# def test_input_exist():
-#     assert Path(las_file).exists()
+def test_convert_to_vector():
+    vectorize_bins(las_file, output, 1000, 1, [0, 1, 2, 3, 4, 5, 6, 17, 66 ], crs)
 
-# def test_convert_to_vector(create_raster_instance, create_vector_instance):
-#     array = create_raster_instance.create_mask(las_file, classes = [0, 1, 2, 3, 4, 5, 6, 17, 66 ])
-    
-#     create_vector_instance.raster_to_geojson(array, output_geojson)
-
-#     assert Path(output_geojson).exists()
+    assert Path(output).exists()

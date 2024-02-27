@@ -12,8 +12,7 @@ from lidro.utils.get_pointcloud_origin import get_pointcloud_origin
 
 
 def binarisation(points: np.array, tile_size: int, pixel_size: float, origin: Tuple[int, int]):
-    """ Binarisation
-            
+    """Convert a numpy.array to a binary array
     Args:
         - points (np.array): array from pointcloud
         - tile_size (int): tile of the raster grid (in meters)
@@ -60,6 +59,7 @@ def detect_hydro_by_tile(filename: str, tile_size: int, pixel_size: float, class
 
     Returns:
         - bins (np.array): array from pointcloud
+        - pcd_origin (list): extract origin from pointcloud
     """
     # Read pointcloud, and extract coordinates (X, Y, Z, and classification) of all points 
     array, crs = read_pointcloud(filename) 
@@ -77,5 +77,5 @@ def detect_hydro_by_tile(filename: str, tile_size: int, pixel_size: float, class
     # Apply a mathematical morphology operations: clonsing 
     closing_bins = morphology_math_closing(_bins)
 
-    return closing_bins
+    return closing_bins, pcd_origin
 
