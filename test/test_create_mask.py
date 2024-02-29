@@ -10,24 +10,23 @@ from rasterio.transform import from_origin
 
 las_file_test = "./data/pointcloud/LHD_FXX_0706_6627_PTS_C_LAMB93_IGN69_TEST.las"
 las_file= "./data/pointcloud/Semis_2021_0830_6291_LA93_IGN69.laz"
-output_tif = "./tmp/Semis_2021_0830_6291_LA93_IGN69_size.tif"
+output_tif = "./tmp/detect_hydro/Semis_2021_0830_6291_LA93_IGN69_size.tif"
 
 tile_size = 1000
 pixel_size = 1
 
 
 def setup_module(module):
-    os.makedirs('tmp', exist_ok = True)
+    os.makedirs('tmp/detect_hydro', exist_ok = True)
 
 def test_input_exist():
     assert Path(las_file).exists()
-    assert Path(las_file_test).exists()
 
-def test_check_type():
+def test_detect_hydro_by_tile_check_type():
     array, origin = detect_hydro_by_tile(las_file_test, tile_size, pixel_size, classes = [0, 1, 2, 3, 4, 5, 6, 17, 66 ])
     assert isinstance(array, np.ndarray) is True
 
-def test_save_output():
+def test_detect_hydro_by_tile_save_output():
     array, origin = detect_hydro_by_tile(las_file,  tile_size, pixel_size, classes = [0, 1, 2, 3, 4, 5, 6, 17, 66 ])
     
     # Transform

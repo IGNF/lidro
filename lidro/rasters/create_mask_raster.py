@@ -11,7 +11,7 @@ from lidro.utils.get_pointcloud_origin import get_pointcloud_origin
 
 
 
-def binarisation(points: np.array, tile_size: int, pixel_size: float, origin: Tuple[int, int]):
+def create_occupancy_map(points: np.array, tile_size: int, pixel_size: float, origin: Tuple[int, int]):
     """Convert a numpy.array to a binary array
     Args:
         - points (np.array): array from pointcloud
@@ -31,21 +31,6 @@ def binarisation(points: np.array, tile_size: int, pixel_size: float, origin: Tu
     bins = np.where(bins > 0, 0, 1)
             
     return bins
-        
-
-def morphology_math_closing(input):
-    """ Apply a mathematical morphology operations: closing (dilation + erosion)
-
-    Args:
-        - input(np.array): bins array
-            
-    Returns:
-        - output(np.array): bins array with closing
-    """
-    output = scipy.ndimage.binary_closing(input, structure=np.ones((5,5))).astype(np.uint8)
-
-    return output
-
 
 def detect_hydro_by_tile(filename: str, tile_size: int, pixel_size: float, classes: List[int]):
     """Detect hydrographic surfaces by LIDAR tile
@@ -65,16 +50,15 @@ def detect_hydro_by_tile(filename: str, tile_size: int, pixel_size: float, class
     array, crs = read_pointcloud(filename)
 
     # Extracts parameters for binarisation
-    pcd_origin_x, pcd_origin_y = get_pointcloud_origin(array, tile_size)
-    pcd_origin = (pcd_origin_x, pcd_origin_y)
+    pcd_origin = get_pointcloud_origin(array, tile_size) 
 
-    # Filter pointcloud by classes : [0, 1, 2, 3, 4, 5, 6, 17, 66 ]
+    # Filter pointcloud by classes
     array_filter = filter_pointcloud(array, classes)
     
-    # Binarisation
-    _bins = binarisation(array_filter, tile_size, pixel_size, pcd_origin)
+    # create occupancy map (2D)
+    _bins = create_occupancy_map(array_filter, tile_size, pixel_size, pcd_origin)
 
     # Apply a mathematical morphology operations: clonsing 
-    closing_bins = morphology_math_closing(_bins)
+    closing_bins = scipy.ndimage.binary_closing(_bins, structure=np.ones((5,5))).astype(np.uint8)
 
     return closing_bins, pcd_origin

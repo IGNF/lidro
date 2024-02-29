@@ -33,9 +33,8 @@ def vectorize_bins(filename: str, output: str, pixel_size: float, tile_size: int
     transform = from_origin(origin_x, origin_y, pixel_size, pixel_size)
 
     # Convert binary image to vector
-    geometry = [shapely_shape(shapedict) for ii, (shapedict, value) in enumerate(rasterio_shapes(
-                    binary_image.astype(np.int16), mask=None, connectivity=8, transform=transform)) 
-                if value != 0]
+    geometry = [shapely_shape(shapedict) for shapedict, value in rasterio_shapes(binary_image.astype(np.int16), 
+                    mask=None, connectivity=8, transform=transform) if value != 0]
     # keep only water's area > 1000 m²
     filter_geometry = [geom for geom in geometry if geom.area > 1000]
     nb_filter_geometry = len(filter_geometry)

@@ -1,6 +1,7 @@
 
 
 import pytest
+import os
 from lidro.pointcloud.filter_las import filter_pointcloud
 import numpy as  np
 from pathlib import Path
@@ -25,13 +26,16 @@ array_points = np.array([[6062.44,6626308.5,186.1,2],
 [6062.19,6626301.5,186.36,2],
 [6062.19,6626301.0,186.36,5]])
 
-csv_file = "./tmp/pointcloud_filter.csv"
+csv_file = "./tmp/filter_las/pointcloud_filter.csv"
+
+def setup_module(module):
+    os.makedirs('tmp/filter_las', exist_ok = True)
 
 def test_return_format_okay():
     output = filter_pointcloud(array_points, [2, 3, 4, 5])
     assert isinstance(output, np.ndarray) is True
 
-def test_save_filter_las():
+def test_filter_pointcloud_save_output():
     array = filter_pointcloud(array_points, [0, 1, 2])
 
     with open(csv_file, 'w', newline='') as csvfile:
