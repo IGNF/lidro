@@ -14,4 +14,3 @@ EXPECTED_ORIGIN = (706000, 6627000)
 def test_get_pointcloud_origin():
     origin_x, origin_y = get_pointcloud_origin(points=INPUT_POINTS, tile_size=1000)
     assert (origin_x, origin_y) == EXPECTED_ORIGIN
-

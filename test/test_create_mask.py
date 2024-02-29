@@ -21,13 +21,14 @@ def setup_module(module):
 
 def test_input_exist():
     assert Path(las_file).exists()
+    assert Path(las_file_test).exists()
 
 def test_check_type():
-    array = detect_hydro_by_tile(las_file_test, tile_size, pixel_size, classes = [0, 1, 2, 3, 4, 5, 6, 17, 66 ])
+    array, origin = detect_hydro_by_tile(las_file_test, tile_size, pixel_size, classes = [0, 1, 2, 3, 4, 5, 6, 17, 66 ])
     assert isinstance(array, np.ndarray) is True
 
 def test_save_output():
-    array = detect_hydro_by_tile(las_file,  tile_size, pixel_size, classes = [0, 1, 2, 3, 4, 5, 6, 17, 66 ])
+    array, origin = detect_hydro_by_tile(las_file,  tile_size, pixel_size, classes = [0, 1, 2, 3, 4, 5, 6, 17, 66 ])
     
     # Transform
     transform = from_origin(830000, 6291000, 1, 1)

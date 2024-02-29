@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """ extract coordinates the original tiles without buffer """
-
 import numpy as np
 
 def get_pointcloud_origin(points: np.array, tile_size: int = 1000, buffer_size: float = 0):

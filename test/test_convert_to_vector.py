@@ -6,8 +6,7 @@ from pathlib import Path
 
 
 las_file= "./data/pointcloud/Semis_2021_0830_6291_LA93_IGN69.laz"
-#las_file = "./data/pointcloud/LHD_FXX_0706_6627_PTS_C_LAMB93_IGN69_TEST.las"
-output = "./tmp/MaskHydro_1_2021_0830_6291.geojson"
+output = "./tmp/Test_MaskHydro_Semis_2021_0830_6291_LA93_IGN69.geojson"
 
 crs = 'PROJCS["RGF93 v1 / Lambert-93",GEOGCS["RGF93 v1",DATUM["Reseau_Geodesique_Francais_1993_v1",SPHEROID["GRS 1980",6378137,298.257222101,AUTHORITY["EPSG","7019"]],\
         AUTHORITY["EPSG","6171"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],\
@@ -18,6 +17,6 @@ def test_input_exist():
     assert Path(las_file).exists()
 
 def test_convert_to_vector():
-    vectorize_bins(las_file, output, 1000, 1, [0, 1, 2, 3, 4, 5, 6, 17, 66 ], crs)
+    vectorize_bins(las_file, output, 1, 1000, [0, 1, 2, 3, 4, 5, 6, 17, 66 ], crs)
 
     assert Path(output).exists()

@@ -61,16 +61,16 @@ def detect_hydro_by_tile(filename: str, tile_size: int, pixel_size: float, class
         - bins (np.array): array from pointcloud
         - pcd_origin (list): extract origin from pointcloud
     """
-    # Read pointcloud, and extract coordinates (X, Y, Z, and classification) of all points 
-    array, crs = read_pointcloud(filename) 
+    # Read pointcloud, and extract coordinates (X, Y, Z, and classification) of all points
+    array, crs = read_pointcloud(filename)
 
     # Extracts parameters for binarisation
     pcd_origin_x, pcd_origin_y = get_pointcloud_origin(array, tile_size)
     pcd_origin = (pcd_origin_x, pcd_origin_y)
 
-    # Filter pointcloud by classes : [0, 1, 2, 3, 4, 5, 6, 17, 66 ] 
-    array_filter = filter_pointcloud(array, classes) 
-
+    # Filter pointcloud by classes : [0, 1, 2, 3, 4, 5, 6, 17, 66 ]
+    array_filter = filter_pointcloud(array, classes)
+    
     # Binarisation
     _bins = binarisation(array_filter, tile_size, pixel_size, pcd_origin)
 
@@ -78,4 +78,3 @@ def detect_hydro_by_tile(filename: str, tile_size: int, pixel_size: float, class
     closing_bins = morphology_math_closing(_bins)
 
     return closing_bins, pcd_origin
-

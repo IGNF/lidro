@@ -20,4 +20,3 @@ def read_pointcloud(las_file: str) :
     crs = las.header.parse_crs()
 
     return output_points, crs
-

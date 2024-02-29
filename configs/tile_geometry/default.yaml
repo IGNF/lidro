@@ -1,4 +1,0 @@
-pixel_size: 1  # pixel size (in metres) for calculate
-tile_size: 1000
-nb_pixels: (1000, 1000)
-no_data_value: -9999
