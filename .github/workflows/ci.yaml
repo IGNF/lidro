@@ -1,0 +1,31 @@
+name: ci
+
+on:
+  pull_request:
+    branches:
+      - main
+      - dev
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+    permissions:
+        contents: read
+        packages: write
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+      # See https://github.com/marketplace/actions/setup-micromamba
+      - name: Install conda env
+        uses: mamba-org/setup-micromamba@v1.8.1
+        with:
+          environment-file: environment.yml
+          environment-name: lidro  # activate the environment
+          cache-environment: true
+          cache-downloads: true
+          generate-run-shell: true
+      - name: Unit test
+        shell: micromamba-shell {0}
+        run: python -m pytest -s --log-cli-level DEBUG
+
