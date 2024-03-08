@@ -11,7 +11,47 @@ conda activate lidro
 ## Base de données sur la machine virtuelle "10.128.38.194"
 #### Pré-requis :
 - PostGresSQL 16 installé
-- configuré le fichier "pg_hba.conf" en ajoutant les lignes suivantes :
+- PostGis installé
+```
+su mdupays-admin
+sudo apt update
+sudo apt install postgis
+```
+- OGR/GDAL installé
+```
+su mdupays-admin
+sudo apt update
+sudo apt-get install gdal-bin
+```
+- GDAL pour Python installé
+```
+su mdupays-admin
+sudo apt update
+sudo apt-get install libgdal-dev
+```
+
+- Installé plusieurs extensions :
+1. postgis
+```
+su mdupays-admin
+sudo apt install postgis
+```
+2. ogr_fdw
+```
+su mdupays-admin
+sudo apt-get install postgresql-16-ogr-fdw
+```
+
+Une fois tout installée, connectez-vous à votre base de données PostgreSQL en tant que superutilisateur et créez les schéma "postgis" et "ogr_fdw" avec les extensions associées:
+```
+CREATE SCHEMA IF NOT EXISTS postgis;"
+CREATE EXTENSION IF NOT EXISTS postgis SCHEMA postgis;
+CREATE EXTENSION IF NOT EXISTS postgis_raster SCHEMA postgis;
+CREATE EXTENSION IF NOT EXISTS postgis_sfcgal SCHEMA postgis;
+CREATE EXTENSION IF NOT EXISTS ogr_fdw SCHEMA ogr_fdw;
+```
+
+1- configuré le fichier "pg_hba.conf" en ajoutant les lignes suivantes :
 ```
 # taper
 vim pg_hba.conf
@@ -22,7 +62,7 @@ host         all      mdupays     10.0.0.0/8      scram-sha-256
 host         all      mdupays     172.16.0.0/12   scram-sha-256
 host         all      mdupays    192.168.0.0/16  scram-sha-256
 ```
-- configuré le fichier "postgresql.conf" en configurant les  lignes suivantes :
+2- configuré le fichier "postgresql.conf" en configurant les  lignes suivantes :
 ```
 # taper
 vim postgresql.conf
@@ -36,6 +76,11 @@ port = 5432
 
 # - Authentification -
 password_encryption = scram-sha-256
+```
+
+3- Redémarrer PostgresSQL
+```
+sudo systemctl restart postgresql
 ```
 
 #### Base de donnée

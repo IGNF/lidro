@@ -1,10 +1,9 @@
 """ Connect Database
 """
-from sqlalchemy import create_engine, exc
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine
 
 
-def connect_to_database(db_name, user, password, host="localhost", port="5432"):
+def get_connection(db_name: str, user: str, password: str, host: str, port: int):
     """
     Connect Database PostgreSQL.
 
@@ -13,23 +12,32 @@ def connect_to_database(db_name, user, password, host="localhost", port="5432"):
         user (str): Name of user
         password (str): Password
         host (str): Hostname
-        port (str): Port
+        port (int): Port
 
     Returns:
-        sqlalchemy.engine.Engine: Motor Database SQLAlchemy
+        sqlalchemy.engine.Engine: Motor Database SQLAlchemy)
+    """
+    engine = create_engine(url="postgresql+psycopg2://{0}:{1}@{2}:{3}/{4}".format(user, password, host, port, db_name))
+    return engine.connect()
+
+
+def connect_to_database(db_name: str, user: str, password: str, host: str, port: int):
+    """
+    Connect Database PostgreSQL.
+
+    Args:
+        db_name (str): Name of database
+        user (str): Name of user
+        password (str): Password
+        host (str): Hostname
+        port (int): Port
+
+    Returns:
         sqlalchemy.orm.Session: Session SQLAlchemy
     """
-    db_url = f"postgresql://{user}:{password}@{host}:{port}/{db_name}"
-    engine = create_engine(db_url)
-
-    # Essayer de se connecter à la base de données
     try:
-        engine.connect()
-        print("database connection established successfully.")
-    except exc.OperationalError:
-        print("The database doesn't exist or the credentials are incorrect.")
-        return None, None
-
-    Session = sessionmaker(bind=engine)
-    session = Session()
-    return engine, session
+        # Get the connection objet (engine) for the database
+        get_connection(db_name, user, password, host, port)
+        print(f"Connection to the {host} for user {user} created successfully.")
+    except Exception as ex:
+        print("Connection could not be made due to the following error: \n", ex)
