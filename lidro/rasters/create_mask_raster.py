@@ -13,15 +13,16 @@ from lidro.utils.get_pointcloud_origin import get_pointcloud_origin
 
 def create_occupancy_map(points: np.array, tile_size: int, pixel_size: float, origin: Tuple[int, int]):
     """Convert a numpy.array to a binary array
+
     Args:
-        - points (np.array): array from pointcloud
-        - tile_size (int): tile of the raster grid (in meters)
-                - pixel_size (float): distance between each node of the raster grid (in meters)
-        - origin (Tuple[int, int]): spatial coordinate of the upper-left corner of the raster
+        points (np.array): array from pointcloud
+        tile_size (int): size of the raster grid (in meters)
+        pixel_size (float): distance between each node of the raster grid (in meters)
+        origin (Tuple[int, int]): spatial coordinate of the upper-left corner of the raster
                     (center of the upper-left pixel)
 
     Returns:
-        - bins (np.array): bins
+        bins (np.array): bins
     """
     # Compute number of points per bin
     bins_x = np.arange(origin[0], origin[0] + tile_size + pixel_size, pixel_size)
@@ -33,19 +34,19 @@ def create_occupancy_map(points: np.array, tile_size: int, pixel_size: float, or
     return bins
 
 def detect_hydro_by_tile(filename: str, tile_size: int, pixel_size: float, classes: List[int]):
-    """Detect hydrographic surfaces by LIDAR tile
+    """"Detect hydrographic surfaces by LIDAR tile
 
     Args:
-        - filename(str): input pointcloud
-        - tile_size (int): tile of the raster grid (in meters)
-        - pixel_size (float): distance between each node of the raster grid (in meters)
-        - classes (List[int]): List of classes to use for the binarisation (points with other
-                    classification values are ignored).
+        filename (str): input pointcloud
+        tile_size (int): size of the raster grid (in meters)
+        pixel_size (float): distance between each node of the raster grid (in meters)
+        classes (List[int]): List of classes to use for the binarisation (points with other
+                    classification values are ignored)
 
     Returns:
-        - bins (np.array): array from pointcloud
-        - pcd_origin (list): extract origin from pointcloud
-    """
+        bins (np.array): array from pointcloud
+        pcd_origin (list): extract origin from pointcloud
+    """    
     # Read pointcloud, and extract coordinates (X, Y, Z, and classification) of all points
     array, crs = read_pointcloud(filename)
 

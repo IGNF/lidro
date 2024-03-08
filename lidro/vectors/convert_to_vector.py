@@ -11,18 +11,18 @@ from shapely.geometry import shape as shapely_shape
 from lidro.rasters.create_mask_raster import detect_hydro_by_tile
 
 
-def vectorize_bins(filename: str, output: str, pixel_size: float, tile_size: int, classes: list, crs: str):
-    """ Converts a binary array to GeoJSON (multipolygon), with polygon smoothing.
+def create_hydro_vector_mask(filename: str, output: str, pixel_size: float, tile_size: int, classes: list, crs: str):
+    """Converts a binary array to GeoJSON (multipolygon), with polygon smoothing.
 
-        Args:
-            - filename(str): input pointcloud
-            - output(str): path to output
-            - pixel_size (float): distance between each node of the raster grid (in meters)
-            - tile_size (int): tile of the raster grid (in meters)
-            - classes (List[int]): List of classes to use for the binarisation (points with other
-                    classification values are ignored).
-            - crs (str): a pyproj CRS object
-    """
+    Args:
+        filename (str): input pointcloud
+        output (str): path to output
+        pixel_size (float): distance between each node of the raster grid (in meters)
+        tile_size (int): size of the raster grid (in meters)
+        classes (list): List of classes to use for the binarisation (points with other
+                    classification values are ignored)
+        crs (str): a pyproj CRS object
+    """    
     # Read a binary image representing hydrographic surface(s)
     binary_image, pcd_origin = detect_hydro_by_tile(filename, tile_size, pixel_size, classes)
     

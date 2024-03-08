@@ -10,7 +10,6 @@ io:
   input_filename: null
   input_dir: null
   output_dir: null
-  spatial_reference: EPSG:2154
   srid: 2154
   extension: .tif
   raster_driver: GTiff

@@ -8,11 +8,19 @@ from pyproj import CRS
 import hydra
 from omegaconf import DictConfig
 
-from lidro.vectors.convert_to_vector import vectorize_bins
+from lidro.vectors.convert_to_vector import create_hydro_vector_mask
 
 
 @hydra.main(config_path="../configs/", config_name="configs_lidro.yaml", version_base="1.2")
 def main(config: DictConfig):
+    """Run HYDRO
+
+    Args:
+        config (DictConfig): configs_lidro.yaml with severals parameters
+
+    Raises:
+        RuntimeError: Check have a las and an input directory
+    """    
     logging.basicConfig(level=logging.INFO)
 
     # Check input/output files and folders
@@ -41,9 +49,20 @@ def main(config: DictConfig):
             tilename, _ = os.path.splitext(file)
             input_file = os.path.join(input_dir, f"{tilename}{_}")
             output_file = os.path.join(output_dir, f"MaskHydro_{tilename}.GeoJSON")
-            # Lauch the create Hydro's Mask
-            logging.info(f"\nStep 1: Create Mask Hydro 1 for tile : {tilename}")
-            vectorize_bins(input_file, output_file, pixel_size, tile_size, classe, crs)
+            if os.path.exists(input_file):
+                # Lauch the create Hydro's Mask
+                logging.info(f"\nCreate Mask Hydro 1 for tile : {tilename}")
+                create_hydro_vector_mask(input_file, output_file, pixel_size, tile_size, classe, crs)
+            else:
+                raise RuntimeError(
+                """An input file(s) doesn't/don't exist.
+                For more info run the same command by adding --help"""
+            )  
+    else:
+        raise RuntimeError(
+            """An input directory doesn't exist.
+            For more info run the same command by adding --help"""
+        )
     
 
 if __name__ == "__main__":
