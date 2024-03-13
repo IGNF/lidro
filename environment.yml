@@ -3,11 +3,6 @@ channels:
   - conda-forge
 dependencies:
   - python==3.11.*
-  - black
-  - flake8
-  - isort
-  - pre-commit
-  - pip
   - pytest
   - gdal
   - laspy
@@ -24,3 +19,9 @@ dependencies:
     # --------- hydra configs --------- #
   - hydra-core
   - hydra-colorlog
+  # ----------- linting --------------- #
+  - black
+  - flake8
+  - isort
+  - pre-commit
+  - pip

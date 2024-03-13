@@ -2,6 +2,7 @@
 """ extract coordinates the original tiles without buffer """
 import numpy as np
 
+
 def get_pointcloud_origin(points: np.array, tile_size: int = 1000, buffer_size: float = 0):
     # Extract coordinates xmin, xmax, ymin and ymax of the original tile without buffer
     x_min, y_min = np.min(points[:, :2], axis=0) + buffer_size
