@@ -26,9 +26,19 @@ def main(config: DictConfig):
 
     # Check input/output files and folders
     input_dir = config.io.input_dir
-    output_dir = config.io.output_dir
+    if input_dir is None:
+        raise ValueError("""config.io.input_dir is empty, please provide an input directory in the configuration""")
 
-    # Check pointcloud tile
+    if not os.path.isdir(input_dir):
+        raise FileNotFoundError(f"""The input directory ({input_dir}) doesn't exist.""")
+
+    output_dir = config.io.output_dir
+    if output_dir is None:
+        raise ValueError("""config.io.output_dir is empty, please provide an input directory in the configuration""")
+
+    os.makedirs(output_dir, exist_ok=True)
+
+    # If input filename is not provided, lidro runs on the whole input_dir directory
     initial_las_filename = config.io.input_filename
 
     # Parameters for creating Mask Hydro
@@ -37,29 +47,21 @@ def main(config: DictConfig):
     crs = CRS.from_user_input(config.io.srid)
     classe = config.filter.keep_classes
 
-    os.makedirs(output_dir, exist_ok=True)
-
-    if initial_las_filename is None and input_dir is not None:
-        # Lauch creating mask hydro by tiles
-        if os.path.isdir(input_dir):
-            for file in os.listdir(input_dir):
-                tilename, _ = os.path.splitext(file)
-                input_file = os.path.join(input_dir, f"{tilename}{_}")
-                output_file = os.path.join(output_dir, f"MaskHydro_{tilename}.GeoJSON")
-                logging.info(f"\nCreate Mask Hydro 1 for tile : {tilename}")
-                create_hydro_vector_mask(input_file, output_file, pixel_size, tile_size, classe, crs)
-        else:
-            raise FileNotFoundError(f"""The input directory ({input_dir}) doesn't exist.""")
-
-    elif initial_las_filename is not None and input_dir is not None:
-        tilename = os.path.splitext(initial_las_filename)[0]
-        # Lauch creating mask by one tile:
-        input_file = os.path.join(input_dir, initial_las_filename)
+    def main_on_one_tile(filename):
+        tilename = os.path.splitext(filename)[0]
+        input_file = os.path.join(input_dir, filename)
         output_file = os.path.join(output_dir, f"MaskHydro_{tilename}.GeoJSON")
         logging.info(f"\nCreate Mask Hydro 1 for tile : {tilename}")
         create_hydro_vector_mask(input_file, output_file, pixel_size, tile_size, classe, crs)
+
+    if initial_las_filename:
+        # Lauch creating mask by one tile:
+        main_on_one_tile(initial_las_filename)
+
     else:
-        raise ValueError("""config.io.input_dir is empty, please provide an input directory in the configuration""")
+        # Lauch creating mask hydro tile by tile
+        for file in os.listdir(input_dir):
+            main_on_one_tile(file)
 
 
 if __name__ == "__main__":
