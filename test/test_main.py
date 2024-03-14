@@ -16,9 +16,10 @@ def setup_module(module):
 
 
 def test_main_run_okay():
-    cmd = """python -m lidro.main \
-        io.input_dir="/home/MDupays/Documents/lidro/data/pointcloud/"\
-        io.output_dir="/home/MDupays/Documents/lidro/tmp/main/"
+    repo_dir = Path.cwd().parent.parent
+    cmd = f"""python -m lidro.main \
+        io.input_dir="{repo_dir}/lidro/data/pointcloud/"\
+        io.output_dir="{repo_dir}/lidro/tmp/main/"
         """
     sp.run(cmd, shell=True, check=True)
 

@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from lidro.vectors.convert_to_vector import vectorize_bins
+from lidro.vectors.convert_to_vector import create_hydro_vector_mask
 
 las_file = "./data/pointcloud/LHD_FXX_0706_6627_PTS_C_LAMB93_IGN69_TEST.las"
 output = "./tmp/vectorize_bins/Test_MaskHydro_LHD_FXX_0706_6627_PTS_C_LAMB93_IGN69_TEST.geojson"
@@ -26,6 +26,6 @@ def test_input_exist():
 
 
 def test_vectorize_bins_save_output():
-    vectorize_bins(las_file, output, 1, 1000, [0, 1, 2, 3, 4, 5, 6, 17, 66], crs)
+    create_hydro_vector_mask(las_file, output, 1, 1000, [0, 1, 2, 3, 4, 5, 6, 17, 66], crs)
 
     assert Path(output).exists()

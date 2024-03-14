@@ -1,7 +1,7 @@
 import laspy
 import numpy as np
 
-from lidro.utils.get_pointcloud_origin import get_pointcloud_origin
+from lidro.pointcloud.io import get_pointcloud_origin
 
 LAS_FILE = "./data/pointcloud/LHD_FXX_0706_6627_PTS_C_LAMB93_IGN69_TEST.las"
 LAS = laspy.read(LAS_FILE)
