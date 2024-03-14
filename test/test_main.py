@@ -1,24 +1,22 @@
-import pytest
-import shutil
 import os
-
-from pathlib import Path
 import subprocess as sp
+from pathlib import Path
 
-from lidro.main import main
 from hydra import compose, initialize
 
+from lidro.main import main
 
 INPUT_DIR = Path("data") / "pointcloud"
-OUTPUT_DIR = Path("tmp") 
+OUTPUT_DIR = Path("tmp")
 
 
 def setup_module(module):
-    os.makedirs('tmp/main', exist_ok = True)
-    os.makedirs('tmp/main_lidro', exist_ok = True)
+    os.makedirs("tmp/main", exist_ok=True)
+    os.makedirs("tmp/main_lidro", exist_ok=True)
+
 
 def test_main_run_okay():
-    cmd = f"""python -m lidro.main \
+    cmd = """python -m lidro.main \
         io.input_dir="/home/MDupays/Documents/lidro/data/pointcloud/"\
         io.output_dir="/home/MDupays/Documents/lidro/tmp/main/"
         """
@@ -26,12 +24,11 @@ def test_main_run_okay():
 
 
 def test_main_lidro_default():
-    input_dir = INPUT_DIR 
+    input_dir = INPUT_DIR
     output_dir = OUTPUT_DIR / "main_lidro"
     pixel_size = 1
     tile_size = 1000
-    classe = [2]
-    srid= 2154
+    srid = 2154
     with initialize(version_base="1.2", config_path="../configs"):
         # config is relative to a module
         cfg = compose(
@@ -41,9 +38,8 @@ def test_main_lidro_default():
                 f"io.output_dir={output_dir}",
                 f"io.pixel_size={pixel_size}",
                 f"io.tile_size={tile_size}",
-                 f"io.srid={srid}",
-
+                f"io.srid={srid}",
             ],
         )
     main(cfg)
-    assert (Path(output_dir) / f"MaskHydro_LHD_FXX_0706_6627_PTS_C_LAMB93_IGN69_TEST.GeoJSON").is_file()
+    assert (Path(output_dir) / "MaskHydro_LHD_FXX_0706_6627_PTS_C_LAMB93_IGN69_TEST.GeoJSON").is_file()

@@ -1,7 +1,5 @@
-import pytest
-import numpy as  np
 import laspy
-from pathlib import Path
+import numpy as np
 
 from lidro.utils.get_pointcloud_origin import get_pointcloud_origin
 
