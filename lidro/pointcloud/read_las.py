@@ -3,7 +3,8 @@
 import laspy
 import numpy as np
 
-def read_pointcloud(las_file: str) :
+
+def read_pointcloud(las_file: str):
     """Reads a LAS pointcloud file and extracts point coordinates (X, Y, Z, classification)
 
     Args:
@@ -12,7 +13,7 @@ def read_pointcloud(las_file: str) :
     Returns:
         input_point (np.ndarray) : Numpy array containing point coordinates (X, Y, Z, classification)
         crs (dict): a pyproj CRS object
-    """  
+    """
     # Read pointcloud
     with laspy.open(las_file) as f:
         las = f.read()
