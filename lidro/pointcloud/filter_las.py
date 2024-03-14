@@ -4,14 +4,14 @@ import numpy as np
 
 
 def filter_pointcloud(input_points: np.array, classes: list):
-    """Filter pointcloud and extracts point coordinates (X, Y, Z)
+    """Filter pointcloud by class
 
     Args:
         input_points (np.array): Numpy array containing point coordinates (X, Y, Z, classification)
         classes (list): List of classes to use for the filtering
 
     Returns:
-        filtered_points (np.ndarray) : Numpy array containing point coordinates (X, Y, Z) filtering
+        filtered_points (np.ndarray) : Numpy array containing point coordinates (X, Y, Z) after filtering
     """
     # Filter pointcloud by classe(s)
     points_mask = np.isin(input_points[:, -1], classes)

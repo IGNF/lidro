@@ -18,10 +18,11 @@ def create_occupancy_map(points: np.array, tile_size: int, pixel_size: float, or
         points (np.array): array from pointcloud
         tile_size (int): size of the raster grid (in meters)
         pixel_size (float): distance between each node of the raster grid (in meters)
-        origin (Tuple[int, int]):
+        origin (Tuple[int, int]): Coordinates of the top left corner of the top-left pixel
 
     Returns:
-        bins (np.array): bins
+        bins (np.array): 2D binary array (x, y) with 1 for if there is at least one point of the input cloud
+        in the corresponding pixel, 0 otherwise
     """
     # Compute number of points per bin
     bins_x = np.arange(origin[0], origin[0] + tile_size + pixel_size, pixel_size)
@@ -34,7 +35,7 @@ def create_occupancy_map(points: np.array, tile_size: int, pixel_size: float, or
 
 
 def detect_hydro_by_tile(filename: str, tile_size: int, pixel_size: float, classes: List[int]):
-    """ "Detect hydrographic surfaces by tile origin extracted from the point cloud
+    """ "Detect hydrographic surfaces in a tile from the classified points of the input pointcloud
 
     Args:
         filename (str): input pointcloud
@@ -44,8 +45,9 @@ def detect_hydro_by_tile(filename: str, tile_size: int, pixel_size: float, class
                     classification values are ignored)
 
     Returns:
-        bins (np.array): array from pointcloud
-        pcd_origin (list): extract origin from pointcloud
+        bins (np.array):  2D binary array (x, y) of the water presence from the point cloud
+        pcd_origin (list): top left corner of the tile containing the point cloud
+        (infered from pointcloud bounding box and input tile size)
     """
     # Read pointcloud, and extract coordinates (X, Y, Z, and classification) of all points
     array, crs = read_pointcloud(filename)

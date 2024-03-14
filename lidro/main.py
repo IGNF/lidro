@@ -13,13 +13,14 @@ from lidro.vectors.convert_to_vector import create_hydro_vector_mask
 
 @hydra.main(config_path="../configs/", config_name="configs_lidro.yaml", version_base="1.2")
 def main(config: DictConfig):
-    """Run HYDRO
+    """Create a vector mask of hydro surfaces from the points classification of the input LAS/LAZ file,
+    and save it as a GeoJSON file.
+
+    It can run either on a single file, or on each file of a folder
 
     Args:
-        config (DictConfig): configs_lidro.yaml with severals parameters
-
-    Raises:
-        RuntimeError: Check have a las and an input directory
+        config (DictConfig): hydra configuration (configs/configs_lidro.yaml by default)
+        It contains the algorithm parameters and the input/output parameters
     """
     logging.basicConfig(level=logging.INFO)
 
@@ -48,10 +49,8 @@ def main(config: DictConfig):
                 logging.info(f"\nCreate Mask Hydro 1 for tile : {tilename}")
                 create_hydro_vector_mask(input_file, output_file, pixel_size, tile_size, classe, crs)
         else:
-            raise RuntimeError(
-                """An input directory doesn't exist.
-                For more info run the same command by adding --help"""
-            )
+            raise FileNotFoundError(f"""The input directory ({input_dir}) doesn't exist.""")
+
     elif initial_las_filename is not None and input_dir is not None:
         tilename = os.path.splitext(initial_las_filename)[0]
         # Lauch creating mask by one tile:
@@ -60,10 +59,7 @@ def main(config: DictConfig):
         logging.info(f"\nCreate Mask Hydro 1 for tile : {tilename}")
         create_hydro_vector_mask(input_file, output_file, pixel_size, tile_size, classe, crs)
     else:
-        raise RuntimeError(
-            """In input you haven't to give a las, an input directory.
-            For more info run the same command by adding --help"""
-        )
+        raise ValueError("""config.io.input_dir is empty, please provide an input directory in the configuration""")
 
 
 if __name__ == "__main__":

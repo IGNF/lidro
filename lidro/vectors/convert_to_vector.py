@@ -11,16 +11,17 @@ from lidro.rasters.create_mask_raster import detect_hydro_by_tile
 
 
 def create_hydro_vector_mask(filename: str, output: str, pixel_size: float, tile_size: int, classes: list, crs: str):
-    """Converts a binary array to GeoJSON (multipolygon), with polygon smoothing.
+    """Create a vector mask of hydro surfaces in a tile from the points classification of the input LAS/LAZ file,
+    and save it as a GeoJSON file.
+
 
     Args:
-        filename (str): input pointcloud
-        output (str): path to output
-        pixel_size (float): distance between each node of the raster grid (in meters)
-        tile_size (int): size of the raster grid (in meters)
-        classes (list): List of classes to use for the binarisation (points with other
-                    classification values are ignored)
-        crs (str): a pyproj CRS object
+        filename (str): path to the input pointcloud
+        output (str): path to output geoJSON
+        pixel_size (float): distance between each node of the intermediate raster grid (in meters)
+        tile_size (int): size of the intermediate raster grid (in meters)
+        classes (list): List of classes to consider as water (points with other classification values are ignored)
+        crs (str): a pyproj CRS object used to create the output GeoJSON file
     """
     # Read a binary image representing hydrographic surface(s)
     binary_image, pcd_origin = detect_hydro_by_tile(filename, tile_size, pixel_size, classes)
