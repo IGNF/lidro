@@ -27,6 +27,7 @@ def test_create_hydro_vector_mask_default():
             UNIT["metre",1,AUTHORITY["EPSG","9001"]],\
             AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","2154"]]'
 
+    Path(output).parent.mkdir(exist_ok=True)
     create_hydro_vector_mask(las_file, output, 1, 1000, [0, 1, 2, 3, 4, 5, 6, 17, 66], crs)
 
     assert Path(output).exists()
