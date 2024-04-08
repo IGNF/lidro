@@ -48,9 +48,14 @@ def main(config: DictConfig):
     classe = config.filter.keep_classes
 
     def main_on_one_tile(filename):
-        tilename = os.path.splitext(filename)[0]
-        input_file = os.path.join(input_dir, filename)
-        output_file = os.path.join(output_dir, f"MaskHydro_{tilename}.GeoJSON")
+        """Lauch main.py on one tile
+
+        Args:
+            filename (str): filename to the LAS file
+        """
+        tilename = os.path.splitext(filename)[0] # filename to the LAS file
+        input_file = os.path.join(input_dir, filename) # path to the LAS file
+        output_file = os.path.join(output_dir, f"MaskHydro_{tilename}.GeoJSON") # path to the Mask Hydro file
         logging.info(f"\nCreate Mask Hydro 1 for tile : {tilename}")
         create_hydro_vector_mask(input_file, output_file, pixel_size, tile_size, classe, crs)
 
