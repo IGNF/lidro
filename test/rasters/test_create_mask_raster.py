@@ -40,21 +40,18 @@ def test_create_occupancy_map_default():
     assert np.all(occupancy_map == expected_occupancy)
 
 
-def test_detect_hydro_by_tile_default():
-    array, _ = detect_hydro_by_tile(LAS_FILE, tile_size, pixel_size, classes=[0, 1, 2, 3, 4, 5, 6, 17, 66])
-    assert isinstance(array, np.ndarray) is True
-    assert array.shape == [tile_size / pixel_size] * 2
-    assert np.any(array)  # Check that not all values are 0
-    assert not np.all(array)  # Check that not all values are 1
-
-
 @pytest.mark.returnfile
 def test_detect_hydro_by_tile_return_file():
     output_tif = TMP_PATH / "Semis_2021_0830_6291_LA93_IGN69_size.tif"
     array, origin = detect_hydro_by_tile(LAS_FILE, tile_size, pixel_size, classes=[0, 1, 2, 3, 4, 5, 6, 17, 66])
 
+    assert isinstance(array, np.ndarray) is True
+    assert list(array.shape) == [tile_size / pixel_size] * 2
+    assert np.any(array)  # Check that not all values are 0
+    assert not np.all(array)  # Check that not all values are 1
+
     # Transform
-    transform = from_origin(origin, 1, 1)
+    transform = from_origin(origin[0], origin[1], 1, 1)
 
     # Save the result
     with rasterio.open(
