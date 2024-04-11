@@ -13,7 +13,6 @@ OUTPUT_DIR = Path("tmp") / "main"
 
 def setup_module(module):
     os.makedirs("tmp/main", exist_ok=True)
-    os.makedirs("tmp/main_lidro", exist_ok=True)
 
 
 def test_main_run_okay():

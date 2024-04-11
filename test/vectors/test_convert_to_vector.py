@@ -1,6 +1,6 @@
+import json
 import os
 import shutil
-import json
 from pathlib import Path
 
 from lidro.vectors.convert_to_vector import create_hydro_vector_mask
@@ -33,19 +33,23 @@ def test_create_hydro_vector_mask_default():
 
     assert Path(output).exists()
 
-    ## Checks on the output
-    with open(output, 'r') as f:
-            geojson_data = json.load(f)
+    with open(output, "r") as f:
+        geojson_data = json.load(f)
 
-    # Vérifie la structure globale du fichier GeoJSON
-    assert 'type' in geojson_data
-    assert geojson_data['type'] == 'FeatureCollection'
-    assert 'features' in geojson_data
-    assert isinstance(geojson_data['features'], list)
+        # Vérifie la structure globale du fichier GeoJSON
+        assert "type" in geojson_data
+        assert geojson_data["type"] == "FeatureCollection"
+        assert "features" in geojson_data
+        assert isinstance(geojson_data["features"], list)
 
-    # Vérifie la validité de la géométrie de chaque feature
-    for feature in geojson_data['features']:
-        assert 'geometry' in feature
-        geometry = feature['geometry']
-        assert 'type' in geometry
-        assert geometry['type'] in ['Point', 'LineString', 'Polygon']  # Adapté selon votre cas
+        # Vérifie le premier polygone correspondent bien
+        for feature in geojson_data["features"]:
+            geometry = feature["geometry"]
+            coordinates = geometry["coordinates"]
+            assert coordinates[0] == [
+                [706002.0, 6626998.0],
+                [706002.0, 6626002.0],
+                [706998.0, 6626002.0],
+                [706998.0, 6626998.0],
+                [706002.0, 6626998.0],
+            ]
