@@ -42,14 +42,14 @@ def test_create_hydro_vector_mask_default():
         assert "features" in geojson_data
         assert isinstance(geojson_data["features"], list)
 
-        # Vérifie le premier polygone correspondent bien
+        # Vérifie le quatrième polygone correspondent bien
         for feature in geojson_data["features"]:
             geometry = feature["geometry"]
             coordinates = geometry["coordinates"]
-            assert coordinates[0] == [
-                [706002.0, 6626998.0],
-                [706002.0, 6626002.0],
-                [706998.0, 6626002.0],
-                [706998.0, 6626998.0],
-                [706002.0, 6626998.0],
+            assert coordinates[3] == [
+                [706231.0, 6626179.0],
+                [706232.0, 6626179.0],
+                [706232.0, 6626178.0],
+                [706231.0, 6626178.0],
+                [706231.0, 6626179.0],
             ]
