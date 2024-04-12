@@ -47,6 +47,11 @@ mamba env update -n lidro -f environment.yml
 conda activate lidro
 ```
 
+Installer pre-commit
+```
+pre-commit install
+```
+
 ## Données de test
 Les données de test se trouvent dans un autre projet ici : http://gitlab.forge-idi.ign.fr/Lidar/lidro-data
 
