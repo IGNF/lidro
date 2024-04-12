@@ -64,7 +64,7 @@ def detect_hydro_by_tile(filename: str, tile_size: int, pixel_size: float, class
     # Revert occupancy map to keep pixels where there is no point of the selected classes
     detected_water = np.logical_not(occupancy)
 
-    # Apply a mathematical morphology operations: closing
-    smoothed_water = scipy.ndimage.binary_closing(detected_water, structure=np.ones((5, 5))).astype(np.uint8)
+    # Apply a mathematical morphology operations: dilation (/ ! \ closing : reduct size of image)
+    morphology_bins = scipy.ndimage.binary_dilation(detected_water, structure=np.ones((3, 3))).astype(np.uint8)
 
-    return smoothed_water, pcd_origin
+    return morphology_bins, pcd_origin
