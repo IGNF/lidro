@@ -40,19 +40,6 @@ def create_hydro_vector_mask(filename: str, output: str, pixel_size: float, tile
         )
         if value != 0
     ]
-    # keep only water's area > 1000 m²
-    filter_geometry = [geom for geom in geometry if geom.area > 1000]
-    nb_filter_geometry = len(filter_geometry)
-
-    gdf = gpd.GeoDataFrame(
-        {
-            "layer": [ii for ii, geom in enumerate(filter_geometry)] * np.ones(nb_filter_geometry),
-            "dalles": filename,
-            "geometry": filter_geometry,
-        },
-        geometry="geometry",
-        crs=crs,
-    )
-
     # save the result
+    gdf = gpd.GeoDataFrame(geometry=geometry, crs=crs)
     gdf.to_file(output, driver="GeoJSON", crs=crs)

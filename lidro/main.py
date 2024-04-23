@@ -9,14 +9,17 @@ from omegaconf import DictConfig
 from pyproj import CRS
 
 from lidro.vectors.convert_to_vector import create_hydro_vector_mask
+from lidro.vectors.merge_vector import merge_geom
 
 
 @hydra.main(config_path="../configs/", config_name="configs_lidro.yaml", version_base="1.2")
 def main(config: DictConfig):
-    """Create a vector mask of hydro surfaces from the points classification of the input LAS/LAZ file,
+    """Step 1 : Create a vector mask of hydro surfaces from the points classification of the input LAS/LAZ file,
     and save it as a GeoJSON file.
 
     It can run either on a single file, or on each file of a folder
+
+    Step 2 : Merge all vector masks of hydro surfaces
 
     Args:
         config (DictConfig): hydra configuration (configs/configs_lidro.yaml by default)
@@ -53,9 +56,9 @@ def main(config: DictConfig):
         Args:
             filename (str): filename to the LAS file
         """
-        tilename = os.path.splitext(filename)[0] # filename to the LAS file
-        input_file = os.path.join(input_dir, filename) # path to the LAS file
-        output_file = os.path.join(output_dir, f"MaskHydro_{tilename}.GeoJSON") # path to the Mask Hydro file
+        tilename = os.path.splitext(filename)[0]  # filename to the LAS file
+        input_file = os.path.join(input_dir, filename)  # path to the LAS file
+        output_file = os.path.join(output_dir, f"MaskHydro_{tilename}.GeoJSON")  # path to the Mask Hydro file
         logging.info(f"\nCreate Mask Hydro 1 for tile : {tilename}")
         create_hydro_vector_mask(input_file, output_file, pixel_size, tile_size, classe, crs)
 
@@ -64,9 +67,14 @@ def main(config: DictConfig):
         main_on_one_tile(initial_las_filename)
 
     else:
-        # Lauch creating mask hydro tile by tile
+        # Lauch creating Mask Hydro tile by tile
         for file in os.listdir(input_dir):
             main_on_one_tile(file)
+        if os.path.isdir(output_dir):
+            output_dir_merge = os.path.join(output_dir, "merge")  # folder with Mask Hydro file
+            os.makedirs(output_dir_merge, exist_ok=True)  # Create folder "merge"
+            # Merge all Mash Hydro
+            merge_geom(output_dir, output_dir_merge, crs)
 
 
 if __name__ == "__main__":

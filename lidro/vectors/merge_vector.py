@@ -4,7 +4,14 @@
 import os
 
 import geopandas as gpd
+from shapely.geometry import MultiPolygon
 from shapely.ops import unary_union
+
+from lidro.vectors.check_rectify_geometry import (
+    check_geometry,
+    remove_hole,
+    simplify_geometry,
+)
 
 
 def merge_geom(input_folder: str, output_folder: str, crs: str):
@@ -19,13 +26,13 @@ def merge_geom(input_folder: str, output_folder: str, crs: str):
     # List for stocking all GeoDataFrame
     polys = []
 
-    # Parcourir tous les fichiers dans le dossier
+    # Browse all files in folder
     for fichier in os.listdir(input_folder):
         if fichier.endswith(".GeoJSON"):
-            # Charger chaque fichier GeoJSON en tant que GeoDataFrame
+            # Load each GeoJSON file as GeoDataFrame
             geojson = gpd.read_file(os.path.join(input_folder, fichier))
             merge_geom = geojson["geometry"].unary_union
-            # Ajouter le GeoDataFrame à la liste
+            # Add the GeoDataFrame to the list
             polys.append(merge_geom)
 
     # Union geometry
@@ -33,10 +40,24 @@ def merge_geom(input_folder: str, output_folder: str, crs: str):
 
     geometry = gpd.GeoSeries(mergedPolys, crs=crs).explode(index_parts=False)
 
-    # keep only water's area > 1000 m²
-    filter_geometry = [geom for geom in geometry if geom.area > 1000]
+    # keep only water's area > 100 m²
+    filter_geometry = [geom for geom in geometry if geom.area > 100]
+    gdf_filter = gpd.GeoDataFrame(geometry=filter_geometry, crs=crs)
 
-    gdf = gpd.GeoDataFrame(geometry=filter_geometry, crs=crs)
+    # Check and rectify the invalid geometry
+    gdf = check_geometry(gdf_filter)
+
+    # Correcting geometric errors: simplifying certain shapes to make calculations easier
+    buffer_geom = gdf["geometry"].apply(simplify_geometry)
+    simplify_geom = buffer_geom.simplify(tolerance=0.5, preserve_topology=True)
+
+    # Correction of holes (< 50m²) in Hydrological Masks
+    list_parts = []
+    for poly in simplify_geom:
+        list_parts.append(poly)
+    not_hole_geom = remove_hole(MultiPolygon(list_parts))
+    geometry = gpd.GeoSeries(not_hole_geom.geoms, crs=crs).explode(index_parts=False)
+    gdf = gpd.GeoDataFrame(geometry=geometry, crs=crs)
 
     # save the result
     gdf.to_file(os.path.join(output_folder, "MaskHydro_merge.geojson"), driver="GeoJSON", crs=crs)
