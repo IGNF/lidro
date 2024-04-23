@@ -36,7 +36,7 @@ def test_create_hydro_vector_mask_default():
     with open(output, "r") as f:
         geojson_data = json.load(f)
 
-        # Vérifie la structure globale du fichier GeoJSON
+        # CHECK STRUCTURE
         assert "type" in geojson_data
         assert geojson_data["type"] == "FeatureCollection"
         assert "features" in geojson_data

@@ -16,7 +16,7 @@ from lidro.vectors.check_rectify_geometry import (
 
 def merge_geom(input_folder: str, output_folder: str, crs: str):
     """Merge severals masks of hydro surfaces from the points classification of the input LAS/LAZ file,
-    filter mask (keep only water's area > 1000 m²) and save it as a GeoJSON file.
+    filter mask (keep only water's area > 150 m²) and save it as a GeoJSON file.
 
     Args:
         input_folder (str): folder who contains severals Masks Hydro
@@ -40,8 +40,8 @@ def merge_geom(input_folder: str, output_folder: str, crs: str):
 
     geometry = gpd.GeoSeries(mergedPolys, crs=crs).explode(index_parts=False)
 
-    # keep only water's area > 100 m²
-    filter_geometry = [geom for geom in geometry if geom.area > 100]
+    # keep only water's area > 150 m²
+    filter_geometry = [geom for geom in geometry if geom.area > 150]
     gdf_filter = gpd.GeoDataFrame(geometry=filter_geometry, crs=crs)
 
     # Check and rectify the invalid geometry
@@ -51,7 +51,7 @@ def merge_geom(input_folder: str, output_folder: str, crs: str):
     buffer_geom = gdf["geometry"].apply(simplify_geometry)
     simplify_geom = buffer_geom.simplify(tolerance=0.5, preserve_topology=True)
 
-    # Correction of holes (< 50m²) in Hydrological Masks
+    # Correction of holes (< 100m²) in Hydrological Masks
     list_parts = []
     for poly in simplify_geom:
         list_parts.append(poly)

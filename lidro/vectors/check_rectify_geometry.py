@@ -12,10 +12,10 @@ def remove_hole(multipoly):
         - multipoly (GeoJSON): Hydro Mask geometry
 
     Returns:
-        GeoJSON: Hydro Mask geometry without holes (< 50 m²)
+        GeoJSON: Hydro Mask geometry without holes (< 100 m²)
     """
     list_parts = []
-    eps = 50
+    eps = 100
 
     for polygon in multipoly.geoms:
         list_interiors = []
@@ -43,7 +43,8 @@ def simplify_geometry(polygon):
     Returns:
         GeoJSON: Hydro Mask geometry simplify
     """
-    # Positive buffer half the size of the HYDRO mask resolution (1m resolution)
+    # Positive buffer half the size of the Hydro Mask resolution (0.5 m resolution)
+    # + Negative buffer the size of the Hydro Mask Resolution (1m)
     _geom = polygon.buffer(0.5, cap_style=CAP_STYLE.square)
     geom = _geom.buffer(-1, cap_style=CAP_STYLE.square)
     return geom
