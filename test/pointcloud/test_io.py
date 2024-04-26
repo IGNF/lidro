@@ -5,9 +5,9 @@ from pathlib import Path
 import laspy
 import numpy as np
 
-from lidro.pointcloud.io import get_pointcloud_origin
+from lidro.create_mask_hydro.pointcloud.io import get_pointcloud_origin
 
-TMP_PATH = Path("./tmp/pointcloud/io")
+TMP_PATH = Path("./tmp/create_mask_hydro/pointcloud/io")
 
 LAS_FILE = "./data/pointcloud/LHD_FXX_0706_6627_PTS_C_LAMB93_IGN69_TEST.las"
 

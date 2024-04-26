@@ -6,9 +6,9 @@ from typing import List, Tuple
 import numpy as np
 import scipy.ndimage
 
-from lidro.pointcloud.filter_las import filter_pointcloud
-from lidro.pointcloud.io import get_pointcloud_origin
-from lidro.pointcloud.read_las import read_pointcloud
+from lidro.create_mask_hydro.pointcloud.filter_las import filter_pointcloud
+from lidro.create_mask_hydro.pointcloud.io import get_pointcloud_origin
+from lidro.create_mask_hydro.pointcloud.read_las import read_pointcloud
 
 
 def create_occupancy_map(points: np.array, tile_size: int, pixel_size: float, origin: Tuple[int, int]):
@@ -33,7 +33,7 @@ def create_occupancy_map(points: np.array, tile_size: int, pixel_size: float, or
     return bins
 
 
-def detect_hydro_by_tile(filename: str, tile_size: int, pixel_size: float, classes: List[int]):
+def detect_hydro_by_tile(filename: str, tile_size: int, pixel_size: float, classes: List[int], dilatation_size: int):
     """ "Detect hydrographic surfaces in a tile from the classified points of the input pointcloud
     An hydrographic surface is define as a surface where there is no points from any class different from water
 
@@ -43,6 +43,7 @@ def detect_hydro_by_tile(filename: str, tile_size: int, pixel_size: float, class
         pixel_size (float): distance between each node of the raster grid (in meters)
         classes (List[int]): List of classes to use for the binarisation (points with other
                     classification values are ignored)
+        dilatation_size (int): size for dilatation raster
 
     Returns:
         smoothed_water (np.array):  2D binary array (x, y) of the water presence from the point cloud
@@ -64,7 +65,9 @@ def detect_hydro_by_tile(filename: str, tile_size: int, pixel_size: float, class
     # Revert occupancy map to keep pixels where there is no point of the selected classes
     detected_water = np.logical_not(occupancy)
 
-    # Apply a mathematical morphology operations: dilation (/ ! \ closing : reduct size of image)
-    morphology_bins = scipy.ndimage.binary_dilation(detected_water, structure=np.ones((3, 3))).astype(np.uint8)
+    # Apply a mathematical morphology operations: DILATATION
+    # / ! \ NOT "CLOSING", due to the reduction in the size of hydro masks, particularly at the tile borders.
+    # / ! \ WITH "CLOSING" => Masks Hydro are no longer continuous, when they are merged
+    morphology_bins = scipy.ndimage.binary_dilation(detected_water, structure=np.ones((dilatation_size, dilatation_size))).astype(np.uint8)
 
     return morphology_bins, pcd_origin

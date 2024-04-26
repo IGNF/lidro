@@ -5,21 +5,21 @@ from pathlib import Path
 import pytest
 from hydra import compose, initialize
 
-from lidro.main import main
+from lidro.main_create_mask import main
 
 INPUT_DIR = Path("data") / "pointcloud"
-OUTPUT_DIR = Path("tmp") / "main"
+OUTPUT_DIR = Path("tmp") / "create_mask_hydro/main"
 
 
 def setup_module(module):
-    os.makedirs("tmp/main", exist_ok=True)
+    os.makedirs("tmp/create_mask_hydro/main", exist_ok=True)
 
 
 def test_main_run_okay():
     repo_dir = Path.cwd().parent
-    cmd = f"""python -m lidro.main \
+    cmd = f"""python -m lidro.main_create_mask \
         io.input_dir="{repo_dir}/lidro/data/pointcloud/"\
-        io.output_dir="{repo_dir}/lidro/tmp/main/"
+        io.output_dir="{repo_dir}/lidro/tmp/create_mask_hydro/main/"
         """
     sp.run(cmd, shell=True, check=True)
 
