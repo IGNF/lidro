@@ -4,9 +4,9 @@ from pathlib import Path
 
 import numpy as np
 
-from lidro.pointcloud.filter_las import filter_pointcloud
+from lidro.create_mask_hydro.pointcloud.filter_las import filter_pointcloud
 
-TMP_PATH = Path("./tmp/pointcloud/filter_las")
+TMP_PATH = Path("./tmp/create_mask_hydro/pointcloud/filter_las")
 
 
 def setup_module(module):

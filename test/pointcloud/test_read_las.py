@@ -5,9 +5,9 @@ from pathlib import Path
 import numpy as np
 from pyproj import CRS
 
-from lidro.pointcloud.read_las import read_pointcloud
+from lidro.create_mask_hydro.pointcloud.read_las import read_pointcloud
 
-TMP_PATH = Path("./tmp/pointcloud/io")
+TMP_PATH = Path("./tmp/create_mask_hydro/pointcloud/io")
 
 LAS_FILE = "./data/pointcloud/LHD_FXX_0706_6627_PTS_C_LAMB93_IGN69_TEST.las"
 
