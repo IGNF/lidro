@@ -46,7 +46,7 @@ def main(config: DictConfig):
     tile_size = config.io.tile_size
     crs = CRS.from_user_input(config.io.srid)
     classe = config.filter.keep_classes
-    dilation_size = config.raster.dilation_size
+    dilatation_size = config.raster.dilatation_size
 
     def main_on_one_tile(filename):
         """Lauch main.py on one tile
@@ -58,7 +58,7 @@ def main(config: DictConfig):
         input_file = os.path.join(input_dir, filename)  # path to the LAS file
         output_file = os.path.join(output_dir, f"MaskHydro_{tilename}.GeoJSON")  # path to the Mask Hydro file
         logging.info(f"\nCreate Mask Hydro 1 for tile : {tilename}")
-        create_hydro_vector_mask(input_file, output_file, pixel_size, tile_size, classe, crs, dilation_size)
+        create_hydro_vector_mask(input_file, output_file, pixel_size, tile_size, classe, crs, dilatation_size)
 
     if initial_las_filename:
         # Lauch creating mask by one tile:
@@ -68,7 +68,6 @@ def main(config: DictConfig):
         # Lauch creating Mask Hydro tile by tile
         for file in os.listdir(input_dir):
             main_on_one_tile(file)
-
 
 if __name__ == "__main__":
     main()

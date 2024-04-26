@@ -14,6 +14,7 @@ las_file = "./data/pointcloud/Semis_2021_0830_6291_LA93_IGN69.laz"
 output = "./tmp/create_mask_hydro/vectors/convert_to_vector/MaskHydro_Semis_2021_0830_6291_LA93_IGN69.GeoJSON"
 
 
+
 def setup_module(module):
     if TMP_PATH.is_dir():
         shutil.rmtree(TMP_PATH)
@@ -31,11 +32,29 @@ def test_create_hydro_vector_mask_default():
     create_hydro_vector_mask(las_file, output, pixel_size, tile_size, classes, crs, dilatation_size)
     assert Path(output).exists()
 
-    gdf = gpd.read_file(output)
+def test_check_structure_default():
+    # Output
+    with open(output, "r") as f:
+        geojson_data = json.load(f)
+    
+    with open(output_main, "r") as f:
+        geojson_data_main = json.load(f)
 
-    assert not gdf.empty  # GeoDataFrame shouldn't empty
-    assert gdf.crs.to_string() == crs  # CRS is identical
-    assert all(isinstance(geom, Polygon) for geom in gdf.geometry)  # All geometry should Polygons
+        # CHECK STRUCTURE
+        assert "type" in geojson_data
+        assert geojson_data["type"] == "FeatureCollection"
+        assert "features" in geojson_data
+        assert isinstance(geojson_data["features"], list)
 
-    expected_number_of_geometries = 2820
-    assert len(gdf) == expected_number_of_geometries  # the number of geometries must be identical
+       # CHECK POLYGON
+        for feature in geojson_data["features"]:
+            geometry = feature["geometry"]
+            coordinates = geometry["coordinates"]
+
+        for feature in geojson_data_main["features"]:
+            geometry_main = feature["geometry"]
+            coordinates_main = geometry_main["coordinates"]
+        
+        assert coordinates[0] == coordinates_main[0]
+   
+

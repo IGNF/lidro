@@ -10,9 +10,7 @@ from shapely.geometry import shape as shapely_shape
 from lidro.create_mask_hydro.rasters.create_mask_raster import detect_hydro_by_tile
 
 
-def create_hydro_vector_mask(
-    filename: str, output: str, pixel_size: float, tile_size: int, classes: list, crs: str, dilatation_size: int
-):
+def create_hydro_vector_mask(filename: str, output: str, pixel_size: float, tile_size: int, classes: list, crs: str, dilatation_size: int):
     """Create a vector mask of hydro surfaces in a tile from the points classification of the input LAS/LAZ file,
     and save it as a GeoJSON file.
 

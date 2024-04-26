@@ -33,7 +33,7 @@ def create_occupancy_map(points: np.array, tile_size: int, pixel_size: float, or
     return bins
 
 
-def detect_hydro_by_tile(filename: str, tile_size: int, pixel_size: float, classes: List[int], dilation_size: int):
+def detect_hydro_by_tile(filename: str, tile_size: int, pixel_size: float, classes: List[int], dilatation_size: int):
     """ "Detect hydrographic surfaces in a tile from the classified points of the input pointcloud
         An hydrographic surface is defined as a surface where there is no points from any class different from water
     The output hydrographic surface mask is dilated to make sure that the masks are continuous when merged with their
@@ -46,10 +46,18 @@ def detect_hydro_by_tile(filename: str, tile_size: int, pixel_size: float, class
                         classification values are ignored)
             dilation_size (int): size of the structuring element for dilation
 
-        Returns:
-            smoothed_water (np.array):  2D binary array (x, y) of the water presence from the point cloud
-            pcd_origin (list): top left corner of the tile containing the point cloud
-            (infered from pointcloud bounding box and input tile size)
+    Args:
+        filename (str): input pointcloud
+        tile_size (int): size of the raster grid (in meters)
+        pixel_size (float): distance between each node of the raster grid (in meters)
+        classes (List[int]): List of classes to use for the binarisation (points with other
+                    classification values are ignored)
+        dilatation_size (int): size for dilatation raster
+
+    Returns:
+        smoothed_water (np.array):  2D binary array (x, y) of the water presence from the point cloud
+        pcd_origin (list): top left corner of the tile containing the point cloud
+        (infered from pointcloud bounding box and input tile size)
     """
     # Read pointcloud, and extract coordinates (X, Y, Z, and classification) of all points
     array, crs = read_pointcloud(filename)
@@ -66,11 +74,9 @@ def detect_hydro_by_tile(filename: str, tile_size: int, pixel_size: float, class
     # Revert occupancy map to keep pixels where there is no point of the selected classes
     detected_water = np.logical_not(occupancy)
 
-    # Apply a mathematical morphology operations: DILATION
-    # / ! \ NOT "CLOSING", due to the reduction in the size of hydro masks (tile borders)
+    # Apply a mathematical morphology operations: DILATATION
+    # / ! \ NOT "CLOSING", due to the reduction in the size of hydro masks, particularly at the tile borders.
     # / ! \ WITH "CLOSING" => Masks Hydro are no longer continuous, when they are merged
-    water_mask = scipy.ndimage.binary_dilation(
-        detected_water, structure=np.ones((dilation_size, dilation_size))
-    ).astype(np.uint8)
+    morphology_bins = scipy.ndimage.binary_dilation(detected_water, structure=np.ones((dilatation_size, dilatation_size))).astype(np.uint8)
 
     return water_mask, pcd_origin
