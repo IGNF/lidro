@@ -20,7 +20,16 @@ io:
 raster:
   # size for dilatation
   dilatation_size: 3
-  
+
+vector:
+  # Filter water's area (m²)
+  water_area: 150
+  # Parameters for buffer
+  buffer_positive: 1
+  buffer_negative: -0.5
+  # Tolerance from DOuglas-Peucker
+  tolerance: 1
+
 filter:
   # Classes to be considered as "non-water"
   keep_classes: [0, 1, 2, 3, 4, 5, 6, 17, 65, 66, 67]
