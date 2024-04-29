@@ -19,7 +19,8 @@ io:
 
 raster:
   # size for dilatation
-  dilatation_size: 3
+  dilation_size: 3
+
 
 vector:
   # Filter water's area (m²)
@@ -27,7 +28,7 @@ vector:
   # Parameters for buffer
   buffer_positive: 1
   buffer_negative: -0.5
-  # Tolerance from DOuglas-Peucker
+  # Tolerance from Douglas-Peucker
   tolerance: 1
 
 filter:

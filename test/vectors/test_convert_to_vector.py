@@ -12,7 +12,6 @@ output = "./tmp/create_mask_hydro/vectors/convert_to_vector/MaskHydro_Semis_2021
 output_main = "./tmp/create_mask_hydro/main/main_lidro_default/MaskHydro_Semis_2021_0830_6291_LA93_IGN69.GeoJSON"
 
 
-
 def setup_module(module):
     if TMP_PATH.is_dir():
         shutil.rmtree(TMP_PATH)
@@ -34,11 +33,12 @@ def test_create_hydro_vector_mask_default():
 
     assert Path(output).exists()
 
+
 def test_check_structure_default():
     # Output
     with open(output, "r") as f:
         geojson_data = json.load(f)
-    
+
     with open(output_main, "r") as f:
         geojson_data_main = json.load(f)
 
@@ -48,7 +48,7 @@ def test_check_structure_default():
         assert "features" in geojson_data
         assert isinstance(geojson_data["features"], list)
 
-       # CHECK POLYGON
+        # CHECK POLYGON
         for feature in geojson_data["features"]:
             geometry = feature["geometry"]
             coordinates = geometry["coordinates"]
@@ -56,7 +56,5 @@ def test_check_structure_default():
         for feature in geojson_data_main["features"]:
             geometry_main = feature["geometry"]
             coordinates_main = geometry_main["coordinates"]
-        
-        assert coordinates[0] == coordinates_main[0]
-   
 
+        assert coordinates[0] == coordinates_main[0]
