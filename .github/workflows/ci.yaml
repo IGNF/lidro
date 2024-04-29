@@ -16,6 +16,9 @@ jobs:
     steps:
       - name: Checkout branch
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.PAT_TOKEN }}
       # See https://github.com/marketplace/actions/setup-micromamba
       - name: Install conda env
         uses: mamba-org/setup-micromamba@v1.8.1

@@ -11,7 +11,8 @@ def read_pointcloud(las_file: str):
         las_file (str): Path to the LAS file
 
     Returns:
-        input_point (np.ndarray) : Numpy array containing point coordinates (X, Y, Z, classification)
+        input_point (np.ndarray) : Numpy array containing point coordinates and classification
+        (X, Y, Z, classification)
         crs (dict): a pyproj CRS object
     """
     # Read pointcloud

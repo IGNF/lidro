@@ -25,3 +25,9 @@ exclude = '''
 
 [tool.isort]
 profile = "black"
+
+
+[tool.pytest.ini_options]
+markers = [
+    "returnfile: marks tests that return a file to visualize results (select with '--return-file')"
+]
