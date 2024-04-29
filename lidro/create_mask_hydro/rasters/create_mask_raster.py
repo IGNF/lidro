@@ -33,7 +33,7 @@ def create_occupancy_map(points: np.array, tile_size: int, pixel_size: float, or
     return bins
 
 
-def detect_hydro_by_tile(filename: str, tile_size: int, pixel_size: float, classes: List[int], dilatation_size: int):
+def detect_hydro_by_tile(filename: str, tile_size: int, pixel_size: float, classes: List[int], dilation_size: int):
     """ "Detect hydrographic surfaces in a tile from the classified points of the input pointcloud
     An hydrographic surface is define as a surface where there is no points from any class different from water
 
