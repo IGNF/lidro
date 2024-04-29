@@ -69,5 +69,6 @@ def main(config: DictConfig):
         for file in os.listdir(input_dir):
             main_on_one_tile(file)
 
+
 if __name__ == "__main__":
     main()
