@@ -70,4 +70,4 @@ def detect_hydro_by_tile(filename: str, tile_size: int, pixel_size: float, class
     # / ! \ WITH "CLOSING" => Masks Hydro are no longer continuous, when they are merged
     water_mask = scipy.ndimage.binary_dilation(detected_water, structure=np.ones((dilation_size, dilation_size))).astype(np.uint8)
 
-    return morphology_bins, pcd_origin
+    return water_mask, pcd_origin
