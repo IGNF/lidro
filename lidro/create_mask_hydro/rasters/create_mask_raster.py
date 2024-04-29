@@ -43,7 +43,7 @@ The output hydrographic surface mask is dilated to make sure that the masks are 
         pixel_size (float): distance between each node of the raster grid (in meters)
         classes (List[int]): List of classes to use for the binarisation (points with other
                     classification values are ignored)
-        dilation_size (int): size for dilatation raster
+        dilation_size (int): size of the structuring element for dilation
 
     Returns:
         smoothed_water (np.array):  2D binary array (x, y) of the water presence from the point cloud
