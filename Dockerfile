@@ -1,4 +1,4 @@
-FROM mambaorg/micromamba:latest as mamba_pdal
+FROM mambaorg/micromamba:latest as mamba_lidro
 COPY environment.yml /environment.yml
 USER root
 RUN micromamba env create -n lidro -f /environment.yml
