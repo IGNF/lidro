@@ -68,6 +68,6 @@ def detect_hydro_by_tile(filename: str, tile_size: int, pixel_size: float, class
     # Apply a mathematical morphology operations: DILATATION
     # / ! \ NOT "CLOSING", due to the reduction in the size of hydro masks, particularly at the tile borders.
     # / ! \ WITH "CLOSING" => Masks Hydro are no longer continuous, when they are merged
-    morphology_bins = scipy.ndimage.binary_dilation(detected_water, structure=np.ones((dilatation_size, dilatation_size))).astype(np.uint8)
+    water_mask = scipy.ndimage.binary_dilation(detected_water, structure=np.ones((dilatation_size, dilatation_size))).astype(np.uint8)
 
     return morphology_bins, pcd_origin
