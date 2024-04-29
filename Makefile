@@ -12,7 +12,7 @@ install-precommit:
 	pre-commit install
 
 testing:
-	./ci/test.sh
+	python -m pytest -s ./test -v
 
 mamba-env-create:
 	mamba env create -n lidro -f environment.yml
