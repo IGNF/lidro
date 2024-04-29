@@ -19,7 +19,7 @@ io:
 
 raster:
   # size for dilatation
-  dilatation_size: 3
+  dilation_size: 3
   
 filter:
   # Classes to be considered as "non-water"
