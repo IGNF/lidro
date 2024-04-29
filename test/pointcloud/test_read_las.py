@@ -23,4 +23,4 @@ def test_read_pointcloud_return_format_okay():
 
     assert isinstance(output, np.ndarray) is True
 
-    assert CRS.from_user_input("EPSG:2154")
+    assert crs == CRS.from_user_input("EPSG:2154")
