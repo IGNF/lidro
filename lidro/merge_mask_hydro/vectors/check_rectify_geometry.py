@@ -1,38 +1,8 @@
 # -*- coding: utf-8 -*-
 """ Rectify and check geometry
 """
-import geopandas as gpd
-from shapely.geometry import CAP_STYLE, MultiPolygon, Polygon
+from shapely.geometry import CAP_STYLE
 from shapely.validation import make_valid
-
-
-def remove_hole(multipoly):
-    """Remove small holes (surface < 100 m²)
-
-    Args:
-        - multipoly (GeoJSON): Hydro Mask geometry
-
-    Returns:
-        GeoJSON: Hydro Mask geometry without holes (< 100 m²)
-    """
-    list_parts = []
-    eps = 100
-
-    for polygon in multipoly.geoms:
-        list_interiors = []
-
-        for interior in polygon.interiors:
-            p = Polygon(interior)
-
-            if p.area > eps:
-                list_interiors.append(interior)
-
-        temp_pol = Polygon(polygon.exterior.coords, holes=list_interiors)
-        list_parts.append(temp_pol)
-
-    new_multipolygon = MultiPolygon(list_parts)
-
-    return new_multipolygon
 
 
 def simplify_geometry(s, buffer_positive: float, buffer_negative: float):
@@ -49,7 +19,6 @@ def simplify_geometry(s, buffer_positive: float, buffer_negative: float):
     """
     # Buffer
     _geom = s.buffer(buffer_positive, cap_style=CAP_STYLE.square)
-    #_geom = polygon.buffer(buffer_positive, cap_style=CAP_STYLE.square)
     geom = _geom.buffer(buffer_negative, cap_style=CAP_STYLE.square)
     return geom
 

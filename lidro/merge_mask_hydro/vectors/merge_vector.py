@@ -9,12 +9,20 @@ from shapely.ops import unary_union
 
 from lidro.merge_mask_hydro.vectors.check_rectify_geometry import (
     check_geometry,
-    remove_hole,
     simplify_geometry,
 )
+from lidro.merge_mask_hydro.vectors.remove_hole import remove_hole
 
 
-def merge_geom(input_folder: str, output_folder: str, crs: str, water_area: int, buffer_positive: float, buffer_negative: float, tolerance: float):
+def merge_geom(
+    input_folder: str,
+    output_folder: str,
+    crs: str,
+    water_area: int,
+    buffer_positive: float,
+    buffer_negative: float,
+    tolerance: float,
+):
     """Merge severals masks of hydro surfaces from the points classification of the input LAS/LAZ file,
     filter mask (keep only water's area > 150 m²) and save it as a GeoJSON file.
 
@@ -25,7 +33,8 @@ def merge_geom(input_folder: str, output_folder: str, crs: str, water_area: int,
         water_area (int): filter Mask Hydro : keep only water's area (> 150 m² by default)
         buffer_positive (int): positive buffer from Mask Hydro
         buffer_negative (int): negative buffer from Mask Hydro
-        tolerance (float): All parts of a simplified geometry will be no more than tolerance distance from the original. 
+        tolerance (float): All parts of a simplified geometry will be no more
+                           than tolerance distance from the original.
     """
     # List for stocking all GeoDataFrame
     polys = []
@@ -59,9 +68,12 @@ def merge_geom(input_folder: str, output_folder: str, crs: str, water_area: int,
     list_parts = []
     for poly in simplify_geom:
         list_parts.append(poly)
+
     not_hole_geom = remove_hole(MultiPolygon(list_parts))
     geometry = gpd.GeoSeries(not_hole_geom.geoms, crs=crs).explode(index_parts=False)
-    gdf = gpd.GeoDataFrame(geometry=geometry, crs=crs)
+    # keep only water's area (> 150 m² by default) :
+    filter_geometry_second = [geom for geom in geometry if geom.area > water_area]
+    gdf = gpd.GeoDataFrame(geometry=filter_geometry_second, crs=crs)
 
     # save the result
     gdf.to_file(os.path.join(output_folder, "MaskHydro_merge.geojson"), driver="GeoJSON", crs=crs)

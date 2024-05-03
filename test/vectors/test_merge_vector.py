@@ -9,7 +9,7 @@ TMP_PATH = Path("./tmp/merge_mask_hydro/vectors/merge_mask_hydro")
 
 input_folder = "./data/mask_hydro/"
 output = Path("./tmp/merge_mask_hydro/vectors/merge_mask_hydro/MaskHydro_merge.geojson")
-
+output_main = "./data/merge_mask_hydro/MaskHydro_merge.geojson"
 
 
 def setup_module(module):
@@ -33,21 +33,28 @@ def test_create_hydro_vector_mask_default():
 
     assert Path(output).exists()
 
-# def test_check_structure_default():
-#     # Output
-#     with open(output, "r") as f:
-#         geojson_data = json.load(f)
 
-#         # CHECK STRUCTURE
-#         assert "type" in geojson_data
-#         assert geojson_data["type"] == "FeatureCollection"
-#         assert "features" in geojson_data
-#         assert isinstance(geojson_data["features"], list)
+def test_check_structure_default():
+    # Output
+    with open(output, "r") as f:
+        geojson_data = json.load(f)
 
-#        # CHECK POLYGON
-#         for feature in geojson_data["features"]:
-#             geometry = feature["geometry"]
-#             coordinates = geometry["coordinates"]
-        
-        #assert coordinates[0] == coordinates_main[0]
-   
+    with open(output_main, "r") as f:
+        geojson_data_main = json.load(f)
+
+        # CHECK STRUCTURE
+        assert "type" in geojson_data
+        assert geojson_data["type"] == "FeatureCollection"
+        assert "features" in geojson_data
+        assert isinstance(geojson_data["features"], list)
+
+        # CHECK POLYGON
+        for feature in geojson_data["features"]:
+            geometry = feature["geometry"]
+            coordinates = geometry["coordinates"]
+
+        for feature in geojson_data_main["features"]:
+            geometry_main = feature["geometry"]
+            coordinates_main = geometry_main["coordinates"]
+
+        assert coordinates[0] == coordinates_main[0]
