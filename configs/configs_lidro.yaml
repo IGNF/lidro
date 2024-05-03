@@ -21,7 +21,6 @@ raster:
   # size for dilatation
   dilation_size: 3
 
-
 vector:
   # Filter water's area (m²)
   water_area: 150
