@@ -48,7 +48,14 @@ def main(config: DictConfig):
     if os.path.isdir(input_dir):
         os.makedirs(output_dir, exist_ok=True)  # Create folder "merge"
         # Merge all Mash Hydro
-        merge_geom(input_dir, output_dir, crs, water_area, buffer_positive, buffer_negative, tolerance)
+        merge_geom(
+          input_dir, 
+          output_dir, 
+          CRS.from_user_input(config.io.srid),
+          config.vector.water_area, 
+          config.vector.buffer_positive, 
+          config.vector.buffer_negative, 
+          config.vector.tolerance)
 
 
 if __name__ == "__main__":
