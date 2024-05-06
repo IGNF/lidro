@@ -16,8 +16,6 @@ def main(config: DictConfig):
     """Merge all vector masks of hydro surfaces from the points classification of the input LAS/LAZ file,
     and save it as a GeoJSON file.
 
-    It can run either on each file of a folder
-
     Args:
         config (DictConfig): hydra configuration (configs/configs_lidro.yaml by default)
         It contains the algorithm parameters and the input/output parameters
@@ -39,7 +37,7 @@ def main(config: DictConfig):
     os.makedirs(output_dir, exist_ok=True)
 
     # Parameters for merging Mask Hydro
-    water_area = config.vector.water_area  # keep only water's area (> 150 m² by default)
+    min_water_area = config.vector.min_water_area  # keep only water's area (> 150 m² by default)
     buffer_positive = config.vector.buffer_positive  # positive buffer from Mask Hydro
     buffer_negative = config.vector.buffer_negative  # negative buffer from Mask Hydro
     tolerance = config.vector.tolerance  # Tolerance from Douglas-Peucker
@@ -52,7 +50,7 @@ def main(config: DictConfig):
           input_dir, 
           output_dir, 
           CRS.from_user_input(config.io.srid),
-          config.vector.water_area, 
+          config.vector.min_water_area, 
           config.vector.buffer_positive, 
           config.vector.buffer_negative, 
           config.vector.tolerance)

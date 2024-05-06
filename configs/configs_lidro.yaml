@@ -23,7 +23,7 @@ raster:
 
 vector:
   # Filter water's area (m²)
-  water_area: 150
+  min_water_area: 150
   # Parameters for buffer
   buffer_positive: 1
   buffer_negative: -0.5
