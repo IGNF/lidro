@@ -38,7 +38,7 @@ def main(config: DictConfig):
 
     os.makedirs(output_dir, exist_ok=True)
 
-    # Parameters for cmerging Mask Hydro
+    # Parameters for merging Mask Hydro
     water_area = config.vector.water_area  # keep only water's area (> 150 m² by default)
     buffer_positive = config.vector.buffer_positive  # positive buffer from Mask Hydro
     buffer_negative = config.vector.buffer_negative  # negative buffer from Mask Hydro
