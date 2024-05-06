@@ -13,7 +13,7 @@ from lidro.merge_mask_hydro.vectors.merge_vector import merge_geom
 
 @hydra.main(config_path="../configs/", config_name="configs_lidro.yaml", version_base="1.2")
 def main(config: DictConfig):
-    """Merge all vector masks of hydro surfacesfrom the points classification of the input LAS/LAZ file,
+    """Merge all vector masks of hydro surfaces from the points classification of the input LAS/LAZ file,
     and save it as a GeoJSON file.
 
     It can run either on each file of a folder
