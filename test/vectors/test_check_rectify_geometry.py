@@ -21,4 +21,18 @@ def test_check_geometry_default():
     # Load each GeoJSON file as GeoDataFrame
     geojson = gpd.read_file(input)
     check_geom = check_geometry(geojson)
+
     assert isinstance(check_geom.dtypes, object)
+
+    assert geojson.geometry.dtype == "geometry"
+
+
+def test_check_geometry_integrity():
+    # Load each GeoJSON file as GeoDataFrame
+    geojson = gpd.read_file(input)
+
+    # duplicates in the data
+    assert not geojson.duplicated().any(), "There are duplicates in the data"
+
+    # Check geometry
+    assert geojson["geometry"].is_valid.all(), "Geometry no-valid"

@@ -1,7 +1,10 @@
-import json
 import os
 import shutil
 from pathlib import Path
+
+import geopandas as gpd
+from pyproj import CRS
+from shapely.geometry import Polygon
 
 from lidro.merge_mask_hydro.vectors.merge_vector import merge_geom
 
@@ -19,42 +22,21 @@ def setup_module(module):
 
 
 def test_create_hydro_vector_mask_default():
-    crs = 'PROJCS["RGF93 v1 / Lambert-93",GEOGCS["RGF93 v1",DATUM["Reseau_Geodesique_Francais_1993_v1",\
-            SPHEROID["GRS 1980",6378137,298.257222101,AUTHORITY["EPSG","7019"]],\
-            AUTHORITY["EPSG","6171"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],\
-            UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4171"]],\
-            PROJECTION["Lambert_Conformal_Conic_2SP"],PARAMETER["latitude_of_origin",46.5],\
-            PARAMETER["central_meridian",3],PARAMETER["standard_parallel_1",49],PARAMETER["standard_parallel_2",44],\
-            PARAMETER["false_easting",700000],PARAMETER["false_northing",6600000],\
-            UNIT["metre",1,AUTHORITY["EPSG","9001"]],\
-            AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","2154"]]'
+    # Parameters
+    min_water_area = 150
+    buffer_positive = 0.5
+    buffer_negative = -1.5
+    tolerance = 1
+    crs = CRS.from_epsg(2154)
 
-    merge_geom(input_folder, TMP_PATH, crs, 150, 0.5, -1.5, 1)
-
+    merge_geom(input_folder, TMP_PATH, crs, min_water_area, buffer_positive, buffer_negative, tolerance)
     assert Path(output).exists()
 
+    gdf = gpd.read_file(output)
 
-def test_check_structure_default():
-    # Output
-    with open(output, "r") as f:
-        geojson_data = json.load(f)
+    assert not gdf.empty  # GeoDataFrame shouldn't empty
+    assert gdf.crs.to_string() == crs  # CRS is identical
+    assert all(isinstance(geom, Polygon) for geom in gdf.geometry)  # All geometry should Polygons
 
-    with open(output_main, "r") as f:
-        geojson_data_main = json.load(f)
-
-        # CHECK STRUCTURE
-        assert "type" in geojson_data
-        assert geojson_data["type"] == "FeatureCollection"
-        assert "features" in geojson_data
-        assert isinstance(geojson_data["features"], list)
-
-        # CHECK POLYGON
-        for feature in geojson_data["features"]:
-            geometry = feature["geometry"]
-            coordinates = geometry["coordinates"]
-
-        for feature in geojson_data_main["features"]:
-            geometry_main = feature["geometry"]
-            coordinates_main = geometry_main["coordinates"]
-
-        assert coordinates[0] == coordinates_main[0]
+    expected_number_of_geometries = 1
+    assert len(gdf) == expected_number_of_geometries  # One geometry
