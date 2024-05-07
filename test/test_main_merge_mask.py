@@ -27,7 +27,7 @@ def test_main_run_okay():
 def test_main_lidro_fail_no_input_dir():
     output_dir = OUTPUT_DIR / "main_no_input_dir"
     pixel_size = 1
-    water_area = 150
+    min_water_area = 150
     buffer_positive = 0.5
     buffer_negative = -1.5
     tolerance = 1
@@ -39,7 +39,7 @@ def test_main_lidro_fail_no_input_dir():
             overrides=[
                 f"io.output_dir={output_dir}",
                 f"io.pixel_size={pixel_size}",
-                f"vector.water_area={water_area}",
+                f"vector.min_water_area={min_water_area}",
                 f"vector.buffer_positive={buffer_positive}",
                 f"vector.buffer_negative={buffer_negative}",
                 f"vector.tolerance={tolerance}",
@@ -53,7 +53,7 @@ def test_main_lidro_fail_no_input_dir():
 def test_main_lidro_fail_wrong_input_dir():
     output_dir = OUTPUT_DIR / "main_wrong_input_dir"
     pixel_size = 1
-    water_area = 150
+    min_water_area = 150
     buffer_positive = 0.5
     buffer_negative = -1.5
     tolerance = 1
@@ -66,7 +66,7 @@ def test_main_lidro_fail_wrong_input_dir():
                 "io.input_dir=some_random_input_dir",
                 f"io.output_dir={output_dir}",
                 f"io.pixel_size={pixel_size}",
-                f"vector.water_area={water_area}",
+                f"vector.min_water_area={min_water_area}",
                 f"vector.buffer_positive={buffer_positive}",
                 f"vector.buffer_negative={buffer_negative}",
                 f"vector.tolerance={tolerance}",
@@ -80,7 +80,7 @@ def test_main_lidro_fail_wrong_input_dir():
 def test_main_lidro_fail_no_output_dir():
     input_dir = INPUT_DIR
     pixel_size = 1
-    water_area = 150
+    min_water_area = 150
     buffer_positive = 0.5
     buffer_negative = -1.5
     tolerance = 1
@@ -92,7 +92,7 @@ def test_main_lidro_fail_no_output_dir():
             overrides=[
                 f"io.input_dir={input_dir}",
                 f"io.pixel_size={pixel_size}",
-                f"vector.water_area={water_area}",
+                f"vector.min_water_area={min_water_area}",
                 f"vector.buffer_positive={buffer_positive}",
                 f"vector.buffer_negative={buffer_negative}",
                 f"vector.tolerance={tolerance}",

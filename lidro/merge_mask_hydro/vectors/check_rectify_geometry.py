@@ -2,41 +2,23 @@
 """ Rectify and check geometry
 """
 from shapely.geometry import CAP_STYLE
-from shapely.validation import make_valid
 
 
-def simplify_geometry(s, buffer_positive: float, buffer_negative: float):
+def apply_buffers_to_geometry(hydro_mask, buffer_positive: float, buffer_negative: float):
     """Buffer geometry
     Objective: create a HYDRO mask at the edge of the bank, not protruding over the banks
 
     Args:
-        s (GeoJSON): Hydro Mask geometry
-        buffer_positive (float): positive buffer from Mask Hydro
-        buffer_negative (float): negative buffer from Mask Hydro
-
+        s (gpd.GeoDataFrame): geopandas dataframe with input geometry
+        buffer_positive (float): positive buffer to apply to the input geometry
+        buffer_negative (float): negative buffer to apply to the input geometry
     Returns:
-        GeoJSON: Hydro Mask geometry simplify
+        GeoJSON: updated geometry
     """
     # Buffer
-    _geom = s.buffer(buffer_positive, cap_style=CAP_STYLE.square)
+    _geom = hydro_mask.buffer(buffer_positive, cap_style=CAP_STYLE.square)
     geom = _geom.buffer(buffer_negative, cap_style=CAP_STYLE.square)
     return geom
-
-
-def fix_invalid_geometry(geometry):
-    """Set invalid geoemtries
-
-    Args:
-        geometry (GeoJSON): Hydro Mask geometry
-
-    Returns:
-        GeoJSON: Hydro Mask geometry valid
-    """
-
-    if not geometry.is_valid:
-        return make_valid(geometry)
-    else:
-        return geometry
 
 
 def check_geometry(initial_gdf):
@@ -51,8 +33,8 @@ def check_geometry(initial_gdf):
     # Obtain simple geometries
     gdf_simple = initial_gdf.explode(ignore_index=True)
     # Delete duplicate geoemtries if any
-    gdf_without_duplicates = gdf_simple.drop_duplicates(ignore_index=True)
-    # Identify invalid geometries and keep only valid ones
-    gdf_valid = gdf_without_duplicates.copy()
-    gdf_valid.geometry = gdf_valid.geometry.apply(lambda geom: fix_invalid_geometry(geom))
+    gdf_simple = gdf_simple.drop_duplicates(ignore_index=True)
+    # Identify invalid geometries, then returns a GeoSeries with valid geometrie
+    gdf_valid = gdf_simple.make_valid()
+
     return gdf_valid
