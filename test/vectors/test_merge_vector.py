@@ -37,5 +37,5 @@ def test_create_hydro_vector_mask_default():
     assert gdf.crs.to_string() == crs  # CRS is identical
     assert all(isinstance(geom, Polygon) for geom in gdf.geometry)  # All geometry should Polygons
 
-    expected_number_of_geometries = 1
+    expected_number_of_geometries = 3
     assert len(gdf) == expected_number_of_geometries  # One geometry

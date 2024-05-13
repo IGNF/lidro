@@ -20,7 +20,7 @@ def close_holes(polygon, min_hole_area):
     # Create polygons from each exterior contour without holes
     exterior_polygons = [Polygon(ring) for ring in exterior_contours]
     # Merge all polygons into a single encompassing shape
-    unified_shape = unary_union(polygons)
+    unified_shape = unary_union(exterior_polygons)
 
     # Interior Hydro Mask
     interiors_to_keep = [
