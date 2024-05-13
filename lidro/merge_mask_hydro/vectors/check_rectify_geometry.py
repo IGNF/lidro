@@ -9,7 +9,7 @@ def apply_buffers_to_geometry(hydro_mask, buffer_positive: float, buffer_negativ
     Objective: create a HYDRO mask at the edge of the bank, not protruding over the banks
 
     Args:
-        s (gpd.GeoDataFrame): geopandas dataframe with input geometry
+        hydro_mask (gpd.GeoDataFrame): geopandas dataframe with input geometry
         buffer_positive (float): positive buffer to apply to the input geometry
         buffer_negative (float): negative buffer to apply to the input geometry
     Returns:
