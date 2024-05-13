@@ -34,7 +34,7 @@ def check_geometry(initial_gdf):
     gdf_simple = initial_gdf.explode(ignore_index=True)
     # Delete duplicate geoemtries if any
     gdf_simple = gdf_simple.drop_duplicates(ignore_index=True)
-    # Identify invalid geometries, then returns a GeoSeries with valid geometrie
+    # Identify invalid geometries, then return a GeoSeries with valid geometries
     gdf_valid = gdf_simple.make_valid()
 
     return gdf_valid
