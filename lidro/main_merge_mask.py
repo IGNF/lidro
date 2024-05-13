@@ -36,13 +36,6 @@ def main(config: DictConfig):
 
     os.makedirs(output_dir, exist_ok=True)
 
-    # Parameters for merging Mask Hydro
-    min_water_area = config.vector.min_water_area  # keep only water's area (> 150 m² by default)
-    buffer_positive = config.vector.buffer_positive  # positive buffer from Mask Hydro
-    buffer_negative = config.vector.buffer_negative  # negative buffer from Mask Hydro
-    tolerance = config.vector.tolerance  # Tolerance from Douglas-Peucker
-    crs = CRS.from_user_input(config.io.srid)
-
     if os.path.isdir(input_dir):
         os.makedirs(output_dir, exist_ok=True)  # Create folder "merge"
         # Merge all Mash Hydro
