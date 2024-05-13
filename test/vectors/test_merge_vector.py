@@ -11,8 +11,7 @@ from lidro.merge_mask_hydro.vectors.merge_vector import merge_geom
 TMP_PATH = Path("./tmp/merge_mask_hydro/vectors/merge_mask_hydro")
 
 input_folder = "./data/mask_hydro/"
-output = Path("./tmp/merge_mask_hydro/vectors/merge_mask_hydro/MaskHydro_merge.geojson")
-output_main = "./data/merge_mask_hydro/MaskHydro_merge.geojson"
+output = Path("./data/merge_mask_hydro/MaskHydro_merge.geojson")
 
 
 def setup_module(module):
