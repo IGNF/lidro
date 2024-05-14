@@ -2,11 +2,12 @@
 """ Rectify and check geometry
 """
 from shapely.geometry import CAP_STYLE
-
+import geopandas as gpd
 
 def apply_buffers_to_geometry(hydro_mask, buffer_positive: float, buffer_negative: float):
     """Buffer geometry
-    Objective: create a HYDRO mask at the edge of the bank, not protruding over the banks
+    Objective: create a HYDRO mask at the edge of the bank, not protruding over the banks. 
+    In this case, negative buffer should be bigger than positive buffer
 
     Args:
         hydro_mask (gpd.GeoDataFrame): geopandas dataframe with input geometry
@@ -21,15 +22,15 @@ def apply_buffers_to_geometry(hydro_mask, buffer_positive: float, buffer_negativ
     return geom
 
 
-def check_geometry(initial_gdf):
-    """Check topology
+def fix_topology(initial_gdf: gpd.GeoDataFrame)-> gpd.GeoDataFrame:
+    """Fix topology
 
     Args:
-        initial_gdf (GeoJSON): Hydro Mask geometry
+        initial_gdf (gpd.GeoDataFrame): Hydro Mask geometry
 
     Returns:
-        GeoJSON: Hydro Mask geometry valid
-    """
+        gpd.GeoDataFrame: Hydro Mask geometry valid
+    """    
     # Obtain simple geometries
     gdf_simple = initial_gdf.explode(ignore_index=True)
 
