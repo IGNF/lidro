@@ -62,7 +62,7 @@ def merge_geom(
     gdf = close_holes(gdf, min_hole_area=100)
     gdf = gpd.GeoSeries(gdf, crs=crs).explode(index_parts=False)
 
-    # keep only water's area (> 150 m² by default) :
+    # filter out water area < min_water_area (150 m² by default) again to make sure that previous geometry updates did not generate new small water areas
     gdf = gdf[gdf.geometry.area > min_water_area]
 
     # save the result
