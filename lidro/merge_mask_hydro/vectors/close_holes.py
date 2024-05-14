@@ -4,7 +4,7 @@ from shapely.geometry import Polygon
 from shapely.ops import unary_union
 
 
-def close_holes(polygon: Polygon, min_hole_area)-> Polygon:
+def close_holes(polygon: Polygon, min_hole_area):
     """Remove small holes (surface < 100 m²)
 
     Args:

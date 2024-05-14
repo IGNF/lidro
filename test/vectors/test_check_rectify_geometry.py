@@ -16,7 +16,6 @@ def test_apply_buffers_to_geometry_default():
 
 
 def test_fix_topology_default():
-    input = "./data/merge_mask_hydro/MaskHydro_merge.geojson"
     # Load each GeoJSON file as GeoDataFrame
     geojson = gpd.read_file(input)
     check_geom = fix_topology(geojson)
@@ -25,6 +24,7 @@ def test_fix_topology_default():
 
     assert check_geom.geometry.dtype == "geometry"
 
+<<<<<<< HEAD
     # Check not duplicates in the data
     assert not check_geom.duplicated().any(), "There are duplicates in the data"
 
@@ -46,3 +46,11 @@ def test_fix_topology_error():
 
     # # Check geometry
     assert check_geom.geometry.is_valid.all(), "Geometry no-valid"
+=======
+    # duplicates in the data
+    assert not geojson.duplicated().any(), "There are duplicates in the data"
+
+    # Check geometry
+    assert geojson["geometry"].is_valid.all(), "Geometry no-valid"
+
+>>>>>>> ebdf035 (refacto with Lea)
