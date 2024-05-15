@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 """ Remove small holes """
-from shapely.geometry import MultiPolygon, Polygon
+from shapely.geometry import Polygon
 from shapely.ops import unary_union
 
 
-def close_holes(polygon: Polygon, min_hole_area):
+def close_holes(polygon: Polygon, min_hole_area)-> Polygon:
     """Remove small holes (surface < 100 m²)
 
     Args:
-        - polygon (GeoJSON): Hydro Mask geometry
+        - polygon (Polygon): Hydro Mask geometry
         - minhole_area (int): close holes in Mask Hydro : keep only holes with area bigger
                               than min_hole_area (> 100 m² by default)
 
     Returns:
-        GeoJSON: Hydro Mask geometry without holes (< 100 m²)
+        Polygon: Hydro Mask geometry without holes (< 100 m²)
     """
     # Interior Hydro Mask
     interiors_to_keep = [
