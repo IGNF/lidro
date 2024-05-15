@@ -7,6 +7,7 @@ from lidro.merge_mask_hydro.vectors.check_rectify_geometry import (
 )
 
 input = "./data/merge_mask_hydro/MaskHydro_merge.geojson"
+input_error = "./data/merge_mask_hydro/MaskHydro_merge_NoValid.geojson"
 
 
 def test_apply_buffers_to_geometry_default():
@@ -24,11 +25,25 @@ def test_fix_topology_default():
 
     assert isinstance(check_geom.dtypes, object)
 
-    assert geojson.geometry.dtype == "geometry"
+    assert check_geom.geometry.dtype == "geometry"
 
-    # duplicates in the data
-    assert not geojson.duplicated().any(), "There are duplicates in the data"
+    # Check not duplicates in the data
+    assert not check_geom.duplicated().any(), "There are duplicates in the data"
 
-    # Check geometry
-    assert geojson["geometry"].is_valid.all(), "Geometry no-valid"
+    # # Check geometry
+    assert check_geom.geometry.is_valid.all(), "Geometry no-valid"
 
+def test_fix_topology_error():
+    # Load each GeoJSON file as GeoDataFrame
+    geojson = gpd.read_file(input_error)
+    check_geom = fix_topology(geojson)
+
+    assert isinstance(check_geom.dtypes, object)
+    
+    assert check_geom.geometry.dtype == "geometry"
+
+    # Check not duplicates in the data
+    assert not check_geom.duplicated().any(), "There are duplicates in the data"
+
+    # # Check geometry
+    assert check_geom.geometry.is_valid.all(), "Geometry no-valid"
