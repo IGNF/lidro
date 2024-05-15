@@ -6,11 +6,8 @@ from lidro.merge_mask_hydro.vectors.check_rectify_geometry import (
     fix_topology,
 )
 
-input = "./data/merge_mask_hydro/MaskHydro_merge.geojson"
-input_error = "./data/merge_mask_hydro/MaskHydro_merge_NoValid.geojson"
-
-
 def test_apply_buffers_to_geometry_default():
+    input = "./data/merge_mask_hydro/MaskHydro_merge.geojson"
     # Load each GeoJSON file as GeoDataFrame
     geojson = gpd.read_file(input)
     geometry = geojson["geometry"].unary_union
@@ -19,6 +16,7 @@ def test_apply_buffers_to_geometry_default():
 
 
 def test_fix_topology_default():
+    input = "./data/merge_mask_hydro/MaskHydro_merge.geojson"
     # Load each GeoJSON file as GeoDataFrame
     geojson = gpd.read_file(input)
     check_geom = fix_topology(geojson)
@@ -34,6 +32,7 @@ def test_fix_topology_default():
     assert check_geom.geometry.is_valid.all(), "Geometry no-valid"
 
 def test_fix_topology_error():
+    input_error = "./data/merge_mask_hydro/MaskHydro_merge_NoValid.geojson"
     # Load each GeoJSON file as GeoDataFrame
     geojson = gpd.read_file(input_error)
     check_geom = fix_topology(geojson)
