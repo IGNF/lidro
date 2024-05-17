@@ -23,12 +23,16 @@ def setup_module(module):
     os.makedirs(TMP_PATH)
 
 
-def test_create_hydro_vector_mask_default():
+def test_points_along_skeleton_default():
     # Parameters
     distance_meters = 2
     crs = CRS.from_epsg(2154)
 
-    generate_points_along_skeleton(input_folder, TMP_PATH, file, distance_meters, crs)
+    result = generate_points_along_skeleton(input_folder, file, distance_meters, crs)
+
+    result = gpd.GeoDataFrame(geometry=result, crs=crs)
+    result.to_file(output, driver="GeoJSON", crs=crs)
+
     assert Path(output).exists()
 
     gdf = gpd.read_file(output)
