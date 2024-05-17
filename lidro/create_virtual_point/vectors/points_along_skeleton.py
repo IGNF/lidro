@@ -1,8 +1,8 @@
 import os
 
 import geopandas as gpd
-import shapely
-from shapely.geometry import MultiPoint
+from shapely.geometry import LineString, Point
+from shapely.ops import linemerge
 
 
 def generate_points_along_skeleton(input_folder: str, output_folder: str, file: str, distance_meters: float, crs: str):
@@ -14,16 +14,25 @@ def generate_points_along_skeleton(input_folder: str, output_folder: str, file: 
         file (str): filename for creating points
         distance_meters (float): distance in meters betwen each point
         crs (str): a pyproj CRS object used to create the output GeoJSON file
-    """ """"""
+    """
+    # Read the input file
     gdf = gpd.read_file(os.path.join(input_folder, file), crs=crs)
+    gdf_lines = gpd.GeoDataFrame(gdf, crs=crs).explode(index_parts=False)
 
     # Segmentize geometry
-    multi_line = shapely.segmentize((gdf["geometry"].unary_union), max_segment_length=distance_meters)
+    lines = linemerge(gdf.geometry.unary_union)
 
-    # Extract Points along skeleton
-    points = [point for line in multi_line.geoms for point in line.coords]
-    multi_point = MultiPoint(points)
+    merged_line = LineString([point for line in lines.geoms for point in line.coords])
 
-    gdf_final = gpd.GeoSeries(multi_point, crs=crs).explode(index_parts=False)
+    # Create severals points every "distance meters" along skeleton's line
+    points = [
+        Point(merged_line.interpolate(distance)) for distance in range(0, int(merged_line.length), distance_meters)
+    ]
+    points.append(Point(merged_line.coords[-1]))  # ADD last point from line
 
-    gdf_final.to_file(os.path.join(output_folder, "Points.geojson"), driver="GeoJSON", crs=crs)
+    # Create an empty list to hold points that intersect with LineStrings
+    # Iterate through each point and check if it intersects with any LineString in the GeoDataFrame
+    intersecting_points = [point for point in points if any(gdf_lines.geometry.intersects(point.buffer(0.1)))]
+
+    result = gpd.GeoDataFrame(geometry=intersecting_points, crs=crs).explode(index_parts=False)
+    result.to_file(os.path.join(output_folder, "Points.geojson"), driver="GeoJSON", crs=crs)
