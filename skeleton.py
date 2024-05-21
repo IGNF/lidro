@@ -1,15 +1,15 @@
 from itertools import product
+from typing import Dict, List, Tuple
 
 import geopandas as gpd
 from geopandas.geodataframe import GeoDataFrame
 import pandas as pd
 import numpy as np
 
-from shapely import LineString
+from shapely import LineString, Point, geometry
 from shapely.geometry import CAP_STYLE
 from shapely.validation import make_valid
-from shapely.ops import voronoi_diagram, linemerge
-
+from shapely.ops import voronoi_diagram, linemerge, split, snap
 import logging
 
 MASK_GEOJSON_1 = "/home/MDaab/data/squelette_test/MaskHydro_merge 1.geojson"
@@ -20,20 +20,12 @@ MASK_GEOJSON_4 = "/home/MDaab/data/squelette_test/ecoulement_brut_lg1.geojson"
 MIDDLE_FILE = "squelette_filtrer.geojson"
 SAVE_FILE = "squelette_hydrographique.geojson"
 WATER_MIN_SIZE = 20
-
-
-
-# def simplify_geometry(polygon):
-#     """ simplifier certaines formes pour faciliter les calculs
-#     """
-#     ## Buffer positif de la moitié de la taille de la résolution du masque HYDRO (1m de résolution)
-#     _geom = polygon.buffer(1, cap_style=CAP_STYLE.square)
-#     geom = _geom.buffer(-0.5, cap_style=CAP_STYLE.square)
-#     return geom
+BRIDGE_MAX_WIDTH = 50
+VORONOI_MAX_LENGTH = 2
 
 
 def fix_invalid_geometry(geometry):
-    """ Fixer les géoémtries invalides
+    """ Fixer les géométries invalides
     """
     if not geometry.is_valid:
         return make_valid(geometry)
@@ -42,13 +34,12 @@ def fix_invalid_geometry(geometry):
 
 
 def check_geometry(initial_gdf):
-    """Vérifier la topologie des polygones
+    """garanty polygons' validity
     """
-    # Obtenir des géométries simples
-    gdf_simple = initial_gdf.explode(ignore_index=True)  # Le paramètre ignore_index est utilisé pour obtenir une incrémentation d'index mise à jour.
-    # Supprimer les géométries en double si il y en a
+    # create simple geometry 
+    gdf_simple = initial_gdf.explode(ignore_index=True)  # ignore_index makes the resulting index multi-indexed
     gdf_without_duplicates = gdf_simple.drop_duplicates(ignore_index=True)
-    # Identifier les géométries invalides et ne garder que les géométries valides
+    # remove invalid polygons
     gdf_valid = gdf_without_duplicates.copy()
     gdf_valid.geometry = gdf_valid.geometry.apply(
         lambda geom: fix_invalid_geometry(geom)
@@ -106,30 +97,38 @@ def can_line_be_removed(line, vertices_dict):
         return False
     return True
 
-def remove_extra_lines(lines:GeoDataFrame):
-
-    #  prepare a vertice dict, containing all the lines joining on a same vertex
+def get_vertices_dict(gdf_lines:GeoDataFrame)->Dict[Point, List[LineString]]:
+    """
+    get a dictionary of vertices listing all the lines having a specific vertex as one of its extremities
+    Args:
+        - gdf_lines:geodataframe containing a list of lines
+    return:
+        - a dict with the vertices are the keys and the values are lists of lines
+    """
+    #  prepare a vertice dict, containing all the lines connected on a same vertex
     vertices_dict = {}
-    for index in lines.index :
-        line = lines.iloc[index]['geometry']
+    for index in gdf_lines.index :
+        line = gdf_lines.iloc[index]['geometry']
         point_a, point_b = line.boundary.geoms[0], line.boundary.geoms[1]
         try :
-            vertices_dict[point_a].append(line)     # ATTENTION (les points peuvent peut-être être légèrement différents)
+            vertices_dict[point_a].append(line)
         except KeyError:
             vertices_dict[point_a] = [line]
         try :
             vertices_dict[point_b].append(line)
         except KeyError:
             vertices_dict[point_b] = [line]
+    return vertices_dict
 
-    # get all the lines to remove from the list
+def remove_extra_lines(gdf_lines:GeoDataFrame)->GeoDataFrame:
+    vertices_dict = get_vertices_dict(gdf_lines)
+
     lines_to_remove = []
     for vertex, line_list in vertices_dict.items():
-        # print(len(line_list))
         if len(line_list) == 1 :
             continue
 
-        # if len(line_list) != 1, then it's probably 3 ; Can't be 2 because of the previous merge, very unlikely to be 4+
+        # if len(line_list) !is not 1, then it's probably 3; Can't be 2 because of the previous merge, very unlikely to be 4+
         lines_to_keep = []
         lines_that_can_be_removed = []
         for line in line_list:
@@ -157,16 +156,6 @@ def remove_extra_lines(lines:GeoDataFrame):
         min_dot_product = 1
         line_that_should_not_be_removed = None
         for line_to_keep, line_that_can_be_removed in product(lines_to_keep, lines_that_can_be_removed):
-            # if vertex == line_to_keep.boundary.geoms[0]:
-            #     vector_to_keep = np.array((line_to_keep.boundary.geoms[1] - vertex).coords[0])
-            # else:
-            #     vector_to_keep = np.array((line_to_keep.boundary.geoms[0] - vertex).coords[0])
-
-            # if vertex == line_that_can_be_removed.boundary.geoms[0]:
-            #     vector_to_remove = np.array((line_that_can_be_removed.boundary.geoms[1] - vertex).coords[0])
-            # else:
-            #     vector_to_remove = np.array((line_that_can_be_removed.boundary.geoms[0] - vertex).coords[0])
-
             if vertex == line_to_keep.boundary.geoms[0]:
                 vector_to_keep = np.array(line_to_keep.boundary.geoms[1].coords[0]) - np.array(vertex.coords[0])
             else:
@@ -194,7 +183,7 @@ def remove_extra_lines(lines:GeoDataFrame):
         lines_to_remove += lines_that_can_be_removed
 
     # return the lines without the lines to remove
-    return lines[~lines['geometry'].isin(lines_to_remove)]
+    return gdf_lines[~gdf_lines['geometry'].isin(lines_to_remove)]
 
 def line_merge(voronoi_lines):
     """Fusionner tous les LINESTRING en un seul objet MultiLineString
@@ -203,7 +192,6 @@ def line_merge(voronoi_lines):
         - voronoi_lines (GeoDataframe) :  Lignes de Voronoi comprises à l'intérieur du masque hydrographique
 
     Returns:
-
         lines (GeoDataframe): Lignes de Voronoi fusionnées comprises à l'intérieur du masque hydrographique
 
     """
@@ -229,15 +217,13 @@ def create_voronoi_lines(mask_hydro, crs):
     Returns :
         out lines (GeoDataframe) : Lignes de Voronoi comprises à l'intérieur du masque hydrographique
     """
-    # Vérfier quye la Geometrie n'est pas vide
+    # we don't work on an empty geometry
     if not mask_hydro['geometry'].dtype == 'geometry':
         return
-    
-    ###### Calculer le diagram de Voronoi ######
-    # "Segmentize" le masque HYDRO :
-    # Renvoie une geometry/geography modifiée dont aucun segment n'est plus long que max_segment_length.
-    segmentize_geom = (mask_hydro['geometry'].unary_union).segmentize(max_segment_length=2)
-    # Calculer le diagrame de Voronoi, et ne renvoyer que les polylignes
+
+    # divide geometry into segments no longer than max_segment_length
+    segmentize_geom = (mask_hydro['geometry'].unary_union).segmentize(max_segment_length=VORONOI_MAX_LENGTH)
+    # Create the voronoi diagram and only keep polygon
     regions = voronoi_diagram(segmentize_geom, envelope=segmentize_geom, tolerance=0.0, edges=True)
 
     ##### Filtrer les lignes de Voronoi en excluant celles à l'extérieur du masques ######
@@ -250,6 +236,90 @@ def create_voronoi_lines(mask_hydro, crs):
 
     return gpd.GeoDataFrame(lines_filter, crs=crs)
 
+def get_prior_point(vertex, line) -> Tuple[float, float]:
+    """ return the point right before an extremity vertex in a line 
+    """
+    if vertex == line.boundary.geoms[0]:
+        prior_point = line.coords[2]
+    else:
+        prior_point = line.coords[-2]
+    return prior_point
+
+def connect_extremities(gdf_lines:GeoDataFrame)->GeoDataFrame:
+    """
+    connect extremities of rivers, as we assume they are disconnected because of bridges
+    Args:
+        - gdf_lines: geodataframe containing a list of lines
+    return:
+        The same geodataframe with connection between extremities
+    """
+    # garanty that all lines have at least 3 segments, because the connexion is not
+    # done on the last point, but the previous one. Therefore we need enough points
+    for index in gdf_lines.index :
+        line = gdf_lines.iloc[index]['geometry']
+        if len(line.coords) < 4: # 3 segments, so 4 points
+            gdf_lines.loc[index] = line.segmentize(line.length/3)
+
+    vertices_dict = get_vertices_dict(gdf_lines)
+    # we remove all vertices that are not extremities (an extremity is connected to only one line)
+    keys_to_remove = []
+    for vertex, line_list in vertices_dict.items():
+        if len(line_list) != 1:
+            keys_to_remove.append(vertex)
+    for vertex in keys_to_remove:
+        vertices_dict.pop(vertex, None)
+
+    best_candidate = {}
+    for vertex, [line] in vertices_dict.items():
+        prior_point = get_prior_point(vertex, line)
+
+        # get the perpendicular line passing throught vertex, equation ax + by + c = 0
+        a, b = vertex.coords[0][0] - prior_point[0], vertex.coords[0][1] - prior_point[1]
+        c = - a * vertex.coords[0][0] - b * vertex.coords[0][1]
+
+        # make sure the prior_point is below the line (if above, we multiply the equation by -1 to change it)
+        if not a * prior_point[0] + b * prior_point[1] + c <= 0:
+            a, b, c = -a, -b, -c
+
+        # search best vertex candidate to join this vertex i.e:
+        # the closest, not too far, vertex above the perpendicular line (to be "in front" of the river)
+        for  other_vertex, [other_line] in vertices_dict.items():
+            if other_vertex == vertex:
+                continue
+            # have to be above the perpendicular line 
+            if  a * other_vertex.coords[0][0] + b * other_vertex.coords[0][1] + c <= 0:
+                continue
+            # should not be too far:
+            squared_distance = (vertex.coords[0][0] - other_vertex.coords[0][0])**2 + (vertex.coords[0][1] - other_vertex.coords[0][1])**2
+            if  squared_distance > BRIDGE_MAX_WIDTH**2:
+                continue
+            other_prior_point = get_prior_point(other_vertex, other_line)
+            best_candidate[prior_point] = other_prior_point
+
+    already_done_prior_points= []
+    # if 2 prior_points have each other as best candidate, we create a line between them
+    for prior_point, other_prior_point in best_candidate.items():
+        if best_candidate[other_prior_point] == prior_point and other_prior_point not in already_done_prior_points:
+            already_done_prior_points.append(prior_point)
+            gdf_lines.loc[len(gdf_lines)] = [LineString([prior_point, other_prior_point])]
+    return gdf_lines
+
+def split_into_basic_segments(gdf_lines:GeoDataFrame)->GeoDataFrame:
+    def split_line_by_point(line, point, tolerance: float=1.0e-12):
+        return split(snap(line, point, tolerance), point)
+    result = (
+        gdf_lines
+        .assign(geometry=gdf_lines.apply(
+            lambda x: split_line_by_point(
+                x.geometry, 
+                geometry.Point(x.geometry.coords[1])
+            ), axis=1
+        ))
+        .explode()
+        .reset_index(drop=True)
+    )
+    return result
+
 
 def run(mask_hydro, crs):
     """Calculer le squelette hydrographique
@@ -259,52 +329,31 @@ def run(mask_hydro, crs):
         - crs (str): code EPSG
     """
     gdf = check_geometry(mask_hydro)  # Vérifier et corriger les géométries non valides
-    ### Diagram Voronoi ###
+    ### Voronoi Diagram ###
     voronoi_lines = create_voronoi_lines(gdf, crs)
 
-    ### Mettre une occurence au squelette pour obtenir un tronçon hydrographique ###
-    # Fusionner tous les LINESTRING en un seul objet MultiLineString
-    lines = line_merge(voronoi_lines)
-    old_number_of_lines = len(lines)
+    # merge all lines that can be merged without doubt (when only 2 lines are connected)
+    # remove lines we don't want, then repeat until it doesn't change anymore
+    gdf_lines = line_merge(voronoi_lines)
+    old_number_of_lines = len(gdf_lines)
     while True:
-        lines = remove_extra_lines(lines)
-        lines = line_merge(lines)
+        gdf_lines = remove_extra_lines(gdf_lines)
+        gdf_lines = line_merge(gdf_lines)
 
-        if len(lines) != old_number_of_lines:
-            old_number_of_lines = len(lines)
+        if len(gdf_lines) != old_number_of_lines:
+            old_number_of_lines = len(gdf_lines)
         else:
             break
 
-    # pruned_lines = remove_extra_lines(lines)
-    # merged_pruned_lines = line_merge(pruned_lines)
-    # super_pruned_lines = remove_extra_lines(merged_pruned_lines)
-    gpd.GeoDataFrame(lines, crs=crs).to_file("test_5.geojson", driver='GeoJSON')
+    gdf_lines = connect_extremities(gdf_lines)
+    gdf_lines = gdf_lines.set_crs(crs, allow_override=True)  # the lines added to connect the extremities have no crs
 
-
-
-
-    # gdf = filter_branch(lines, crs)
-
-    # gdf.to_file(MIDDLE_FILE, driver='GeoJSON')  # sauvegarder le résultat
-    # ## Filtrer les occurences ##
-    # # Filtrer les lignes pour ne conserver que celles dont les "occurences > 1"
-    # filtered_gdf = gdf.query('occurence_min > 1')
-    # filtered_gdf.drop(columns=['occurence_min'])
-    # # Merge lines pour des occurences > 1
-    # lines_occurences = line_merge(filtered_gdf)
-    # ## 2e calcul des occurences filtrées ##
-    # gdf2 = filter_branch(lines_occurences, crs)
-    # ## Filtrer les occurences ##
-    # # Filtrer les lignes pour ne conserver que celles dont les "occurences > 1"
-    # filtered_gdf2 = gdf2.query('occurence_min > 1')
-    # # print(len(filtered_gdf)*0.1)
-    # # print(len(filtered_gdf2))
-    # # Eviter les squelettes discontinues
-    # if len(filtered_gdf2) < len(filtered_gdf)*0.1:
-    #     gdf2.to_file(SAVE_FILE, driver='GeoJSON')  # sauvegarder le résultat
-    # else:
-    #     filtered_gdf2.to_file(SAVE_FILE, driver='GeoJSON')  # sauvegarder le résultat
-
+    # connecting extremities creates lines we don't want (because of where we connect the extremities),
+    # we remove them one last time
+    gdf_lines = remove_extra_lines(gdf_lines)
+    # gdf_lines = line_merge(gdf_lines)
+    
+    gpd.GeoDataFrame(gdf_lines, crs=crs).to_file("test_7.geojson", driver='GeoJSON')
 
 if __name__ == "__main__":
     # Example usage
@@ -315,5 +364,7 @@ if __name__ == "__main__":
     # buffer_geom = mask_hydro.apply(simplify_geometry) ## Appliquer un buffer
     simplify_geom = mask_hydro.simplify(tolerance=2, preserve_topology=True)  # simplifier les géométries avec Douglas-Peucker
     df = gpd.GeoDataFrame(geometry=simplify_geom, crs=crs)
+    df.to_file("test_0.geojson", driver='GeoJSON')
     # Squelette
-    run(df, crs)
+    # run(df, crs)
+    run(mask_hydro, crs)
