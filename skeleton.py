@@ -7,15 +7,16 @@ import pandas as pd
 import numpy as np
 
 from shapely import LineString, Point, geometry
-from shapely.geometry import CAP_STYLE
+from shapely.geometry import CAP_STYLE, Polygon, MultiPoint
 from shapely.validation import make_valid
-from shapely.ops import voronoi_diagram, linemerge, split, snap
+from shapely.ops import voronoi_diagram, linemerge, split, snap, triangulate
 import logging
 
 MASK_GEOJSON_1 = "/home/MDaab/data/squelette_test/MaskHydro_merge 1.geojson"
 MASK_GEOJSON_2 = "/home/MDaab/data/squelette_test/ecoulement_brut_pm2.geojson"
 MASK_GEOJSON_3 = "/home/MDaab/data/squelette_test/ecoulement_brut_pm3.geojson"
 MASK_GEOJSON_4 = "/home/MDaab/data/squelette_test/ecoulement_brut_lg1.geojson"
+MASK_GEOJSON_5 = "/home/MDaab/data/squelette_test/Mask_Hydro_without_vegetation.geojson"
 
 MIDDLE_FILE = "squelette_filtrer.geojson"
 SAVE_FILE = "squelette_hydrographique.geojson"
@@ -97,6 +98,35 @@ def can_line_be_removed(line, vertices_dict):
         return False
     return True
 
+def un_loop(loop):
+    polygon_loop = Polygon(loop.coords)
+    geometry = gpd.GeoSeries(polygon_loop, crs=2154)
+    gpd_loop = gpd.GeoDataFrame(geometry=geometry, crs=2154)
+    gpd_loop.to_file("loop.geojson", driver='GeoJSON')
+    # new_lines = triangulate(loop, 0, True)
+    # polygon_loop = MultiPoint(loop.coords)
+    # new_lines = voronoi_diagram(polygon_loop, envelope=polygon_loop, tolerance=0, edges=True)
+
+    voronoi = create_voronoi_lines(gpd_loop, 2154)
+
+    voronoi.to_file("voronoi.geojson", driver='GeoJSON')
+
+    # coords_combine = loop.coords
+    # for index in voronoi.index :
+    #     coords_combine = coords_combine + voronoi.iloc[index]['geometry'].coords
+
+    voronoi.loc[len(voronoi.index)] = loop
+
+    # combine_point = MultiPoint(coords_combine)
+
+    # combine_point = MultiPoint(list(loop.coords) + [x.coords for x in voronoi['geometry']])
+    triangulate_combine_points = triangulate(voronoi.unary_union, 0, True)
+    gpd.GeoDataFrame(geometry=triangulate_combine_points, crs=2154).to_file("triangulate_combine.geojson", driver='GeoJSON')
+    # geometry = gpd.GeoSeries(new_lines, crs=2154).explode(index_parts=False)
+    # geometry = gpd.GeoSeries(new_lines.geoms, crs=2154)
+    # gpd.GeoDataFrame(geometry=geometry, crs=2154).to_file("new_lines.geojson", driver='GeoJSON')
+    pass
+
 def get_vertices_dict(gdf_lines:GeoDataFrame)->Dict[Point, List[LineString]]:
     """
     get a dictionary of vertices listing all the lines having a specific vertex as one of its extremities
@@ -109,7 +139,11 @@ def get_vertices_dict(gdf_lines:GeoDataFrame)->Dict[Point, List[LineString]]:
     vertices_dict = {}
     for index in gdf_lines.index :
         line = gdf_lines.iloc[index]['geometry']
+        if line.is_ring:   # it's a loop : no extremity
+            continue 
+
         point_a, point_b = line.boundary.geoms[0], line.boundary.geoms[1]
+        # point_a, point_b = line.coords[0], line.coords[-1]
         try :
             vertices_dict[point_a].append(line)
         except KeyError:
@@ -121,6 +155,8 @@ def get_vertices_dict(gdf_lines:GeoDataFrame)->Dict[Point, List[LineString]]:
     return vertices_dict
 
 def remove_extra_lines(gdf_lines:GeoDataFrame)->GeoDataFrame:
+
+    gpd.GeoDataFrame(gdf_lines, crs=2154).to_file("test_ring.geojson", driver='GeoJSON')
     vertices_dict = get_vertices_dict(gdf_lines)
 
     lines_to_remove = []
@@ -233,7 +269,7 @@ def create_voronoi_lines(mask_hydro, crs):
     # Enregistrer le diagram de Voronoi (Squelette)
     lines_filter = lines_filter.reset_index(drop=True)  # Réinitialiser l'index
     lines_filter = lines_filter.drop(columns=['index_right'])  # Supprimer la colonne 'index_right'
-
+  
     return gpd.GeoDataFrame(lines_filter, crs=crs)
 
 def get_prior_point(vertex, line) -> Tuple[float, float]:
@@ -245,7 +281,7 @@ def get_prior_point(vertex, line) -> Tuple[float, float]:
         prior_point = line.coords[-2]
     return prior_point
 
-def connect_extremities(gdf_lines:GeoDataFrame)->GeoDataFrame:
+def connect_extremities(gdf_lines:GeoDataFrame, crs)->GeoDataFrame:
     """
     connect extremities of rivers, as we assume they are disconnected because of bridges
     Args:
@@ -255,7 +291,7 @@ def connect_extremities(gdf_lines:GeoDataFrame)->GeoDataFrame:
     """
     # garanty that all lines have at least 3 segments, because the connexion is not
     # done on the last point, but the previous one. Therefore we need enough points
-    for index in gdf_lines.index :
+    for index in gdf_lines.index:
         line = gdf_lines.iloc[index]['geometry']
         if len(line.coords) < 4: # 3 segments, so 4 points
             gdf_lines.loc[index] = line.segmentize(line.length/3)
@@ -268,6 +304,7 @@ def connect_extremities(gdf_lines:GeoDataFrame)->GeoDataFrame:
             keys_to_remove.append(vertex)
     for vertex in keys_to_remove:
         vertices_dict.pop(vertex, None)
+
 
     best_candidate = {}
     for vertex, [line] in vertices_dict.items():
@@ -296,30 +333,82 @@ def connect_extremities(gdf_lines:GeoDataFrame)->GeoDataFrame:
             other_prior_point = get_prior_point(other_vertex, other_line)
             best_candidate[prior_point] = other_prior_point
 
-    already_done_prior_points= []
+    new_lines = []
+    already_done_prior_points = set()
     # if 2 prior_points have each other as best candidate, we create a line between them
     for prior_point, other_prior_point in best_candidate.items():
         if best_candidate[other_prior_point] == prior_point and other_prior_point not in already_done_prior_points:
-            already_done_prior_points.append(prior_point)
-            gdf_lines.loc[len(gdf_lines)] = [LineString([prior_point, other_prior_point])]
-    return gdf_lines
+            already_done_prior_points.add(prior_point)
+            already_done_prior_points.add(other_prior_point)
+            # gdf_lines.loc[len(gdf_lines)] = [LineString([prior_point, other_prior_point])]
+            new_lines.append(LineString([prior_point, other_prior_point]))
 
-def split_into_basic_segments(gdf_lines:GeoDataFrame)->GeoDataFrame:
-    def split_line_by_point(line, point, tolerance: float=1.0e-12):
-        return split(snap(line, point, tolerance), point)
-    result = (
-        gdf_lines
-        .assign(geometry=gdf_lines.apply(
-            lambda x: split_line_by_point(
-                x.geometry, 
-                geometry.Point(x.geometry.coords[1])
-            ), axis=1
-        ))
-        .explode()
-        .reset_index(drop=True)
-    )
-    return result
+    for index in gdf_lines.index:
+        line = gdf_lines.iloc[index]['geometry']
+        start = 0
+        end = len(line.coords)
+        if line.coords[2] in already_done_prior_points:
+            start = 2
+            # new_lines.append(LineString(line.coords[0:2]))
+        if line.coords[-2] in already_done_prior_points:
+            end = -2
+            # new_lines.append(LineString(line.coords[-2:]))
+        new_lines.append(LineString(line.coords[start:end]))
+    
+    # gdf_cutlines = gpd.GeoDataFrame(geometry=cut_lines)
 
+    return gpd.GeoDataFrame(geometry=new_lines).set_crs(crs, allow_override=True)
+    # gdf_lines = gdf_lines.set_crs(crs, allow_override=True)  # the lines added to connect the extremities have no crs
+    # return 
+
+def get_lines_partially_on_loops(gdf_lines:GeoDataFrame, gdf_divided_lines:GeoDataFrame, crs:int)->GeoDataFrame:
+    # get all loops
+    gdf_loops = gdf_lines[gdf_lines['geometry'].is_ring].reset_index()
+
+    # gets all points on loops
+    points_on_loops = []
+    for index in gdf_loops.index:
+        points_on_loops += list(gdf_loops.iloc[index]['geometry'].coords)
+    mp = MultiPoint(points_on_loops)
+
+    # get lines with at least 1 point on a loop
+    commun_lines = gdf_divided_lines[~gdf_divided_lines['geometry'].disjoint(mp)].reset_index()
+
+    # get lines with one point, and one point only, on loops
+    partially_on_loop_lines = []
+    for index in commun_lines.index:
+        coords = commun_lines.iloc[index]['geometry'].coords
+        completely_covered = False
+        for index_loop in gdf_loops.index:
+            for begin_loop, end_loop in zip(gdf_loops.iloc[index_loop]['geometry'].coords[:-1], gdf_loops.iloc[index_loop]['geometry'].coords[1:]):
+                if (begin_loop in coords) and (end_loop in coords):
+                    completely_covered = True
+                    break
+            if completely_covered:
+                break
+        if not completely_covered:
+            partially_on_loop_lines.append(commun_lines.iloc[index]['geometry'])
+
+    return gpd.GeoDataFrame(geometry=partially_on_loop_lines, crs=crs)
+    # gdf_connected_lines.to_file("test_connected_lines.geojson", driver='GeoJSON')
+
+    # assembled = gpd.GeoDataFrame(pd.concat([gdf_connected_lines, gdf_lines], ignore_index=True))
+    # assembled.to_file("test_assembled.geojson", driver='GeoJSON') # premerge
+
+    # test = commun_lines[any(commun_lines['geometry'].covered_by(gdf_lines))]
+    # new_lines_excluded = []
+
+    # test = gdf_lines.unary_union
+
+    # for index in commun_lines.index:
+    #     if not any(commun_lines.iloc[index]['geometry'].covered_by(gdf_lines)):
+    #         new_lines_excluded.append(commun_lines.iloc[index]['geometry'])
+
+    
+    # geometry = gpd.GeoSeries(regions.geoms, crs=crs).explode(index_parts=False)
+    # df = gpd.GeoDataFrame(geometry=geometry, crs=crs)
+
+    # gpd.GeoDataFrame(new_lines_excluded, crs=2154).to_file("test_new_lines_excluded.geojson", driver='GeoJSON')
 
 def run(mask_hydro, crs):
     """Calculer le squelette hydrographique
@@ -331,40 +420,50 @@ def run(mask_hydro, crs):
     gdf = check_geometry(mask_hydro)  # Vérifier et corriger les géométries non valides
     ### Voronoi Diagram ###
     voronoi_lines = create_voronoi_lines(gdf, crs)
+    saved_voronoi_lines = voronoi_lines.copy()
 
     # merge all lines that can be merged without doubt (when only 2 lines are connected)
     # remove lines we don't want, then repeat until it doesn't change anymore
     gdf_lines = line_merge(voronoi_lines)
+
+    # gdf_lines = unloop_geometry(voronoi_lines)
+
+    gpd.GeoDataFrame(gdf_lines, crs=crs).to_file("test_pre_pruning.geojson", driver='GeoJSON')
+
     old_number_of_lines = len(gdf_lines)
     while True:
         gdf_lines = remove_extra_lines(gdf_lines)
         gdf_lines = line_merge(gdf_lines)
-
         if len(gdf_lines) != old_number_of_lines:
             old_number_of_lines = len(gdf_lines)
         else:
             break
 
-    gdf_lines = connect_extremities(gdf_lines)
-    gdf_lines = gdf_lines.set_crs(crs, allow_override=True)  # the lines added to connect the extremities have no crs
+    gdf_lines_partially_on_loops = get_lines_partially_on_loops(gdf_lines, saved_voronoi_lines, crs)
+
+    gdf_lines = gpd.GeoDataFrame(pd.concat([gdf_lines, gdf_lines_partially_on_loops], ignore_index=True))
+    # assembled = gpd.GeoDataFrame(pd.concat([gdf_connected_lines, gdf_lines], ignore_index=True))
+    # assembled.to_file("test_assembled.geojson", driver='GeoJSON') # premerge
+
+    gdf_lines = connect_extremities(gdf_lines, crs)
+    # gdf_lines = gdf_lines.set_crs(crs, allow_override=True)  # the lines added to connect the extremities have no crs
 
     # connecting extremities creates lines we don't want (because of where we connect the extremities),
     # we remove them one last time
-    gdf_lines = remove_extra_lines(gdf_lines)
+    # gdf_lines = remove_extra_lines(gdf_lines)
     # gdf_lines = line_merge(gdf_lines)
     
-    gpd.GeoDataFrame(gdf_lines, crs=crs).to_file("test_7.geojson", driver='GeoJSON')
+    gpd.GeoDataFrame(gdf_lines, crs=crs).to_file("test_final.geojson", driver='GeoJSON')
 
 if __name__ == "__main__":
-    # Example usage
-    # Calcule du squelette
-    mask_hydro = gpd.read_file(MASK_GEOJSON_1)
+    mask_hydro = gpd.read_file(MASK_GEOJSON_5)
+
     crs = mask_hydro.crs  # Load a crs from input
     # Simplifier geometrie
     # buffer_geom = mask_hydro.apply(simplify_geometry) ## Appliquer un buffer
-    simplify_geom = mask_hydro.simplify(tolerance=2, preserve_topology=True)  # simplifier les géométries avec Douglas-Peucker
+    simplify_geom = mask_hydro.simplify(tolerance=2)  # simplifier les géométries avec Douglas-Peucker
     df = gpd.GeoDataFrame(geometry=simplify_geom, crs=crs)
     df.to_file("test_0.geojson", driver='GeoJSON')
     # Squelette
-    # run(df, crs)
-    run(mask_hydro, crs)
+    run(df, crs)
+    # run(mask_hydro, crs)
