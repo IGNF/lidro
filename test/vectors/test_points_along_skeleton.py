@@ -30,7 +30,7 @@ def test_points_along_skeleton_default():
 
     result = generate_points_along_skeleton(input_folder, file, distance_meters, crs)
 
-    result = gpd.GeoDataFrame(geometry=result, crs=crs)
+    # Save the result to GeoJSON
     result.to_file(output, driver="GeoJSON", crs=crs)
 
     assert Path(output).exists()
