@@ -29,6 +29,8 @@ vector:
   buffer_negative: -1.5 # negative buffer should be bigger than positive buffer to prevent protruding over the banks
   # Tolerance from Douglas-Peucker
   tolerance: 1
+  # distance in meters between 2 consecutive points 
+  distance_meters: 2
 
 filter:
   # Classes to be considered as "non-water"
