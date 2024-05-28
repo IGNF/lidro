@@ -4,39 +4,34 @@
 import os
 
 import geopandas as gpd
-from shapely.geometry import LineString, Point
+from shapely.geometry import Point
 from shapely.ops import linemerge
 
 
-def generate_points_along_skeleton(input_folder: str, file: str, distance_meters: float, crs: str) -> Point:
-    """Create severals points every 2 meters (by default) along skeleton Hydro
+def generate_points_along_skeleton(
+    input_folder: str, input_file: str, distance_meters: 2, crs: tuple
+) -> gpd.GeoDataFrame:
+    """Create several points every 2 meters (by default) along skeleton Hydro
 
     Args:
-        input_folder (str): folder wich contains Skeleton Hydro by project
-        file (str): filename for creating points
-        distance_meters (float): distance in meters betwen each point
-        crs (str): a pyproj CRS object used to create the output GeoJSON file
+        input_folder (str): folder which contains Skeleton Hydro (1 file ".GeoJSON")
+        input_file (str): input filename from Skeleton Hydro
+        distance_meters (float): distance in meters between 2 consecutive points (default: 2 meters)
+        crs (tuple): a pyproj CRS object used to create the output GeoJSON file
 
     Returns:
         gpd.GeoDataFrame: Points every 2 meters (by default) along skeleton hydro
     """
     # Read the input file
-    gdf = gpd.read_file(os.path.join(input_folder, file), crs=crs)
-    gdf_lines = gpd.GeoDataFrame(gdf, crs=crs)
+    lines_gdf = gpd.read_file(os.path.join(input_folder, input_file), crs=crs)
 
     # Segmentize geometry
-    lines = linemerge(gdf.geometry.unary_union)
-
-    merged_line = LineString([point for line in lines.geoms for point in line.coords])
+    lines_merged = linemerge(lines_gdf.unary_union, directed=True)
 
     # Create severals points every "distance meters" along skeleton's line
     points = [
-        Point(merged_line.interpolate(distance)) for distance in range(0, int(merged_line.length), distance_meters)
+        Point(lines_merged.interpolate(distance)) for distance in range(1, int(lines_merged.length), distance_meters)
     ]
-    points.append(Point(merged_line.coords[-1]))  # ADD last point from line
+    points_gdf = gpd.GeoDataFrame(geometry=points).explode(ignore_index=True)
 
-    # Create an empty list to hold points that intersect with LineStrings
-    # Iterate through each point and check if it intersects with any LineString in the GeoDataFrame
-    intersecting_points = [point for point in points if any(gdf_lines.geometry.intersects(point.buffer(0.1)))]
-
-    return intersecting_points
+    return points_gdf
