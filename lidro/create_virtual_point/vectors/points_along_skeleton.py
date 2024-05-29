@@ -26,12 +26,14 @@ def generate_points_along_skeleton(
     lines_gdf = gpd.read_file(os.path.join(input_folder, input_file), crs=crs)
 
     # Segmentize geometry
-    lines_merged = linemerge(lines_gdf.unary_union, directed=True)
+    lines_merged = linemerge(lines_gdf.unary_union, directed=False)
 
     # Create severals points every "distance meters" along skeleton's line
-    points = [
-        Point(lines_merged.interpolate(distance)) for distance in range(1, int(lines_merged.length), distance_meters)
+    list_points = [
+        Point(lines_merged.interpolate(distance, normalized=False))
+        for distance in range(0, int(lines_merged.length), distance_meters)
     ]
-    points_gdf = gpd.GeoDataFrame(geometry=points).explode(ignore_index=True)
+
+    points_gdf = gpd.GeoDataFrame(geometry=list_points).explode(ignore_index=True)
 
     return points_gdf
