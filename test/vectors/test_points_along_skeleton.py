@@ -13,8 +13,7 @@ from lidro.create_virtual_point.vectors.points_along_skeleton import (
 
 TMP_PATH = Path("./tmp/create_point_virtual/vectors/points_along_skeleton")
 
-input_folder = "./data/skeleton_hydro/"
-file = "Skeleton_Hydro.geojson"
+file = "./data/skeleton_hydro/Skeleton_Hydro.geojson"
 output = Path("./tmp/create_point_virtual/vectors/points_along_skeleton/Points.geojson")
 
 
@@ -29,7 +28,7 @@ def test_points_along_skeleton_default():
     distance_meters = 2
     crs = CRS.from_epsg(2154)
 
-    result = generate_points_along_skeleton(input_folder, file, distance_meters, crs)
+    result = generate_points_along_skeleton(file, distance_meters, crs)
 
     # Save the result to GeoJSON
     result.to_file(output, driver="GeoJSON", crs=crs)
