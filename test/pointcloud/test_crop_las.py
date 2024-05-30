@@ -8,7 +8,6 @@ from lidro.create_virtual_point.pointcloud.crop_las import crop_pointcloud_by_po
 
 TMP_PATH = Path("./tmp/create_virtual_point/pointcloud/crop_las")
 LAS_FILE = "./data/pointcloud/Semis_2021_0830_6291_LA93_IGN69.laz"
-file_mask = "./data/merge_mask_hydro/mask_test2.geojson"
 
 
 def setup_module(module):
