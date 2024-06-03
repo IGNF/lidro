@@ -12,7 +12,6 @@ def calculate_quartile(points: np.array, q: int) -> float:
         - q (int): Percentage or sequence of percentages for the percentiles to compute.
                    Values must be between 0 and 100 inclusive.
 
-
     Returns:
         - float: The quartile of the value (ex. z-coordinates).
     """
@@ -28,7 +27,6 @@ def calculate_median(points: np.array) -> float:
 
     Parameters:
         - points (numpy.ndarray): An array of 3D points [x, y, z]
-
 
     Returns:
         - float: The median of the value (ex. z-coordinates).
