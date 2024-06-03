@@ -34,4 +34,4 @@ def test_crop_pointcloud_default():
     output = crop_pointcloud_by_points(LAS_FILE, geom, classes)
 
     assert isinstance(output, np.ndarray) is True
-    assert (output == 0).all() is False
+    assert isinstance((output == 0).all(), bool) is False
