@@ -1,5 +1,4 @@
 import numpy as np
-from shapely.geometry import Point
 
 from lidro.create_virtual_point.stats.knn_distance import find_k_nearest_neighbors
 
@@ -13,7 +12,7 @@ def test_find_k_nearest_neighbors_default():
             [830867.61, 6290202.62, 2.89],
         ]
     )
-    point = Point(830574.89, 6290648.53, 0)
+    point = np.array([[830574.89, 6290648.53, 0]])
     k = 3
 
     result = find_k_nearest_neighbors(point, points_array, k)
