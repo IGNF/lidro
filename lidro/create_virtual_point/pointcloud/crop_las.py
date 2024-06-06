@@ -18,7 +18,7 @@ def crop_pointcloud_by_points(input_points: str, geom: MultiPolygon, classes: Li
         classes (list): List of classes to use for the filtering
 
     Returns:
-        filtered_points (np.ndarray) : Numpy array containing point coordinates (X, Y, Z) after filtering and croping
+        np.array : Numpy array containing point coordinates (X, Y, Z) after filtering and croping
     """
     # Crop pointcloud by point
     pipeline = (
