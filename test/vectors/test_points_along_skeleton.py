@@ -11,10 +11,10 @@ from lidro.create_virtual_point.vectors.points_along_skeleton import (
     generate_points_along_skeleton,
 )
 
-TMP_PATH = Path("./tmp/create_point_virtual/vectors/points_along_skeleton")
+TMP_PATH = Path("./tmp/create_virtual_point/vectors/points_along_skeleton")
 
 file = "./data/skeleton_hydro/Skeleton_Hydro.geojson"
-output = Path("./tmp/create_point_virtual/vectors/points_along_skeleton/Points.geojson")
+output = Path("./tmp/create_virtual_point/vectors/points_along_skeleton/Points.geojson")
 
 
 def setup_module(module):
