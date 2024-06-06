@@ -8,6 +8,8 @@ work_dir: ${hydra:runtime.cwd}
 
 io:
   input_filename: null
+  input_mask_hydro: null
+  input_skeleton: null
   input_dir: null
   output_dir: null
   srid: 2154
@@ -31,10 +33,15 @@ vector:
   tolerance: 1
   # distance in meters between 2 consecutive points 
   distance_meters: 2
+  # buffer for searching the points classification (default. "2") of the input LAS/LAZ file
+  buffer: 2
+  # The number of nearest neighbors to find with KNeighbors
+  k: 20
 
 filter:
   # Classes to be considered as "non-water"
   keep_classes: [0, 1, 2, 3, 4, 5, 6, 17, 64, 65, 66, 67] # All classes
+  keep_classe_ground: "[2:2]"
 
 hydra:
   output_subdir: null
