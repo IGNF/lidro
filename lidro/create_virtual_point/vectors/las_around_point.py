@@ -3,27 +3,11 @@
 """
 from typing import List
 
-import geopandas as gpd
 import numpy as np
-from shapely.geometry import CAP_STYLE, Point
+from shapely.geometry import Point
 
 from lidro.create_virtual_point.stats.calculate_stat import calculate_quartile
 from lidro.create_virtual_point.stats.knn_distance import find_k_nearest_neighbors
-
-
-def apply_buffers_to_geometry(hydro_mask: gpd.GeoDataFrame, buffer: float):
-    """Buffer geometry
-    Objective: create a HYDRO mask largest
-
-    Args:
-        hydro_mask (gpd.GeoDataFrame): geopandas dataframe with input geometry
-        buffer (float): buffer to apply to the input geometry
-    Returns:
-        GeoJSON: updated geometry
-    """
-    # Buffer
-    geom = hydro_mask.buffer(buffer, cap_style=CAP_STYLE.square)
-    return geom
 
 
 def filter_las_around_point(points_skeleton: List, points_clip: np.array, k: int) -> List:
