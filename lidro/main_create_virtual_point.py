@@ -55,11 +55,11 @@ def main(config: DictConfig):
     input_skeleton = config.io.input_skeleton
 
     # Parameters for creating virtual point
-    distance_meters = config.vector.distance_meters
-    buffer = config.vector.buffer
+    distance_meters = config.virtual_point.vector.distance_meters
+    buffer = config.virtual_point.vector.buffer
     crs = CRS.from_user_input(config.io.srid)
-    classes = config.filter.keep_classe_ground
-    k = config.vector.k
+    classes = config.virtual_point.filter.keep_classe_ground
+    k = config.virtual_point.vector.k
 
     # Step 1 : Create Mask Hydro with buffer
     # Return GeoDataframe

@@ -45,8 +45,8 @@ def main(config: DictConfig):
     pixel_size = config.io.pixel_size
     tile_size = config.io.tile_size
     crs = CRS.from_user_input(config.io.srid)
-    classe = config.filter.keep_classes
-    dilation_size = config.raster.dilation_size
+    classe = config.mask_generation.filter.keep_classes
+    dilation_size = config.mask_generation.raster.dilation_size
 
     def main_on_one_tile(filename):
         """Lauch main.py on one tile
