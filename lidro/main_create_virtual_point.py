@@ -72,7 +72,7 @@ def main(config: DictConfig):
     points_list_skeleton = [([geom.x, geom.y, 0]) for geom in points_gdf.geometry if isinstance(geom, Point)]
 
     # Step 3 : Crope filtered pointcloud by Mask Hydro with buffer
-    def main_on_one_tile(filename):
+    def extract_points_around_skeleton_points_one_tile(filename):
         """Lauch main.py on one tile
 
         Args:
@@ -90,12 +90,14 @@ def main(config: DictConfig):
 
     if initial_las_filename:
         # Lauch croping filtered pointcloud by Mask Hydro with buffer by one tile:
-        points_clip = main_on_one_tile(initial_las_filename)
+        points_clip = extract_points_around_skeleton_points_one_tile(initial_las_filename)
 
     else:
         # Lauch  croping filtered pointcloud by Mask Hydro with buffer tile by tile
         input_dir_points = os.path.join(input_dir, "pointcloud")
-        points_clip_list = [main_on_one_tile(file) for file in os.listdir(input_dir_points)]
+        points_clip_list = [
+            extract_points_around_skeleton_points_one_tile(file) for file in os.listdir(input_dir_points)
+        ]
         points_clip = np.vstack(points_clip_list)  # merge ONE numpy.array
 
     # Step 4 : Extract a Z elevation value every 2 meters along the hydrographic skeleton
