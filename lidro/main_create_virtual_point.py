@@ -12,10 +12,10 @@ from pyproj import CRS
 from shapely.geometry import Point
 
 from lidro.create_virtual_point.pointcloud.crop_las import crop_pointcloud_by_points
-from lidro.create_virtual_point.vectors.create_mask_hydro_buffer import (
-    create_mask_hydro_buffer,
-)
 from lidro.create_virtual_point.vectors.las_around_point import filter_las_around_point
+from lidro.create_virtual_point.vectors.mask_hydro_with_buffer import (
+    import_mask_hydro_with_buffer,
+)
 from lidro.create_virtual_point.vectors.points_along_skeleton import (
     generate_points_along_skeleton,
 )
@@ -61,9 +61,9 @@ def main(config: DictConfig):
     classes = config.virtual_point.filter.keep_classe_ground
     k = config.virtual_point.vector.k
 
-    # Step 1 : Create Mask Hydro with buffer
+    # Step 1 : Import Mask Hydro, then apply a buffer
     # Return GeoDataframe
-    input_mask_hydro_buffer = create_mask_hydro_buffer(input_mask_hydro, buffer, crs).wkt
+    input_mask_hydro_buffer = import_mask_hydro_with_buffer(input_mask_hydro, buffer, crs).wkt
 
     # Step 2 : Create several points every 2 meters (by default) along skeleton Hydro
     # Return GeoDataframe

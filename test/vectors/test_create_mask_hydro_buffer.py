@@ -6,8 +6,8 @@ import geopandas as gpd
 from pyproj import CRS
 from shapely.geometry import MultiPolygon
 
-from lidro.create_virtual_point.vectors.create_mask_hydro_buffer import (
-    create_mask_hydro_buffer,
+from lidro.create_virtual_point.vectors.mask_hydro_with_buffer import (
+    import_mask_hydro_with_buffer,
 )
 
 TMP_PATH = Path("./tmp/create_virtual_point/vectors/create_mask_hydro_buffer/")
@@ -27,7 +27,7 @@ def test_create_mask_hydro_buffer_default():
     buffer = 2
     crs = CRS.from_epsg(2154)
 
-    result = create_mask_hydro_buffer(file_mask, buffer, crs)
+    result = import_mask_hydro_with_buffer(file_mask, buffer, crs)
 
     # Save the result to GeoJSON
     d = {"nom": "mask_hydro_merge_buffer", "geometry": [result]}
