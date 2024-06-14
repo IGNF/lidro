@@ -6,12 +6,16 @@ import os
 
 import geopandas as gpd
 import hydra
-import numpy as np
+import pandas as pd
 from omegaconf import DictConfig
 from pyproj import CRS
 from shapely.geometry import Point
 
 from lidro.create_virtual_point.pointcloud.crop_las import crop_pointcloud_by_points
+from lidro.create_virtual_point.pointcloud.utils_pdal import get_bounds_from_las
+from lidro.create_virtual_point.vectors.clip_points_with_bounding_box import (
+    clip_points_with_box,
+)
 from lidro.create_virtual_point.vectors.las_around_point import filter_las_around_point
 from lidro.create_virtual_point.vectors.mask_hydro_with_buffer import (
     import_mask_hydro_with_buffer,
@@ -68,7 +72,6 @@ def main(config: DictConfig):
     # Step 2 : Create several points every 2 meters (by default) along skeleton Hydro
     # Return GeoDataframe
     points_gdf = generate_points_along_skeleton(input_skeleton, distance_meters, crs)
-
     points_list_skeleton = [([geom.x, geom.y, 0]) for geom in points_gdf.geometry if isinstance(geom, Point)]
 
     # Step 3 : Crope filtered pointcloud by Mask Hydro with buffer
@@ -85,8 +88,21 @@ def main(config: DictConfig):
         tilename = os.path.splitext(filename)[0]  # filename to the LAS file
         input_pointcloud = os.path.join(input_dir_points, filename)  # path to the LAS file
         logging.info(f"\nCroping filtered pointcloud by Mask Hydro with buffer for tile : {tilename}")
+        # Croping filtered pointcloud by Mask Hydro with buffer for tile
         points_clip = crop_pointcloud_by_points(input_pointcloud, str(input_mask_hydro_buffer), classes)
-        return points_clip
+        logging.info(f"\nCropping skeleton points for tile: {tilename}")
+        # Extract bounding box for clipping points by tile
+        bbox = get_bounds_from_las(input_pointcloud)
+        points_skeleton_clip = clip_points_with_box(points_list_skeleton, bbox)
+        # Create list with Skeleton's points with Z for step 4
+        points_skeleton_with_z_clip = [
+            ([geom.x, geom.y, 0]) for geom in points_skeleton_clip.geometry if isinstance(geom, Point)
+        ]
+        # Step 4 : Extract a Z elevation value along the hydrographic skeleton
+        logging.info(f"\nExtract a Z elevation value along the hydrographic skeleton for tile : {tilename}")
+        result = filter_las_around_point(points_skeleton_with_z_clip, points_clip, k)
+
+        return result
 
     if initial_las_filename:
         # Lauch croping filtered pointcloud by Mask Hydro with buffer by one tile:
@@ -98,13 +114,13 @@ def main(config: DictConfig):
         points_clip_list = [
             extract_points_around_skeleton_points_one_tile(file) for file in os.listdir(input_dir_points)
         ]
-        points_clip = np.vstack(points_clip_list)  # merge ONE numpy.array
+        # Flatten the list of lists into a single list of dictionaries
+        points_clip = [item for sublist in points_clip_list for item in sublist]
 
-    # Step 4 : Extract a Z elevation value every 2 meters along the hydrographic skeleton
-    result = filter_las_around_point(points_list_skeleton, points_clip, k)
-
-    # Convert results to GeoDataFrame
-    result_gdf = gpd.GeoDataFrame(result)
+    # Create a pandas DataFrame from the flattened list
+    df = pd.DataFrame(points_clip)
+    # Create a GeoDataFrame from the pandas DataFrame
+    result_gdf = gpd.GeoDataFrame(df, geometry="geometry")
     result_gdf.set_crs(crs, inplace=True)
     # path to the Points along Skeleton Hydro file
     output_file = os.path.join(output_dir, "Points_Skeleton.GeoJSON")
