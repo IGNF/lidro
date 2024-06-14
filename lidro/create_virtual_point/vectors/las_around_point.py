@@ -11,10 +11,10 @@ from lidro.create_virtual_point.stats.knn_distance import find_k_nearest_neighbo
 
 
 def filter_las_around_point(points_skeleton: List, points_clip: np.array, k: int) -> List:
-    """Extract a Z elevation value every 2 meters along the hydrographic skeleton
+    """Extract a Z elevation value every N meters along the hydrographic skeleton
 
     Args:
-        points_skeleton (list) : points every 2 meters (by default) along skeleton Hydro
+        points_skeleton (list) : points every N meters (by default: 2) along skeleton Hydro
         points_clip (np.array): Numpy array containing point coordinates (X, Y, Z) after filtering and croping
         k (int): The number of nearest neighbors to find
 
@@ -27,7 +27,7 @@ def filter_las_around_point(points_skeleton: List, points_clip: np.array, k: int
         for point in points_skeleton
     ]
 
-    # Calcule Z "Q1" for each points every 2 meters (by default) along skeleton hydro
+    # Calcule Z "Q1" for each points every N meters along skeleton hydro
     results = [
         ({"geometry": p["geometry"], "z_q1": calculate_quartile(p["points_knn"], 10)})
         for p in points_knn_list
