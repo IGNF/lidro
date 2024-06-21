@@ -26,7 +26,7 @@ MIDDLE_FILE = "squelette_filtrer.geojson"
 SAVE_FILE = "squelette_hydrographique.geojson"
 WATER_MIN_SIZE = 20
 VORONOI_MAX_LENGTH = 2
-MAX_BRIDGES = 2
+MAX_BRIDGES = 1
 
 DB_NAME = "bduni_france_consultation"
 DB_HOST = "bduni_consult.ign.fr"
@@ -35,75 +35,28 @@ DB_PASSWORD = "28de#"
 DB_PORT = "5432"
 
 
-# class Blob:
-#     def __init__(self, line:LineString):
-#         data = {'geometry':[], 'extremity_0':[], 'extremity_1':[]}
-#         self.gdf_lines = GeoDataFrame(data = data)
-#         self.extremities_set = set()
-#         self.add_line(line)
+class GroupMaker:
+    def __init__(self, element_list):
+        self.element_set_list = []
+        for element in element_list:
+            self.element_set_list.append({element})
 
-#     def add_line(self, line:LineString):
-#         extremity_0 = line.boundary.geoms[0]
-#         extremity_1 = line.boundary.geoms[1]
-#         new_data = {'geometry':[line], 'extremity_0':[extremity_0], 'extremity_1':[extremity_1]}
-#         gdf_line = GeoDataFrame(data = new_data)
-#         self.gdf_lines = pd.concat([self.gdf_lines, gdf_line])
-#         self.extremities_set.add(extremity_0)
-#         self.extremities_set.add(extremity_1)
+    def find_index(self, element) -> int:
+        for index, element_set in enumerate(self.element_set_list):
+            if element in element_set:
+                return index
 
-#     def is_line_connected(self, line:LineString) -> bool:
-#         extremity_0 = line.boundary.geoms[0]
-#         extremity_1 = line.boundary.geoms[1]
-#         if extremity_0 in self.extremities_set or extremity_1 in self.extremities_set:
-#             return True
-#         return False
-
-#     def is_blob_connected(self, blob:'Blob') -> bool:
-#         if self.extremities_set.intersection(blob.extremities_set):
-#             return True
-#         return False
-
-#     def add_blob(self, blob:'Blob'):
-#         self.gdf_lines = pd.concat([self.gdf_lines, blob.gdf_lines])
-#         self.extremities_set = self.extremities_set.union(blob.extremities_set)
-
-#     def save(self, file_name:str):
-#         self.gdf_lines.to_file(file_name + ".geojson", driver='GeoJSON')
-
-# def create_blobs(gdf_lines:GeoDataFrame)->List[Blob]:
-#     """
-#         Args:
-#         -gdf_lines (GeoDataframe) : a list of linestring that are not connected by intermediate points
-#     """
-#     blobs_list = []
-#     for _, row in gdf_lines.iterrows():
-#         line = row['geometry']
-#         # line_connected = False
-#         # # search if the lines is connected to a blob
-#         # for blob in blobs_list:
-#         #     if blob.is_line_connected(line):
-#         #         blob.add_line(line)
-#         #         line_connected = True
-#         #         break
-#         # # if the line is not connected ot a blob, it creates its own blob
-#         # if not line_connected:
-#         blobs_list.append(Blob(line))
-
-#     # joint all connected blobs together
-#     disjoint_blobs_list = []
-#     while blobs_list:
-#         blob = blobs_list.pop(len(blobs_list) - 1)
-#         eaten = False
-#         for gluton_blob in blobs_list:  # gluton becuase it will "eat" the other blob
-#             if gluton_blob.is_blob_connected(blob):
-#                 gluton_blob.add_blob(blob)
-#                 eaten = True
-#                 break
-#         if not eaten:
-#             disjoint_blobs_list.append(blob)
-
-#     return disjoint_blobs_list
-
+    def are_together(self, element_a, element_b)->bool:
+        """return true if 2 elements are already together"""
+        index = self.find_index(element_a)
+        return element_b in self.element_set_list[index]
+    
+    def put_together(self, element_a, element_b):
+        """put the set of a and b together"""
+        index_a = self.find_index(element_a)
+        set_a = self.element_set_list.pop(index_a)
+        index_b = self.find_index(element_b)
+        self.element_set_list[index_b] = self.element_set_list[index_b].union(set_a)
 
 def db_connector():
     """Return a connector to the postgis database"""
@@ -112,6 +65,27 @@ def db_connector():
                         user=DB_USER,
                         password=DB_PASSWORD,
                         port=DB_PORT)
+
+def query_db_for_bridge(candidate:Candidate)->bool:
+    """
+    Query the database to check if a candidate for a bridge indeed intersects a bridge
+    """
+    line = f"LINESTRING({candidate.extremity_1[0]} {candidate.extremity_1[1]}, {candidate.extremity_2[0]} {candidate.extremity_2[1]})"
+    query_linear = f"SELECT cleabs FROM public.Construction_lineaire WHERE gcms_detruit = false AND ST_Intersects(ST_Force2D(geometrie), ST_GeomFromText('{line}'));"
+    query_area = f"SELECT cleabs FROM public.Construction_surfacique WHERE gcms_detruit = false AND ST_Intersects(ST_Force2D(geometrie), ST_GeomFromText('{line}'));"
+    
+    with db_connector() as db_conn:
+        with db_conn.cursor() as db_cursor:
+            db_cursor.execute(query_linear)
+            results = db_cursor.fetchall()
+            # if no result with linear bridge, maybe with area bridge...
+            if not results:
+                db_cursor.execute(query_area)
+                results = db_cursor.fetchall()
+    return True if results else False
+
+
+
 
 def fix_invalid_geometry(geometry):
     """ Fixer les géométries invalides
@@ -694,33 +668,25 @@ def get_branches(gdf_mask_hydro:GeoDataFrame, crs:int)->List[GeoDataFrame]:
     pass
 
 
-def run(gdf_mask_hydro, crs):
-    """Calculer le squelette hydrographique
-
-    Args:
-        - mask_hydro (GeoJSON) : Mask Hydrographic (Polygone)
-        - crs (str): code EPSG
+def select_candidates(branches_pair_list:List[Tuple])->List[Candidate]:
     """
-    branches_list = []
-
-    for index_branch, branch_mask_row in gdf_mask_hydro.iterrows():
-        mask_branch = branch_mask_row["geometry"]
-
-        new_branch = Branch(index_branch, mask_branch, crs)
-        new_branch.simplify()
-        branches_list.append(new_branch)
-
-    branches_pair = []
-    for index, branch_a in enumerate(branches_list[:-1]):
-        for branch_b in branches_list[index + 1:]:
-            distance = branch_a.distance_to_a_branch(branch_b)
-            if distance < BRIDGE_MAX_WIDTH:
-                branches_pair.append((branch_a, branch_b))
-
+    selects candidates between pairs of branches
+    """
+    # get all the branches (each only once, hence the set)
+    branch_set = set()
+    for branch_a, branch_b, _ in branches_pair_list:
+        branch_set.add(branch_a)
+        branch_set.add(branch_b)
+    
+    branch_group = GroupMaker(list(branch_set))
     validated_candidates = []
     extremities_connected = set()
-    for branch_a, branch_b in branches_pair:
+    for branch_a, branch_b, _ in branches_pair_list:
         branch_a: Branch
+
+        # we don't create link between 2 branches already connected
+        if branch_group.are_together(branch_a, branch_b):
+            continue
         candidates = branch_a.get_bridge_candidates(branch_b)
 
         # test each candidate to see if we can draw a line for them
@@ -730,36 +696,53 @@ def run(gdf_mask_hydro, crs):
             if candidate.extremity_1 in extremities_connected or candidate.extremity_2 in extremities_connected :
                 continue
 
-            line = f"LINESTRING({candidate.extremity_1[0]} {candidate.extremity_1[1]}, {candidate.extremity_2[0]} {candidate.extremity_2[1]})"
-            query_linear = f"SELECT cleabs FROM public.Construction_lineaire WHERE gcms_detruit = false AND ST_Intersects(ST_Force2D(geometrie), ST_GeomFromText('{line}'));"
-            query_area = f"SELECT cleabs FROM public.Construction_surfacique WHERE gcms_detruit = false AND ST_Intersects(ST_Force2D(geometrie), ST_GeomFromText('{line}'));"
-            
-            results = True
-            """
-            with db_connector() as db_conn:
-                with db_conn.cursor() as db_cursor:
-                    db_cursor.execute(query_linear)
-                    results = db_cursor.fetchall()
-                    # if no result with linear bridge, maybe with area bridge...
-                    if not results:
-                        db_cursor.execute(query_area)
-                        results = db_cursor.fetchall()
-            """
-            # if the line does not cross any bridge, we don't validate that candidate
-            if not results:
-                continue
+            # check with database
+            # is_bridge = query_db_for_bridge(candidate)
+            # # if the line does not cross any bridge, we don't validate that candidate
+            # if not is_bridge:
+            #     continue
 
             # candidate validated
             extremities_connected.add(candidate.extremity_1)
             extremities_connected.add(candidate.extremity_2)
             validated_candidates.append(candidate)
+            branch_group.put_together(branch_a, branch_b)
             nb_bridges_crossed += 1
             if nb_bridges_crossed >= MAX_BRIDGES:   # max bridges reached between those 2 branches
                 break
+    return validated_candidates
+
+
+def run(gdf_mask_hydro, crs):
+    """Calculer le squelette hydrographique
+
+    Args:
+        - mask_hydro (GeoJSON) : Mask Hydrographic (Polygone)
+        - crs (str): code EPSG
+    """
+    # create branches
+    branches_list = []
+    for index_branch, branch_mask_row in gdf_mask_hydro.iterrows():
+        mask_branch = branch_mask_row["geometry"]
+        new_branch = Branch(index_branch, mask_branch, crs)
+        new_branch.simplify()
+        branches_list.append(new_branch)
+
+    branches_pair_list = []
+    for index, branch_a in enumerate(branches_list[:-1]):
+        for branch_b in branches_list[index + 1:]:
+            distance = branch_a.distance_to_a_branch(branch_b)
+            if distance < BRIDGE_MAX_WIDTH:
+                branches_pair_list.append((branch_a, branch_b, distance))
+
+    # sort the branches pairs by distance between them
+    branches_pair_list = sorted(branches_pair_list, key=lambda branches_pair:  branches_pair[2])
+
+    validated_candidates = select_candidates(branches_pair_list)
 
     bridge_lines = [validated_candidate.line for validated_candidate in validated_candidates]
     gdf_bridge_lines = gpd.GeoDataFrame(geometry=bridge_lines).set_crs(crs, allow_override=True)
-    gdf_bridge_lines.to_file("test_bridges.geojson", driver='GeoJSON')
+    gdf_bridge_lines.to_file("test_bridges_group_maker.geojson", driver='GeoJSON')
 
     # for branch in branches_list:
     #     branch:Branch
@@ -780,6 +763,10 @@ def run(gdf_mask_hydro, crs):
     branch_lines_list = [branch.gdf_lines for branch in branches_list]
     gdf_branch_lines = gpd.GeoDataFrame(pd.concat(branch_lines_list, ignore_index=True))
     gdf_branch_lines.to_file("test_branch_lines.geojson", driver='GeoJSON')
+
+    mask_list = [branch.gdf_branch_mask for branch in branches_list]
+    gdf_mask = gpd.GeoDataFrame(pd.concat(mask_list, ignore_index=True))
+    gdf_mask.to_file("test_mask.geojson", driver='GeoJSON')
 
     # gdf_lines = gpd.GeoDataFrame(pd.concat([gdf_lines, gdf_lines_partially_on_loops], ignore_index=True))
 

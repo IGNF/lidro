@@ -47,9 +47,9 @@ class Branch:
         self.branch_id = branch_id
         self.crs = crs
         simplify_geom = mask_branch.simplify(tolerance=2)  # simplifying geometries with Douglas-Peucker
-        gdf_branch_mask = gpd.GeoDataFrame(geometry=[simplify_geom], crs=crs)
+        self.gdf_branch_mask = gpd.GeoDataFrame(geometry=[simplify_geom], crs=crs)
 
-        gdf = check_geometry(gdf_branch_mask)  # Vérifier et corriger les géométries non valides
+        gdf = check_geometry(self.gdf_branch_mask)  # Vérifier et corriger les géométries non valides
 
         voronoi_lines = create_voronoi_lines(gdf, self.crs)
         self.gdf_lines = line_merge(voronoi_lines, self.crs)
