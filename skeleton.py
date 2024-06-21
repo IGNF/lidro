@@ -6,12 +6,15 @@ from geopandas.geodataframe import GeoDataFrame
 import pandas as pd
 import numpy as np
 from math import sqrt
-
+import psycopg2
+from psycopg2.extensions import cursor
 from shapely import LineString, Point, geometry, distance
-from shapely.geometry import CAP_STYLE, Polygon, MultiPoint, Point
+from shapely.geometry import CAP_STYLE, Polygon, MultiPoint, Point, MultiLineString
 from shapely.validation import make_valid
 from shapely.ops import voronoi_diagram, linemerge, split, snap, triangulate
 import logging
+
+from branch import Branch, Candidate, BRIDGE_MAX_WIDTH
 
 MASK_GEOJSON_1 = "/home/MDaab/data/squelette_test/MaskHydro_merge 1.geojson"
 MASK_GEOJSON_2 = "/home/MDaab/data/squelette_test/ecoulement_brut_pm2.geojson"
@@ -22,8 +25,15 @@ MASK_GEOJSON_5 = "/home/MDaab/data/squelette_test/Mask_Hydro_without_vegetation.
 MIDDLE_FILE = "squelette_filtrer.geojson"
 SAVE_FILE = "squelette_hydrographique.geojson"
 WATER_MIN_SIZE = 20
-BRIDGE_MAX_WIDTH = 50
 VORONOI_MAX_LENGTH = 2
+MAX_BRIDGES = 2
+
+DB_NAME = "bduni_france_consultation"
+DB_HOST = "bduni_consult.ign.fr"
+DB_USER = "invite"
+DB_PASSWORD = "28de#"
+DB_PORT = "5432"
+
 
 # class Blob:
 #     def __init__(self, line:LineString):
@@ -94,8 +104,14 @@ VORONOI_MAX_LENGTH = 2
 
 #     return disjoint_blobs_list
 
-class Branch:
-    def __init__(self, )
+
+def db_connector():
+    """Return a connector to the postgis database"""
+    return psycopg2.connect(database=DB_NAME,
+                        host=DB_HOST,
+                        user=DB_USER,
+                        password=DB_PASSWORD,
+                        port=DB_PORT)
 
 def fix_invalid_geometry(geometry):
     """ Fixer les géométries invalides
@@ -187,7 +203,6 @@ def get_vertices_dict(gdf_lines:GeoDataFrame)->Dict[Point, List[LineString]]:
             continue 
 
         point_a, point_b = line.boundary.geoms[0], line.boundary.geoms[1]
-        # point_a, point_b = line.coords[0], line.coords[-1]
         try :
             vertices_dict[point_a].append(line)
         except KeyError:
@@ -679,7 +694,122 @@ def get_branches(gdf_mask_hydro:GeoDataFrame, crs:int)->List[GeoDataFrame]:
     pass
 
 
-def run(mask_hydro, crs):
+def run(gdf_mask_hydro, crs):
+    """Calculer le squelette hydrographique
+
+    Args:
+        - mask_hydro (GeoJSON) : Mask Hydrographic (Polygone)
+        - crs (str): code EPSG
+    """
+    branches_list = []
+
+    for index_branch, branch_mask_row in gdf_mask_hydro.iterrows():
+        mask_branch = branch_mask_row["geometry"]
+
+        new_branch = Branch(index_branch, mask_branch, crs)
+        new_branch.simplify()
+        branches_list.append(new_branch)
+
+    branches_pair = []
+    for index, branch_a in enumerate(branches_list[:-1]):
+        for branch_b in branches_list[index + 1:]:
+            distance = branch_a.distance_to_a_branch(branch_b)
+            if distance < BRIDGE_MAX_WIDTH:
+                branches_pair.append((branch_a, branch_b))
+
+    validated_candidates = []
+    extremities_connected = set()
+    for branch_a, branch_b in branches_pair:
+        branch_a: Branch
+        candidates = branch_a.get_bridge_candidates(branch_b)
+
+        # test each candidate to see if we can draw a line for them
+        nb_bridges_crossed = 0
+        for candidate in candidates :
+            # we connect each extremity only once
+            if candidate.extremity_1 in extremities_connected or candidate.extremity_2 in extremities_connected :
+                continue
+
+            line = f"LINESTRING({candidate.extremity_1[0]} {candidate.extremity_1[1]}, {candidate.extremity_2[0]} {candidate.extremity_2[1]})"
+            query_linear = f"SELECT cleabs FROM public.Construction_lineaire WHERE gcms_detruit = false AND ST_Intersects(ST_Force2D(geometrie), ST_GeomFromText('{line}'));"
+            query_area = f"SELECT cleabs FROM public.Construction_surfacique WHERE gcms_detruit = false AND ST_Intersects(ST_Force2D(geometrie), ST_GeomFromText('{line}'));"
+            
+            results = True
+            """
+            with db_connector() as db_conn:
+                with db_conn.cursor() as db_cursor:
+                    db_cursor.execute(query_linear)
+                    results = db_cursor.fetchall()
+                    # if no result with linear bridge, maybe with area bridge...
+                    if not results:
+                        db_cursor.execute(query_area)
+                        results = db_cursor.fetchall()
+            """
+            # if the line does not cross any bridge, we don't validate that candidate
+            if not results:
+                continue
+
+            # candidate validated
+            extremities_connected.add(candidate.extremity_1)
+            extremities_connected.add(candidate.extremity_2)
+            validated_candidates.append(candidate)
+            nb_bridges_crossed += 1
+            if nb_bridges_crossed >= MAX_BRIDGES:   # max bridges reached between those 2 branches
+                break
+
+    bridge_lines = [validated_candidate.line for validated_candidate in validated_candidates]
+    gdf_bridge_lines = gpd.GeoDataFrame(geometry=bridge_lines).set_crs(crs, allow_override=True)
+    gdf_bridge_lines.to_file("test_bridges.geojson", driver='GeoJSON')
+
+    # for branch in branches_list:
+    #     branch:Branch
+    #     gdf_branch_lines = gpd.GeoDataFrame(branch.gdf_lines).set_crs(crs, allow_override=True)
+    #     gdf_branch_lines.to_file(f"{branch.branch_id}.geojson", driver='GeoJSON')
+
+    # branch_lines_list = gpd.GeoDataFrame()
+    # for branch in branches_list:
+    #     branch:Branch
+    #     data = {'branch_id': branch.branch_id, 'geometry': branch.gdf_lines}
+    #     # data = {'branch_id': [branch.branch_id for _ in range(len(branch.gdf_lines))], 'geometry': branch.gdf_lines}
+    #     gdf_branch_lines = gpd.GeoDataFrame(data).set_crs(crs, allow_override=True)
+    #     branch_lines_list = gpd.GeoDataFrame(pd.concat([branch_lines_list, gdf_branch_lines], ignore_index=True))
+    #     # gdf_branch_lines.to_file(f"{branch.branch_id}.geojson", driver='GeoJSON')
+
+    # branch_lines_list.to_file("test_branch_lines.geojson", driver='GeoJSON')
+
+    branch_lines_list = [branch.gdf_lines for branch in branches_list]
+    gdf_branch_lines = gpd.GeoDataFrame(pd.concat(branch_lines_list, ignore_index=True))
+    gdf_branch_lines.to_file("test_branch_lines.geojson", driver='GeoJSON')
+
+    # gdf_lines = gpd.GeoDataFrame(pd.concat([gdf_lines, gdf_lines_partially_on_loops], ignore_index=True))
+
+
+    # validated_candidates
+    # gpd.GeoDataFrame(gdf_lines, crs=crs).to_file("test_final.geojson", driver='GeoJSON')
+
+    pass
+    # gdf_inbetween_lines = GeoDataFrame(geometry=inbetween_lines, crs=crs)
+    # gdf_inbetween_lines.to_file("test_bridge.geojson", driver='GeoJSON')
+
+
+    # query_list = ""
+    # for index, candidate in enumerate(candidates):
+    #     candidate:Candidate
+    #     geometry = f"LINESTRING({candidate.extremity_1[0]} {candidate.extremity_1[1]}, {candidate.extremity_2[0]} {candidate.extremity_2[1]})"
+    #     query = f"SELECT cleabs FROM public.Construction_lineaire WHERE gcms_detruit = false AND ST_Intersects(ST_Force2D(geometrie), ST_GeomFromText('{geometry}'));"
+    #     query_list += query
+    #     if index >= 5:
+    #         break
+
+    # db_cursor.execute(query_list)
+    # results = db_cursor.fetchall()
+
+def run_branch(mask_hydro, crs):
+
+    get_branches(mask_hydro, crs)
+    pass
+
+def run_old(mask_hydro, crs):
     """Calculer le squelette hydrographique
 
     Args:
@@ -687,17 +817,15 @@ def run(mask_hydro, crs):
         - crs (str): code EPSG
     """
 
-    get_branches(mask_hydro, crs)
+    # get_branches(mask_hydro, crs)
 
     gdf = check_geometry(mask_hydro)  # Vérifier et corriger les géométries non valides
 
     ### Voronoi Diagram ###
     voronoi_lines = create_voronoi_lines(gdf, crs)
     gdf_lines = line_merge(voronoi_lines)
-    blobs_list = create_blobs(gdf_lines)
 
-    pass
-
+    return
     # saved_voronoi_lines = voronoi_lines.copy()
 
     # merge all lines that can be merged without doubt (when only 2 lines are connected)
@@ -742,9 +870,14 @@ if __name__ == "__main__":
     crs = mask_hydro.crs  # Load a crs from input
     # Simplifier geometrie
     # buffer_geom = mask_hydro.apply(simplify_geometry) ## Appliquer un buffer
+
     # simplify_geom = mask_hydro.simplify(tolerance=2)  # simplifier les géométries avec Douglas-Peucker
     # df = gpd.GeoDataFrame(geometry=simplify_geom, crs=crs)
-    # df.to_file("test_0.geojson", driver='GeoJSON')
+    # run_old(df, crs)
+
+    # run_branch(mask_hydro, crs)
+
     # Squelette
+    # run(df, crs)
     run(mask_hydro, crs)
-    # run(mask_hydro, crs)
+
