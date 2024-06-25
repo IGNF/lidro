@@ -14,7 +14,7 @@ from shapely.validation import make_valid
 from shapely.ops import voronoi_diagram, linemerge, split, snap, triangulate
 import logging
 
-from branch import Branch, Candidate, BRIDGE_MAX_WIDTH
+from branch import Branch, Candidate, GAP_MAX_WIDTH
 
 MASK_GEOJSON_1 = "/home/MDaab/data/squelette_test/MaskHydro_merge 1.geojson"
 MASK_GEOJSON_2 = "/home/MDaab/data/squelette_test/ecoulement_brut_pm2.geojson"
@@ -377,7 +377,7 @@ def connect_extremities(gdf_lines:GeoDataFrame, crs)->GeoDataFrame:
 
         # get all close enough vertices
         df_vertex['square_distance'] = (df_vertex['x'] - vertex_1.x)**2 + (df_vertex['y'] - vertex_1.y)**2
-        df_close_enough = df_vertex[df_vertex['square_distance'] < BRIDGE_MAX_WIDTH**2]
+        df_close_enough = df_vertex[df_vertex['square_distance'] < GAP_MAX_WIDTH**2]
         for index, extremity_row in df_close_enough.iterrows():
 
             # we can connect only vertex with a previous one in the list
@@ -687,7 +687,7 @@ def select_candidates(branches_pair_list:List[Tuple])->List[Candidate]:
         # we don't create link between 2 branches already connected
         if branch_group.are_together(branch_a, branch_b):
             continue
-        candidates = branch_a.get_bridge_candidates(branch_b)
+        candidates = branch_a.get_gap_candidates(branch_b)
 
         # test each candidate to see if we can draw a line for them
         nb_bridges_crossed = 0
@@ -725,14 +725,15 @@ def run(gdf_mask_hydro, crs):
     for index_branch, branch_mask_row in gdf_mask_hydro.iterrows():
         mask_branch = branch_mask_row["geometry"]
         new_branch = Branch(index_branch, mask_branch, crs)
-        new_branch.simplify()
+        # new_branch.simplify()
         branches_list.append(new_branch)
 
+    # create branches_pair_list, that stores all pairs of branches close enough to have a bridge
     branches_pair_list = []
     for index, branch_a in enumerate(branches_list[:-1]):
         for branch_b in branches_list[index + 1:]:
             distance = branch_a.distance_to_a_branch(branch_b)
-            if distance < BRIDGE_MAX_WIDTH:
+            if distance < GAP_MAX_WIDTH:
                 branches_pair_list.append((branch_a, branch_b, distance))
 
     # sort the branches pairs by distance between them
@@ -740,9 +741,19 @@ def run(gdf_mask_hydro, crs):
 
     validated_candidates = select_candidates(branches_pair_list)
 
+    # create the bridge lines from the selected candidates
     bridge_lines = [validated_candidate.line for validated_candidate in validated_candidates]
     gdf_bridge_lines = gpd.GeoDataFrame(geometry=bridge_lines).set_crs(crs, allow_override=True)
-    gdf_bridge_lines.to_file("test_bridges_group_maker.geojson", driver='GeoJSON')
+    gdf_bridge_lines.to_file("test_bridges_group_maker_mask.geojson", driver='GeoJSON')
+
+    for candidate in validated_candidates:
+        candidate.branch_1.gap_points.append(Point(candidate.extremity_1))
+        candidate.branch_2.gap_points.append(Point(candidate.extremity_2))
+
+    for branch in branches_list:
+        branch:Branch
+        branch.create_skeleton()
+        branch.simplify()
 
     # for branch in branches_list:
     #     branch:Branch
@@ -762,11 +773,11 @@ def run(gdf_mask_hydro, crs):
 
     branch_lines_list = [branch.gdf_lines for branch in branches_list]
     gdf_branch_lines = gpd.GeoDataFrame(pd.concat(branch_lines_list, ignore_index=True))
-    gdf_branch_lines.to_file("test_branch_lines.geojson", driver='GeoJSON')
+    gdf_branch_lines.to_file("test_branch_lines_mask.geojson", driver='GeoJSON')
 
     mask_list = [branch.gdf_branch_mask for branch in branches_list]
     gdf_mask = gpd.GeoDataFrame(pd.concat(mask_list, ignore_index=True))
-    gdf_mask.to_file("test_mask.geojson", driver='GeoJSON')
+    gdf_mask.to_file("test_mask_mask.geojson", driver='GeoJSON')
 
     # gdf_lines = gpd.GeoDataFrame(pd.concat([gdf_lines, gdf_lines_partially_on_loops], ignore_index=True))
 
