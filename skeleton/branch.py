@@ -7,15 +7,18 @@ import geopandas as gpd
 from geopandas.geodataframe import GeoDataFrame
 import pandas as pd
 import numpy as np
-
-from shapely import LineString, Point
+from shapely import LineString, Point, Geometry
 from shapely.geometry import Polygon, MultiLineString
 from shapely.validation import make_valid
 from shapely.ops import voronoi_diagram, linemerge
+from pyproj.crs.crs import CRS
 
 
 @dataclass
 class Candidate:
+    """
+    a candidate contains the data to close a gap between 2 branches with a line
+    """
     branch_1: "Branch"
     branch_2: "Branch"
     extremity_1: tuple
@@ -31,12 +34,16 @@ class Candidate:
 
 
 class Branch:
-    """a branch is a geodataframe of lines of river that are all connected"""
+    """a branch contains all the data relative to a single 'entity' of water, defined by a single polygon
+    that is the mask (the contour) of the branch """
 
-    def __init__(self, config: DictConfig, branch_id: str, branch_mask: GeoDataFrame, crs: int):
+    def __init__(self, config: DictConfig, branch_id: str, branch_mask: GeoDataFrame, crs: CRS):
         """
         Args:
-            - crs (str): EPSG code
+            - config (DictConfig): the config dict from hydra
+            - branch_id (str): an identifiant for the branch
+            - branch_mask (GeoDataFrame): a polygon as mask of the branch
+            - crs (CRS): EPSG code of the geodataframe
         """
         self.config = config
         self.branch_id = branch_id
@@ -45,14 +52,16 @@ class Branch:
         # self.gdf_branch_mask = gpd.GeoDataFrame(geometry=[simplify_geom], crs=crs)
 
         self.set_gdf_branch_mask(branch_mask)
+        self.gdf_branch_mask.to_file(f"/home/MDaab/code/lidro/branches/{self.branch_id}.geojson", driver='GeoJSON')
+
         self.gap_points = []  # will contain points on the exterior that are connected to close gaps
         self.df_all_coords = get_df_points_from_gdf(self.gdf_branch_mask)
 
     def set_gdf_branch_mask(self, branch_mask: GeoDataFrame):
         """
-        set branch_mask as self.gdf_branch_mask, after checking and correcting it's validity
+        sets branch_mask as self.gdf_branch_mask, after checking and correcting its validity
         Args:
-            - branch_mask (GeoDataFrame): a polygon as mask of the branch   
+            - branch_mask (GeoDataFrame): a polygon as mask of the branch
         """
         raw_gdf_branch_mask = gpd.GeoDataFrame(geometry=[branch_mask], crs=self.crs)
 
@@ -68,7 +77,7 @@ class Branch:
 
     def create_skeleton(self):
         """
-        create a skeleton for the branch
+        creates a skeleton for the branch
         """
         voronoi_lines = self.create_voronoi_lines()
 
@@ -82,7 +91,9 @@ class Branch:
         self.gdf_skeleton_lines = line_merge(voronoi_lines, self.crs)
 
     def simplify(self):
-        """remove useless lines from skeleton_lines"""
+        """
+        removes useless lines from skeleton_lines
+        """
         old_number_of_lines = len(self.gdf_skeleton_lines)
         while old_number_of_lines > 1:
             # we will exit the loop when there is only 1 line left
@@ -96,15 +107,15 @@ class Branch:
 
     def distance_to_a_branch(self, other_branch: 'Branch') -> float:
         """
-        return the distance to another branch
+        returns the distance to another branch
         Args:
-            - other_branch (Branch): the other branch we want the distance to        
+            - other_branch (Branch): the other branch we want the distance to
         """
         return self.gdf_branch_mask.distance(other_branch.gdf_branch_mask)[0]
 
-    def get_gap_candidates(self, other_branch: 'Branch') -> List[Candidate]:
+    def get_candidates(self, other_branch: 'Branch') -> List[Candidate]:
         """
-        Return all candidates to close the gap with the other branch
+        Returns all the possible candidates (up to MAX_GAP_CANDIDATES) to close the gap with the other branch
         Args:
             - other_branch (Branch): the other branch we want the distance to
         """
@@ -143,6 +154,10 @@ class Branch:
         return candidates
 
     def remove_extra_lines(self):
+        """
+        removes the 'spikes" (the lone lines going outward) from a skeleton.
+        Keeps the extremities of long enough lines
+        """
         vertices_dict = get_vertices_dict(self.gdf_skeleton_lines)
 
         lines_to_remove = []
@@ -217,8 +232,12 @@ class Branch:
         # set the lines without the lines to remove
         self.gdf_skeleton_lines = self.gdf_skeleton_lines[~self.gdf_skeleton_lines['geometry'].isin(lines_to_remove)]
 
-    def can_line_be_removed(self, line, vertices_dict):
-        """Return true if a line can be removed
+    def can_line_be_removed(self, line: Geometry, vertices_dict: Dict[Point, List[LineString]]):
+        """
+        Returns true if a line can be removed
+        Args:
+            - line (Geometry) : the line to test
+            - vertices_dict (Dict[Point, List[LineString]]) : a dictionary off all the lines with a point as an extremity
         """
         if line.length > self.config.BRANCH.WATER_MIN_SIZE:
             return False
@@ -237,8 +256,8 @@ class Branch:
         return str(self.branch_id)
 
     def create_voronoi_lines(self) -> GeoDataFrame:
-        """ Return Voronoi lines from the mask.
-        Only internal lines
+        """ Returns the Voronoi lines from the mask.
+        (Only the lines that are completely inside the mask are returned)
         """
         # divide geometry into segments no longer than max_segment_length
         united_geom = self.gdf_branch_mask['geometry'].unary_union
@@ -258,6 +277,13 @@ class Branch:
 
 
 def get_df_points_from_gdf(gdf: GeoDataFrame) -> pd.DataFrame:
+    """
+    Return a 2-columns dataframe (col x, y), containing the coords of 
+    all the points in a geodataframe
+    -Args :
+        - gdf (GeoDataFrame) : the geodataframe we want the points' coordinates from
+    """
+
     all_points = set()  # we use a set instead of a list to remove doubles
     for _, row in gdf.iterrows():
         unknown_geometry = row['geometry']
@@ -278,7 +304,10 @@ def get_df_points_from_gdf(gdf: GeoDataFrame) -> pd.DataFrame:
 
 
 def fix_invalid_geometry(geometry):
-    """ Fixer les géométries invalides
+    """ 
+    return the geometry, fixed
+    Args:
+        - gdf_lines:geodataframe containing a list of lines
     """
     if not geometry.is_valid:
         return make_valid(geometry)
@@ -313,19 +342,14 @@ def get_vertices_dict(gdf_lines: GeoDataFrame) -> Dict[Point, List[LineString]]:
     return vertices_dict
 
 
-def line_merge(voronoi_lines, crs):
-    """Fusionner tous les LINESTRING en un seul objet MultiLineString
-
-    Args:
-        - voronoi_lines (GeoDataframe) :  Lignes de Voronoi comprises à l'intérieur du masque hydrographique
-
-    Returns:
-        lines (GeoDataframe): Lignes de Voronoi fusionnées comprises à l'intérieur du masque hydrographique
-
+def line_merge(gdf_lines: GeoDataFrame, crs: CRS) -> GeoDataFrame:
     """
-    # Fusionner tous les LINESTRING en un seul objet MultiLineString
-    merged_line = voronoi_lines.geometry.unary_union
-    # Appliquer un algo de fusion des lignes (ex. "ST_LineMerge") sur l'objet MultiLineString
+    Merges together all the lines of gdf_lines (supposed to be Linestring) into MultiLinestrings
+    Args:
+        - gdf_lines (GeoDataframe) :  contains a list of Linestring to merge
+    """
+    # merge the linestring together
+    merged_line = gdf_lines.geometry.unary_union
     merged_line = linemerge(merged_line)
 
     # in case the branch is reduced to a single line
@@ -334,6 +358,4 @@ def line_merge(voronoi_lines, crs):
 
     # turn multipart geometries into multiple single geometries
     geometry = gpd.GeoSeries(merged_line.geoms, crs=crs).explode(index_parts=False)
-    lines = gpd.GeoDataFrame(geometry=geometry, crs=crs)
-
-    return lines
+    return gpd.GeoDataFrame(geometry=geometry, crs=crs)

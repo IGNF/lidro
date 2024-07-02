@@ -15,7 +15,9 @@ class GroupMaker:
         return element_b in self.element_set_list[index]
 
     def put_together(self, element_a, element_b):
-        """put the set of a and b together"""
+        """put the set of a and b together if they aren't"""
+        if self.are_together(element_a, element_b):
+            return
         index_a = self.find_index(element_a)
         set_a = self.element_set_list.pop(index_a)
         index_b = self.find_index(element_b)
