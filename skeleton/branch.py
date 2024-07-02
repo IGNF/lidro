@@ -52,8 +52,6 @@ class Branch:
         # self.gdf_branch_mask = gpd.GeoDataFrame(geometry=[simplify_geom], crs=crs)
 
         self.set_gdf_branch_mask(branch_mask)
-        self.gdf_branch_mask.to_file(f"/home/MDaab/code/lidro/branches/{self.branch_id}.geojson", driver='GeoJSON')
-
         self.gap_points = []  # will contain points on the exterior that are connected to close gaps
         self.df_all_coords = get_df_points_from_gdf(self.gdf_branch_mask)
 
