@@ -4,9 +4,9 @@ from hydra import compose, initialize
 import geopandas as gpd
 from omegaconf import DictConfig
 
-from skeleton.branch import Branch, get_vertices_dict
+from lidro.skeleton.branch import Branch, get_vertices_dict
 
-sys.path.append('skeleton')
+sys.path.append('lidro/skeleton')
 
 BRANCH_TEST_1_PATH = "test_files/90.geojson"
 
@@ -22,7 +22,7 @@ def test_branch_1():
     """test creation/simplification of skeleton lines for a branch"""
     with initialize(version_base="1.2", config_path="../../configs"):
         config = compose(
-            config_name="configs_skeleton.yaml",
+            config_name="configs_lidro.yaml",
         )
         branch_1 = read_branch(config, BRANCH_TEST_1_PATH, "test_branch_1")
 

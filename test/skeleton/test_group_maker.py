@@ -1,4 +1,4 @@
-from skeleton.group_maker import GroupMaker
+from lidro.skeleton.group_maker import GroupMaker
 
 
 def test_group_maker():

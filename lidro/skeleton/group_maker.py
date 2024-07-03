@@ -1,8 +1,15 @@
 class GroupMaker:
+    """
+    From a list of elements, GroupMaker is used to
+    group sets of elements according to single element from
+    the sets. For example:
+    At the beginning, we have {A}, {B}, {C}, {D}, {E}
+    put_together(A, B) -> {A, B}, {C}, {D}, {E}
+    put_together(C, D) -> {A, B}, {C, D}, {E}
+    put_together(A, D) -> {A, B, C, D}, {E}
+    """
     def __init__(self, element_list):
-        self.element_set_list = []
-        for element in element_list:
-            self.element_set_list.append({element})
+        self.element_set_list = [{element} for element in element_list]
 
     def find_index(self, element) -> int:
         for index, element_set in enumerate(self.element_set_list):

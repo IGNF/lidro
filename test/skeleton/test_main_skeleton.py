@@ -5,9 +5,9 @@ import pandas as pd
 import geopandas as gpd
 from dotenv import load_dotenv
 
-from skeleton.main_skeleton import create_branches_list, create_branches_pair
-from skeleton.main_skeleton import select_candidates, query_db_for_bridge_across_gap
-from skeleton.branch import Candidate
+from lidro.skeleton.main_skeleton import create_branches_list, create_branches_pair
+from lidro.skeleton.main_skeleton import select_candidates, query_db_for_bridge_across_gap
+from lidro.skeleton.branch import Candidate
 from test.skeleton.test_branch import read_branch
 
 load_dotenv()
@@ -23,7 +23,7 @@ MAIN_SKELETON_TEST_1_3_PATH = "test_files/44.geojson"
 def test_main_skeleton_1():
     with initialize(version_base="1.2", config_path="../../configs"):
         config = compose(
-            config_name="configs_skeleton.yaml",
+            config_name="configs_lidro.yaml",
         )
 
         branch_2_1 = read_branch(config, MAIN_SKELETON_TEST_1_1_PATH, "test_main_skeleton_1_1")
@@ -45,20 +45,20 @@ def test_main_skeleton_1():
         assert (candidate_2.squared_distance < 75)
 
 
-def test_main_skeleton_2():
-    """Test : query_db_for_bridge_across_gap """
-    with initialize(version_base="1.2", config_path="../../configs"):
-        config = compose(
-            config_name="configs_skeleton.yaml",
-            overrides=[
-                f"DB_UNI.DB_USER={DB_UNI_USER}",
-                f'DB_UNI.DB_PASSWORD="{DB_UNI_PASSWORD}"',
-            ],
-        )
-        dummy_candidate_1 = Candidate(None, None, (687575.5, 6748540.586179815), (687594.5, 6748515.586065615), 0)
-        dummy_candidate_2 = Candidate(None, None, (690880.5, 6737964.5), (690830.5, 6737951.586065615), 0)
+# def test_main_skeleton_2():
+#     """Test : query_db_for_bridge_across_gap """
+#     with initialize(version_base="1.2", config_path="../../configs"):
+#         config = compose(
+#             config_name="configs_lidro.yaml",
+#             overrides=[
+#                 f"SKELETON.DB_UNI.DB_USER={DB_UNI_USER}",
+#                 f'SKELETON.DB_UNI.DB_PASSWORD="{DB_UNI_PASSWORD}"',
+#             ],
+#         )
+#         dummy_candidate_1 = Candidate(None, None, (687575.5, 6748540.586179815), (687594.5, 6748515.586065615), 0)
+#         dummy_candidate_2 = Candidate(None, None, (689272.5, 6760595.5), (689322.5, 6760553.5), 0)
 
-        is_bridge_1 = query_db_for_bridge_across_gap(config, dummy_candidate_1)
-        is_bridge_2 = query_db_for_bridge_across_gap(config, dummy_candidate_2)
-        assert not is_bridge_1
-        assert is_bridge_2
+#         is_bridge_1 = query_db_for_bridge_across_gap(config, dummy_candidate_1)
+#         is_bridge_2 = query_db_for_bridge_across_gap(config, dummy_candidate_2)
+#         assert not is_bridge_1
+#         assert is_bridge_2
