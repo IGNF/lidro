@@ -1,19 +1,20 @@
-from hydra import compose, initialize
+import os
 
+from hydra import compose, initialize
 import pandas as pd
 import geopandas as gpd
+from dotenv import load_dotenv
 
 from skeleton.main_skeleton import create_branches_list, create_branches_pair
 from skeleton.main_skeleton import select_candidates, query_db_for_bridge_across_gap
 from skeleton.branch import Candidate
-
 from test.skeleton.test_branch import read_branch
 
-USER = 'TO_BE_DEFINED'
-PASSWORD = 'TO_BE_DEFINED'
+load_dotenv()
 
+DB_UNI_USER = os.getenv('DB_UNI_USER')
+DB_UNI_PASSWORD = os.getenv('DB_UNI_PASSWORD')
 CRS = 2154
-
 MAIN_SKELETON_TEST_1_1_PATH = "test_files/40.geojson"
 MAIN_SKELETON_TEST_1_2_PATH = "test_files/43.geojson"
 MAIN_SKELETON_TEST_1_3_PATH = "test_files/44.geojson"
@@ -50,8 +51,8 @@ def test_main_skeleton_2():
         config = compose(
             config_name="configs_skeleton.yaml",
             overrides=[
-                f"DB_UNI.DB_USER={USER}",
-                f'DB_UNI.DB_PASSWORD="{PASSWORD}"',
+                f"DB_UNI.DB_USER={DB_UNI_USER}",
+                f'DB_UNI.DB_PASSWORD="{DB_UNI_PASSWORD}"',
             ],
         )
         dummy_candidate_1 = Candidate(None, None, (687575.5, 6748540.586179815), (687594.5, 6748515.586065615), 0)
