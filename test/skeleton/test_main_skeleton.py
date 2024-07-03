@@ -9,8 +9,8 @@ from skeleton.branch import Candidate
 
 from test.skeleton.test_branch import read_branch
 
-USER = "TO_DEFINE"
-PASSWORD = "TO_DEFINE"
+USER = 'TO_BE_DEFINED'
+PASSWORD = 'TO_BE_DEFINED'
 
 CRS = 2154
 
