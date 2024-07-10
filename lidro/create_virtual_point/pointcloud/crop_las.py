@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-""" Crop filtered pointcloud """
+""" Filter pointcloud to keep only the ground class """
 from typing import List
 
 import numpy as np
@@ -8,9 +8,7 @@ from shapely.geometry import MultiPolygon
 
 
 def crop_pointcloud_by_points(input_points: str, geom: MultiPolygon, classes: List[int:int]) -> np.array:
-    """Crop filtered pointcloud :
-    1. Filter pointcloud for keeping only classe "GROUND"
-    2. Crop filtered pointcloud by "Mask HYDRO + buffer"
+    """Filter pointcloud to keep only the ground class
 
     Args:
         input_points (str): Path to the input LAS/LAZ file

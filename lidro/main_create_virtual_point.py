@@ -62,7 +62,7 @@ def main(config: DictConfig):
     distance_meters = config.virtual_point.vector.distance_meters
     buffer = config.virtual_point.vector.buffer
     crs = CRS.from_user_input(config.io.srid)
-    classes = config.virtual_point.filter.keep_classe_ground
+    classes = config.virtual_point.filter.keep_classes_ground
     k = config.virtual_point.vector.k
 
     # Step 1 : Import Mask Hydro, then apply a buffer
