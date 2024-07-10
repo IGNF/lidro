@@ -2,7 +2,7 @@ name: lidro
 channels:
   - conda-forge
 dependencies:
-  - python==3.11.*
+  - python==3.10.*
   - pip
   - pytest
   - gdal
@@ -24,4 +24,6 @@ dependencies:
   - flake8
   - isort
   - pre-commit
+  - pip:
+    - -r requirements.txt
 
