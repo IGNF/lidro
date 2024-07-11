@@ -2,7 +2,7 @@ name: lidro
 channels:
   - conda-forge
 dependencies:
-  - python==3.11
+  - python==3.11.*
   - pip
   - pytest
   - gdal
@@ -11,7 +11,7 @@ dependencies:
   - scipy
   - geojson
   - rasterio
-  - geopandas
+  - geopandas<=1.*
   - pyproj
   - pdal>=2.6
   - python-pdal>=3.2.1
