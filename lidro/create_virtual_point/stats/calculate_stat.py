@@ -16,7 +16,7 @@ def calculate_quartile_(points: np.array, q: int) -> float:
         - float: The quartile of Z coordinates
     """
     altitudes = points[:, 2]  # Extract the altitude column
-    n_quartile = np.round(np.percentile(altitudes, q), 2)
+    n_quartile = round(np.percentile(altitudes, q), 2)
 
     return n_quartile
 
@@ -32,6 +32,6 @@ def calculate_median(points: np.array) -> float:
         - float: The median of Z coordinates
     """
     altitudes = points[:, 2]  # Extract the altitude column
-    n_median = np.round(np.median(altitudes), 2)
+    n_median = round(np.median(altitudes), 2)
 
     return n_median
