@@ -8,13 +8,13 @@ import geopandas as gpd
 import hydra
 import pandas as pd
 from omegaconf import DictConfig
+from pdaltools.las_info import las_get_xy_bounds
 from pyproj import CRS
 from shapely.geometry import Point
 
 from lidro.create_virtual_point.pointcloud.crop_las import (
     read_filter_and_crop_pointcloud,
 )
-from lidro.create_virtual_point.pointcloud.utils_pdal import get_bounds_from_las
 from lidro.create_virtual_point.vectors.clip_points_with_bounding_box import (
     clip_points_with_box,
 )
@@ -94,7 +94,7 @@ def main(config: DictConfig):
         points_clip = read_filter_and_crop_pointcloud(input_pointcloud, str(input_mask_hydro_buffer), classes)
         logging.info(f"\nCropping skeleton points for tile: {tilename}")
         # Extract bounding box for clipping points by tile
-        bbox = get_bounds_from_las(input_pointcloud)
+        bbox = las_get_xy_bounds(input_pointcloud, 0, crs)
         points_skeleton_clip = clip_points_with_box(points_list_skeleton, bbox)
         # Create list with Skeleton's points with Z for step 4
         points_skeleton_with_z_clip = [
