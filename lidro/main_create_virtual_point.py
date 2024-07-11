@@ -11,7 +11,9 @@ from omegaconf import DictConfig
 from pyproj import CRS
 from shapely.geometry import Point
 
-from lidro.create_virtual_point.pointcloud.crop_las import crop_pointcloud_by_points
+from lidro.create_virtual_point.pointcloud.crop_las import (
+    read_filter_and_crop_pointcloud,
+)
 from lidro.create_virtual_point.pointcloud.utils_pdal import get_bounds_from_las
 from lidro.create_virtual_point.vectors.clip_points_with_bounding_box import (
     clip_points_with_box,
@@ -89,7 +91,7 @@ def main(config: DictConfig):
         input_pointcloud = os.path.join(input_dir_points, filename)  # path to the LAS file
         logging.info(f"\nCroping filtered pointcloud by Mask Hydro with buffer for tile : {tilename}")
         # Croping filtered pointcloud by Mask Hydro with buffer for tile
-        points_clip = crop_pointcloud_by_points(input_pointcloud, str(input_mask_hydro_buffer), classes)
+        points_clip = read_filter_and_crop_pointcloud(input_pointcloud, str(input_mask_hydro_buffer), classes)
         logging.info(f"\nCropping skeleton points for tile: {tilename}")
         # Extract bounding box for clipping points by tile
         bbox = get_bounds_from_las(input_pointcloud)

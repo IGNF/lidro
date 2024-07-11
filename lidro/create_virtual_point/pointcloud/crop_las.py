@@ -7,7 +7,7 @@ import pdal
 from shapely.geometry import MultiPolygon
 
 
-def crop_pointcloud_by_points(input_points: str, geom: MultiPolygon, classes: List[int:int]) -> np.array:
+def read_filter_and_crop_pointcloud(input_points: str, geom: MultiPolygon, classes: List[int:int]) -> np.array:
     """Filter pointcloud to keep only the ground class
 
     Args:
