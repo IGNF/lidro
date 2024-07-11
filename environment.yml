@@ -11,7 +11,7 @@ dependencies:
   - scipy
   - geojson
   - rasterio
-  - geopandas<=1.*
+  - geopandas==0.*
   - pyproj
   - pdal>=2.6
   - python-pdal>=3.2.1
