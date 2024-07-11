@@ -12,7 +12,7 @@ def test_find_k_nearest_neighbors_default():
             [830867.61, 6290202.62, 2.89],
         ]
     )
-    point = np.array([[830574.89, 6290648.53, 0]])
+    point = np.array([[830574.89, 6290648.53]])
     k = 3
 
     result = find_k_nearest_neighbors(point, points_array, k)

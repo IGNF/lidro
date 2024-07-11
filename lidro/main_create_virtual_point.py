@@ -98,7 +98,7 @@ def main(config: DictConfig):
         points_skeleton_clip = clip_points_with_box(points_list_skeleton, bbox)
         # Create list with Skeleton's points with Z for step 4
         points_skeleton_with_z_clip = [
-            ([geom.x, geom.y, 0]) for geom in points_skeleton_clip.geometry if isinstance(geom, Point)
+            ([geom.x, geom.y]) for geom in points_skeleton_clip.geometry if isinstance(geom, Point)
         ]
         # Step 4 : Extract a Z elevation value along the hydrographic skeleton
         logging.info(f"\nExtract a Z elevation value along the hydrographic skeleton for tile : {tilename}")

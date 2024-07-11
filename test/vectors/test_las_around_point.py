@@ -22,7 +22,7 @@ def setup_module(module):
 
 def test_las_around_point_default():
     # Parameters
-    points_along_skeleton = [[830864.5181373736, 6290217.943739296, 0], [830866.5957826116, 6290208.162525126, 0]]
+    points_along_skeleton = [[830864.5181373736, 6290217.943739296], [830866.5957826116, 6290208.162525126]]
 
     points_clip = np.array(
         [
