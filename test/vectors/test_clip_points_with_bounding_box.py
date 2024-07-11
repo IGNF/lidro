@@ -18,6 +18,8 @@ def test_create_hydro_vector_mask_default():
         (830375.000, 6291001.000),  # Outside
         (830400.000, 6291000.000),  # Outside
     ]
+    # Convert points to GeoDataFrame
+    points_gdf = gpd.GeoDataFrame(geometry=[Point(point) for point in points])
 
     # Define a bounding box that should clip out some points
     bbox = ((830375, 830390), (6290970, 6291000))
@@ -29,10 +31,9 @@ def test_create_hydro_vector_mask_default():
         (830386.045, 6290980.81),
         (830389.709, 6290971.505),
     ]
-
     # Convert expected points to GeoDataFrame for comparison
     expected_gdf = gpd.GeoDataFrame(geometry=[Point(point) for point in expected_points])
 
-    result_gdf = clip_points_with_box(points, bbox)
+    result_gdf = clip_points_with_box(points_gdf, bbox)
 
     assert (result_gdf.equals(expected_gdf)) is True
