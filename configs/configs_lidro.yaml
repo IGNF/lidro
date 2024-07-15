@@ -37,8 +37,8 @@ mask_generation:
 
 virtual_point:
   filter:
-    # Keep ground pointcloud between Hydro Mask and Hydro Mask buffer
-    keep_classes_ground: "[2:2]"
+    # Keep ground and water pointclouds between Hydro Mask and Hydro Mask buffer
+    keep_classes_ground: [2, 9]
   vector:
     # distance in meters between 2 consecutive points 
     distance_meters: 2
