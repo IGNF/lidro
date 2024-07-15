@@ -6,7 +6,7 @@ from typing import List
 import numpy as np
 from shapely.geometry import Point
 
-from lidro.create_virtual_point.stats.calculate_stat import calculate_quartile
+from lidro.create_virtual_point.stats.calculate_stat import calculate_percentile
 from lidro.create_virtual_point.stats.knn_distance import find_k_nearest_neighbors
 
 
@@ -29,7 +29,7 @@ def filter_las_around_point(points_skeleton: List, points_clip: np.array, k: int
 
     # Calcule Z "Q1" for each points every N meters along skeleton hydro
     results = [
-        ({"geometry": p["geometry"], "z_q1": calculate_quartile(p["points_knn"], 10)})
+        ({"geometry": p["geometry"], "z_q1": calculate_percentile(p["points_knn"], 10)})
         for p in points_knn_list
         if not np.all(np.isnan(p["points_knn"]))
     ]

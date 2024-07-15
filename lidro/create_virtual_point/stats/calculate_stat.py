@@ -3,13 +3,13 @@
 import numpy as np
 
 
-def calculate_quartile(points: np.array, q: int) -> float:
+def calculate_percentile(points: np.array, q: int) -> float:
     """
     Calculates the quartile's value of Z coordinates
 
     Parameters:
         - points (numpy.ndarray): An array of 3D points [x, y, z]
-        - q (int): Percentage or sequence of percentages for the percentiles to compute.
+        - q (int): Percentage for the percentiles to compute.
                    Values must be between 0 and 100 inclusive.
 
     Returns:
