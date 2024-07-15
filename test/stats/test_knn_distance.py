@@ -18,3 +18,4 @@ def test_find_k_nearest_neighbors_default():
     result = find_k_nearest_neighbors(point, points_array, k)
 
     assert isinstance(result, np.ndarray) is True
+    assert result.ndim == 3  # check dimension numpy.array -> 3D
