@@ -13,9 +13,9 @@ def test_find_k_nearest_neighbors_default():
         ]
     )
     point = np.array([[830574.89, 6290648.53]])
-    k = 3
+    k = 1
 
     result = find_k_nearest_neighbors(point, points_array, k)
 
     assert isinstance(result, np.ndarray) is True
-    assert all(len(sublist) == 3 for sublist in result)  # check 3d dimension
+    assert np.array_equal(result, np.array([[830438.91, 6290854.32, 2.56]]))
