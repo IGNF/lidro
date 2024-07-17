@@ -13,7 +13,7 @@ def read_filter_and_crop_pointcloud(input_points: str, geom: MultiPolygon, class
     Args:
         input_points (str): Path to the input LAS/LAZ file
         geom (MultiPolygon):  An array of WKT or GeoJSON 2D MultiPolygon (Mask Hydro with buffer)
-        classes (List[int]): Values to keep for input points along filter_dimension
+        classes (List[int]): Classification values to keep for input points
 
     Returns:
         np.array : Numpy array containing point coordinates (X, Y, Z) after filtering and croping
