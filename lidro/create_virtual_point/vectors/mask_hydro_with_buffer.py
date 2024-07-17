@@ -22,4 +22,7 @@ def import_mask_hydro_with_buffer(file_mask: str, buffer: float, crs: str | int)
     # Apply buffer (2 meters by default) from Mask Hydro
     gdf_buffer = gdf.buffer(buffer, cap_style=CAP_STYLE.square)
 
-    return gdf_buffer
+    # Return a polygon representing the limit of the bank with a buffer of N meters
+    limit_bank = gdf_buffer.difference(gdf)
+
+    return limit_bank
