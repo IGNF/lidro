@@ -19,7 +19,7 @@ def setup_module(module):
 
 
 def test_crop_pointcloud_default():
-    classes = [2]
+    classes = [1, 2]
 
     geom = str(
         "MULTIPOLYGON (((830873.1249999998 6290475.625000002, \
