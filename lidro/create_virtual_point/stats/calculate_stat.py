@@ -9,7 +9,7 @@ def calculate_percentile(points: np.array, q: int) -> float:
 
     Parameters:
         - points (numpy.ndarray): An array of 3D points [x, y, z]
-        - q (int): Percentage for the percentiles to compute.
+        - q (int): Percentage for the percentile to compute.
                    Values must be between 0 and 100 inclusive.
 
     Returns:
