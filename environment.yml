@@ -11,7 +11,7 @@ dependencies:
   - scipy
   - geojson
   - rasterio
-  - geopandas
+  - geopandas==0.*
   - pyproj
   - pdal>=2.6
   - python-pdal>=3.2.1
@@ -24,4 +24,6 @@ dependencies:
   - flake8
   - isort
   - pre-commit
+  - pip:
+    - -r requirements.txt
 
