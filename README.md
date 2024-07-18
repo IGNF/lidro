@@ -29,13 +29,13 @@ Trois grands axes du processus à mettre en place en distanguant l'échelle de t
 
 Il existe plusieurs étapes intermédiaires :
 * 1- création automatique du tronçon hydrographique ("Squelette hydrographique", soit les tronçons hydrographiques dans la BD Unid) à partir de l'emprise du masque hydrographique "écoulement" apparaier, contrôler et corriger par la "production" (SV3D) en amont (étape manuelle)
-* 2- Analyse de la répartition en Z de l'ensemble des points LIDAR "Sol"
-* 3- Création de points virtuels nécéssitant plusieurs étapes intermédiaires :
-  * Associer chaque point virtuel 2D au point le plus proche du squelette hydrographique
-  * Traitement "Z" du squelette :
-    * Analyser la répartition en Z de l’ensemble des points LIDAR extrait à l’étape précédente afin d’extraire une seule valeur d’altitude au point fictif Z le plus proche du squelette hydrographique. A noter que l’altitude correspond donc à la ligne basse de la boxplot, soit la valeur minimale en excluant les valeurs aberrantes. Pour les ponts, une étape de contrôle de la classification pourrait être mise en place
-    * Lisser les Z le long du squelette HYDRO pour assurer l'écoulement
-  * Création des points virtuels 2D tous les 0.5 mètres le long des bords du masque hydrographique "écoulement" en cohérence en "Z" avec le squelette hydrographique
+A l'échelle de l'entité hydrographique : 
+* 2- Réccupérer tous les points LIDAR considérés comme du "SOL" situés à la limite de berges (masque hydrographique) moins N mètres
+* 3- Transformer les coordonnées de ces points (étape précédente) en abscisses curvilignes
+* 4- Générer un modèle de régression linéaire afin de générer tous les N mètres une valeur d'altitude le long du squelette de cette rivière. A noter que les Z le long du squelette HYDRO doivent assurer l'écoulement.
+* 5- Création de points virtuels nécéssitant plusieurs étapes intermédiaires :
+  * Création des points virtuels 2D espacés selon une grille régulière à l'intérieur du masque hydrographique "écoulement"
+  * Affecter une valeur d'altitude à ces points virtuels en fonction des "Z" calculés à l'étape précédente (interpolation linéaire)
 
 ### Traitement des surfaces planes (mer, lac, étang, etc.)
 Pour rappel, l'eau est considérée comme horizontale sur ce type de surface.
