@@ -8,6 +8,8 @@ work_dir: ${hydra:runtime.cwd}
 
 io:
   input_filename: null
+  input_mask_hydro: null
+  input_skeleton: null
   input_dir: null
   output_dir: null
   srid: 2154
@@ -17,23 +19,33 @@ io:
   no_data_value: -9999
   tile_size: 1000
 
-raster:
-  # size for dilatation
-  dilatation_size: 3
+mask_generation:
+  raster:
+    # size for dilatation
+    dilation_size: 3
+  filter:
+    # Classes to be considered as "non-water"
+    keep_classes: [0, 1, 2, 3, 4, 5, 6, 17, 64, 65, 66, 67] # All classes
+  vector:
+    # Filter water's area (m²)
+    min_water_area: 150
+    # Parameters for buffer
+    buffer_positive: 1
+    buffer_negative: -1.5 # negative buffer should be bigger than positive buffer to prevent protruding over the banks
+    # Tolerance from Douglas-Peucker
+    tolerance: 1
 
-
-vector:
-  # Filter water's area (m²)
-  min_water_area: 150
-  # Parameters for buffer
-  buffer_positive: 1
-  buffer_negative: -1.5 # negative buffer should be bigger than positive buffer to prevent protruding over the banks
-  # Tolerance from Douglas-Peucker
-  tolerance: 1
-
-filter:
-  # Classes to be considered as "non-water"
-  keep_classes: [0, 1, 2, 3, 4, 5, 6, 17, 64, 65, 66, 67] # All classes
+virtual_point:
+  filter:
+    # Keep ground and water pointclouds between Hydro Mask and Hydro Mask buffer
+    keep_neighbors_classes: [2, 9]
+  vector:
+    # distance in meters between 2 consecutive points 
+    distance_meters: 2
+    # buffer for searching the points classification (default. "2") of the input LAS/LAZ file
+    buffer: 2
+    # The number of nearest neighbors to find with KNeighbors
+    k: 20
 
 SKELETON:
   FILE_PATH:
