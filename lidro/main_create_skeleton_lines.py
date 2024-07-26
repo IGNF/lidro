@@ -32,8 +32,8 @@ def run(config: DictConfig):
 
     # create the gap lines from the selected candidates
     gap_lines_list = [validated_candidate.line for validated_candidate in validated_candidates]
+    gdf_gap_lines = gpd.GeoDataFrame(geometry=gap_lines_list).set_crs(crs, allow_override=True)
     if config.SKELETON.FILE_PATH.GAP_LINES_OUTPUT_PATH:
-        gdf_gap_lines = gpd.GeoDataFrame(geometry=gap_lines_list).set_crs(crs, allow_override=True)
         gdf_gap_lines.to_file(config.SKELETON.FILE_PATH.GAP_LINES_OUTPUT_PATH, driver='GeoJSON')
 
     # add the extremities used on each branch to close a gap to the list of gap_point of that branch,
@@ -55,8 +55,7 @@ def run(config: DictConfig):
         gdf_branch_lines.to_file(config.SKELETON.FILE_PATH.SKELETON_LINES_OUTPUT_PATH, driver='GeoJSON')
 
     # saving all lines
-    branch_lines_list.append(gdf_gap_lines)
-    gdf_global_lines = gpd.GeoDataFrame(pd.concat(branch_lines_list, ignore_index=True))
+    gdf_global_lines = gpd.GeoDataFrame(pd.concat([gdf_branch_lines, gdf_gap_lines], ignore_index=True))
     gdf_global_lines = line_merge(gdf_global_lines, crs) # merge lines into polylines
     gdf_global_lines.to_file(config.SKELETON.FILE_PATH.GLOBAL_LINES_OUTPUT_PATH, driver='GeoJSON')
 
