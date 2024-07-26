@@ -11,8 +11,8 @@ from geopandas.geodataframe import GeoDataFrame
 import psycopg2
 from shapely.geometry import Point
 
-from branch import Branch, Candidate
-from group_maker import GroupMaker
+from skeleton.branch import Branch, Candidate
+from skeleton.group_maker import GroupMaker
 
 
 def db_connector(config: DictConfig):
