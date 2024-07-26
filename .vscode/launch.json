@@ -8,7 +8,7 @@
             "name": "Python Debugger: Skeleton",
             "type": "debugpy",
             "request": "launch",
-            "program": "lidro/skeleton/main_skeleton.py",
+            "program": "lidro/main_create_skeleton_lines.py",
             "console": "integratedTerminal",
             "args": [
                 "SKELETON.FILE_PATH.MASK_INPUT_PATH=/home/MDaab/data/squelette_test/Mask_Hydro_without_vegetation.geojson",
@@ -28,7 +28,7 @@
             "args": [
                 "-s",
                 "-k",
-                "test_main_skeleton_2",
+                "test_get_df_points_from_gdf",
             ],
         },
     ]

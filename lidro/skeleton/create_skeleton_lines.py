@@ -1,18 +1,16 @@
 from typing import List, Tuple
+import sys
 
-import hydra
+sys.path.append('../lidro')
+
 from omegaconf import DictConfig
 from pyproj.crs.crs import CRS
 
-import geopandas as gpd
-import pandas as pd
-from pandas import DataFrame as df
 from geopandas.geodataframe import GeoDataFrame
 import psycopg2
-from shapely.geometry import Point
 
-from skeleton.branch import Branch, Candidate
-from skeleton.group_maker import GroupMaker
+from lidro.skeleton.branch import Branch, Candidate
+from lidro.skeleton.group_maker import GroupMaker
 
 
 def db_connector(config: DictConfig):

@@ -5,8 +5,8 @@ import pandas as pd
 import geopandas as gpd
 from dotenv import load_dotenv
 
-from lidro.skeleton.main_skeleton import create_branches_list, create_branches_pair
-from lidro.skeleton.main_skeleton import select_candidates, query_db_for_bridge_across_gap
+from lidro.skeleton.create_skeleton_lines import create_branches_list, create_branches_pair
+from lidro.skeleton.create_skeleton_lines import select_candidates, query_db_for_bridge_across_gap
 from lidro.skeleton.branch import Candidate
 from test.skeleton.test_branch import read_branch
 
