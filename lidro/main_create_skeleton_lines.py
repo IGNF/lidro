@@ -1,5 +1,7 @@
 """ Main script for creating skeleton lines inside masks
 """
+import sys
+
 import hydra
 from omegaconf import DictConfig
 
@@ -7,8 +9,11 @@ import geopandas as gpd
 import pandas as pd
 from shapely.geometry import Point
 
-from skeleton.create_skeleton_lines import create_branches_list, create_branches_pair, select_candidates
-from skeleton.branch import Branch, line_merge
+sys.path.append('../lidro')
+
+from lidro.skeleton.create_skeleton_lines import create_branches_list, create_branches_pair, select_candidates
+from lidro.skeleton.branch import Branch, line_merge
+
 
 
 @hydra.main(version_base="1.2", config_path="../configs/", config_name="configs_lidro.yaml")
