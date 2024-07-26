@@ -8,7 +8,7 @@ import pandas as pd
 from shapely.geometry import Point
 
 from skeleton.create_skeleton_lines import create_branches_list, create_branches_pair, select_candidates
-from skeleton.branch import Branch
+from skeleton.branch import Branch, line_merge
 
 
 @hydra.main(version_base="1.2", config_path="../configs/", config_name="configs_lidro.yaml")
@@ -54,6 +54,11 @@ def run(config: DictConfig):
     if config.SKELETON.FILE_PATH.GAP_LINES_OUTPUT_PATH:
         gdf_branch_lines.to_file(config.SKELETON.FILE_PATH.SKELETON_LINES_OUTPUT_PATH, driver='GeoJSON')
 
+    # saving all lines
+    branch_lines_list.append(gdf_gap_lines)
+    gdf_global_lines = gpd.GeoDataFrame(pd.concat(branch_lines_list, ignore_index=True))
+    gdf_global_lines = line_merge(gdf_global_lines, crs) # merge lines into polylines
+    gdf_global_lines.to_file(config.SKELETON.FILE_PATH.GLOBAL_LINES_OUTPUT_PATH, driver='GeoJSON')
 
 if __name__ == "__main__":
     run()
