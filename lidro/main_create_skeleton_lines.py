@@ -9,11 +9,10 @@ import geopandas as gpd
 import pandas as pd
 from shapely.geometry import Point
 
-sys.path.append('../lidro')
-
 from lidro.skeleton.create_skeleton_lines import create_branches_list, create_branches_pair, select_candidates
 from lidro.skeleton.branch import Branch, line_merge
 
+sys.path.append('../lidro')
 
 
 @hydra.main(version_base="1.2", config_path="../configs/", config_name="configs_lidro.yaml")
@@ -21,7 +20,7 @@ def run(config: DictConfig):
     """
     Get whole hydrographic skeleton lines, based on
     a geojson file containing multiple river contours.
-    The result file will contain "skeleton" lines running in the middle of 
+    The result file will contain "skeleton" lines running in the middle of
     those contours to describe the flow of the rivers, and lines crossing the contours
     to join with the skeleton lines, as bridge and other elements may "break" river contours
     args:
@@ -61,8 +60,9 @@ def run(config: DictConfig):
 
     # saving all lines
     gdf_global_lines = gpd.GeoDataFrame(pd.concat([gdf_branch_lines, gdf_gap_lines], ignore_index=True))
-    gdf_global_lines = line_merge(gdf_global_lines, crs) # merge lines into polylines
+    gdf_global_lines = line_merge(gdf_global_lines, crs)  # merge lines into polylines
     gdf_global_lines.to_file(config.SKELETON.FILE_PATH.GLOBAL_LINES_OUTPUT_PATH, driver='GeoJSON')
+
 
 if __name__ == "__main__":
     run()

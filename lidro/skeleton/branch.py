@@ -137,7 +137,8 @@ class Branch:
             if index >= self.config.SKELETON.BRANCH.MAX_GAP_CANDIDATES:
                 break
             # stop if the following candidates
-            if distance_squared[other_index][self_index] > self.config.SKELETON.MAX_GAP_WIDTH * self.config.SKELETON.MAX_GAP_WIDTH:
+            if distance_squared[other_index][self_index] \
+                    > self.config.SKELETON.MAX_GAP_WIDTH * self.config.SKELETON.MAX_GAP_WIDTH:
                 break
 
             candidates.append(
@@ -234,7 +235,8 @@ class Branch:
         Returns true if a line can be removed
         Args:
             - line (Geometry) : the line to test
-            - vertices_dict (Dict[Point, List[LineString]]) : a dictionary off all the lines with a point as an extremity
+            - vertices_dict (Dict[Point, List[LineString]]) : a dictionary off all the
+            lines with a point as an extremity
         """
         if line.length > self.config.SKELETON.BRANCH.WATER_MIN_SIZE:
             return False
@@ -275,7 +277,7 @@ class Branch:
 
 def get_df_points_from_gdf(gdf: GeoDataFrame) -> pd.DataFrame:
     """
-    Return a 2-columns dataframe (col x, y), containing the coords of 
+    Return a 2-columns dataframe (col x, y), containing the coords of
     all the points in a geodataframe
     -Args :
         - gdf (GeoDataFrame) : the geodataframe we want the points' coordinates from
@@ -301,7 +303,7 @@ def get_df_points_from_gdf(gdf: GeoDataFrame) -> pd.DataFrame:
 
 
 def fix_invalid_geometry(geometry):
-    """ 
+    """
     return the geometry, fixed
     Args:
         - gdf_lines:geodataframe containing a list of lines

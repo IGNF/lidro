@@ -1,8 +1,6 @@
 from typing import List, Tuple
 import sys
 
-sys.path.append('../lidro')
-
 from omegaconf import DictConfig
 from pyproj.crs.crs import CRS
 
@@ -11,6 +9,8 @@ import psycopg2
 
 from lidro.skeleton.branch import Branch, Candidate
 from lidro.skeleton.group_maker import GroupMaker
+
+sys.path.append('../lidro')
 
 
 def db_connector(config: DictConfig):
