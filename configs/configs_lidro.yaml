@@ -70,7 +70,7 @@ SKELETON:
 
   BRANCH:
     VORONOI_MAX_LENGTH: 2 # max size of a voronoi line
-    WATER_MIN_SIZE: 200 # min size of a skeleton line to be sure not to be removed 
+    WATER_MIN_SIZE: 200 # min size of a skeleton line to be sure not to be removed (should be at least more than half the max river width)
     MAX_GAP_CANDIDATES: 3 # max number of candidates to close a gap between 2 branches
 
 hydra:
