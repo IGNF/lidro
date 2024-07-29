@@ -56,7 +56,7 @@ SKELETON:
 
   MAX_GAP_WIDTH: 200 # distance max in meter of any gap between 2 branches we will try to close with a line
   MAX_BRIDGES: 1 # number max of bridges that can be created between 2 branches
-  GAP_WIDTH_CHECK_DB: 30 # for a gap at least this wide, we check with DB_UNI. Smaller than that, we assume a line automatically exists
+  GAP_WIDTH_CHECK_DB: 20 # for a gap at least this wide, we check with DB_UNI if there is a bridge. Smaller than that, we assume a line automatically exists
   RATIO_GAP: 0.25 # when checking if a candidate line to close a gap intersects a bridge in BD UNI, that's the ratio ]0.1] of the line to consider.
                   # we only check part of the line, because when the line is really long it can intersect with bridges not corresponding to that line,
                   # so we make the line smaller
@@ -70,7 +70,7 @@ SKELETON:
 
   BRANCH:
     VORONOI_MAX_LENGTH: 2 # max size of a voronoi line
-    WATER_MIN_SIZE: 200 # min size of a skeleton line to be sure not to be removed (should be at least more than half the max river width)
+    WATER_MIN_SIZE: 500 # min size of a skeleton line to be sure not to be removed (should be at least more than half the max river width)
     MAX_GAP_CANDIDATES: 3 # max number of candidates to close a gap between 2 branches
 
 hydra:

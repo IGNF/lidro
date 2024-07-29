@@ -69,7 +69,8 @@ class Branch:
         gdf_valid.geometry = gdf_valid.geometry.apply(
             lambda geom: fix_invalid_geometry(geom)
         )
-        self.gdf_branch_mask = gdf_valid
+        # # we keep only the exterior ring (that should be unique) as our polygon, to simplify the result
+        self.gdf_branch_mask = gpd.GeoDataFrame(geometry=[Polygon(gdf_valid.exterior[0].coords)], crs=self.crs)
 
     def create_skeleton(self):
         """
@@ -264,7 +265,7 @@ class Branch:
         # remove Voronoi lines exterior to the mask
         geometry = gpd.GeoSeries(regions.geoms, crs=self.crs).explode(index_parts=False)
         df = gpd.GeoDataFrame(geometry=geometry, crs=self.crs)
-        lines_filter = df.sjoin(self.gdf_branch_mask, predicate='within')  # Opération spatiale "Within"
+        lines_filter = df.sjoin(self.gdf_branch_mask, predicate='within')  # only keeps lines "Within" gdf_branch_mask
         # save Voronoi lines
         lines_filter = lines_filter.reset_index(drop=True)  # Réinitialiser l'index
         lines_filter = lines_filter.drop(columns=['index_right'])  # Supprimer la colonne 'index_right'
