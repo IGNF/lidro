@@ -9,10 +9,10 @@ import geopandas as gpd
 import pandas as pd
 from shapely.geometry import Point
 
+sys.path.append('../lidro')
+
 from lidro.skeleton.create_skeleton_lines import create_branches_list, create_branches_pair, select_candidates
 from lidro.skeleton.branch import Branch, line_merge
-
-sys.path.append('../lidro')
 
 
 @hydra.main(version_base="1.2", config_path="../configs/", config_name="configs_lidro.yaml")
@@ -37,7 +37,7 @@ def run(config: DictConfig):
     # create the gap lines from the selected candidates
     gap_lines_list = [validated_candidate.line for validated_candidate in validated_candidates]
     gdf_gap_lines = gpd.GeoDataFrame(geometry=gap_lines_list).set_crs(crs, allow_override=True)
-    if config.SKELETON.FILE_PATH.GAP_LINES_OUTPUT_PATH:
+    if config.SKELETON.FILE_PATH.GAP_LINES_OUTPUT_PATH and validated_candidates:
         gdf_gap_lines.to_file(config.SKELETON.FILE_PATH.GAP_LINES_OUTPUT_PATH, driver='GeoJSON')
 
     # add the extremities used on each branch to close a gap to the list of gap_point of that branch,
