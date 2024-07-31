@@ -32,10 +32,11 @@ def test_main_lidro_default():
     output_dir = OUTPUT_DIR / "main_lidro_default"
     input_mask_hydro = INPUT_DIR / "merge_mask_hydro/MaskHydro_merge.geojson"
     input_skeleton = INPUT_DIR / "skeleton_hydro/Skeleton_Hydro.geojson"
-    distances_meters = 10
-    buffer = 10
+    distances_meters = 5
+    buffer = 3
     srid = 2154
-    k = 20
+    k = 3
+    s = 1
 
     with initialize(version_base="1.2", config_path="../configs"):
         # config is relative to a module
@@ -49,11 +50,12 @@ def test_main_lidro_default():
                 f"virtual_point.vector.distance_meters={distances_meters}",
                 f"virtual_point.vector.buffer={buffer}",
                 f"virtual_point.vector.k={k}",
+                f"virtual_point.vector.s={s}",
                 f"io.srid={srid}",
             ],
         )
     main(cfg)
-    assert (Path(output_dir) / "Points_Skeleton.GeoJSON").is_file()
+    assert (Path(output_dir) / "virtual_points.las").is_file()
 
 
 def test_main_lidro_input_file():
@@ -83,7 +85,7 @@ def test_main_lidro_input_file():
             ],
         )
     main(cfg)
-    assert (Path(output_dir) / "Points_Skeleton.GeoJSON").is_file()
+    assert (Path(output_dir) / "virtual_points.las").is_file()
 
 
 def test_main_lidro_fail_no_input_dir():
