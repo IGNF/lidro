@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-""" Extract a Z elevation value every N meters along the hydrographic skeleton
+""" Create a new Mask Hydro at the edge of the bank with a buffer
 """
 import geopandas as gpd
 from shapely.geometry import CAP_STYLE
 
 
 def import_mask_hydro_with_buffer(file_mask: str, buffer: float, crs: str | int) -> gpd.GeoDataFrame:
-    """Apply buffer (2 meters by default) from Mask Hydro
+    """Create a new Mask Hydro at the edge of the bank with a buffer (+50 cm and -N cm)
 
     Args:
         file_mask (str): Path from Mask Hydro
@@ -19,10 +19,11 @@ def import_mask_hydro_with_buffer(file_mask: str, buffer: float, crs: str | int)
     # Read Mask Hydro merged
     gdf = gpd.read_file(file_mask, crs=crs).unary_union
 
-    # Apply buffer (2 meters by default) from Mask Hydro
-    gdf_buffer = gdf.buffer(buffer, cap_style=CAP_STYLE.square)
-
+    # Apply negative's buffer + difference from Mask Hydro
     # Return a polygon representing the limit of the bank with a buffer of N meters
-    limit_bank = gdf_buffer.difference(gdf)
+    gdf_buffer = gdf.difference(gdf.buffer(-abs(buffer), cap_style=CAP_STYLE.square))
+    # gdf_buffer = gdf.buffer(0.1, cap_style=CAP_STYLE.square).difference(
+    #     gdf.buffer(-abs(buffer), cap_style=CAP_STYLE.square)
+    # )
 
-    return limit_bank
+    return gdf_buffer
