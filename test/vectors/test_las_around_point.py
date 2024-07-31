@@ -4,6 +4,7 @@ from pathlib import Path
 
 import geopandas as gpd
 import numpy as np
+import pandas as pd
 from pyproj import CRS
 from shapely.geometry import Point
 
@@ -40,14 +41,12 @@ def test_las_around_point_default():
 
     result = filter_las_around_point(points_along_skeleton, points_clip, k)
 
-    # Convert results to GeoDataFrame
-    result_gdf = gpd.GeoDataFrame(result)
-    result_gdf.set_crs(crs, inplace=True)
-    # Save to GeoJSON
-    result_gdf.to_file(output, driver="GeoJSON")
+    # Create a pandas DataFrame from the flattened list
+    df = pd.DataFrame(result)
+    # Create a GeoDataFrame from the pandas DataFrame
+    points_gdf = gpd.GeoDataFrame(df, geometry="geometry")
+    points_gdf.set_crs(crs, inplace=True)
 
-    gdf = gpd.read_file(output)
-
-    assert not gdf.empty  # GeoDataFrame shouldn't empty
-    assert gdf.crs.to_string() == crs  # CRS is identical
-    assert all(isinstance(geom, Point) for geom in gdf.geometry)  # All geometry should Points
+    assert not points_gdf.empty  # GeoDataFrame shouldn't empty
+    assert points_gdf.crs.to_string() == crs  # CRS is identical
+    assert all(isinstance(geom, Point) for geom in points_gdf.geometry)  # All geometry should Points
