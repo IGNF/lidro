@@ -103,6 +103,8 @@ def main(config: DictConfig):
     # Create a GeoDataFrame from the pandas DataFrame
     points_gdf = gpd.GeoDataFrame(df, geometry="geometry")
     points_gdf.set_crs(crs, inplace=True)
+    output_points = os.path.join(output_dir, "points_clips.geojson")
+    points_gdf.to_file(output_points, driver="GeoJSON", crs=crs)
 
     # Step 4: Smooth Z by hydro's section
     # Combine skeleton lines into a single polyline for each hydro entity
