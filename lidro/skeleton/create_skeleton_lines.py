@@ -5,7 +5,7 @@ from omegaconf import DictConfig
 from pyproj.crs.crs import CRS
 
 from geopandas.geodataframe import GeoDataFrame
-import psycopg2
+import psycopg
 
 from lidro.skeleton.branch import Branch, Candidate
 from lidro.skeleton.group_maker import GroupMaker
@@ -19,12 +19,20 @@ def db_connector(config: DictConfig):
     args:
         - config (DictConfig): the config dict from hydra
     """
-    return psycopg2.connect(
-        database=config.SKELETON.DB_UNI.DB_NAME,
-        host=config.SKELETON.DB_UNI.DB_HOST,
-        user=config.SKELETON.DB_UNI.DB_USER,
-        password=config.SKELETON.DB_UNI.DB_PASSWORD,
-        port=config.SKELETON.DB_UNI.DB_PORT
+    # return psycopg.connect(
+    #     database=config.SKELETON.DB_UNI.DB_NAME,
+    #     host=config.SKELETON.DB_UNI.DB_HOST,
+    #     user=config.SKELETON.DB_UNI.DB_USER,
+    #     password=config.SKELETON.DB_UNI.DB_PASSWORD,
+    #     port=config.SKELETON.DB_UNI.DB_PORT
+    #     )
+
+    return psycopg.connect(
+        f"dbname={config.SKELETON.DB_UNI.DB_NAME} \
+        host={config.SKELETON.DB_UNI.DB_HOST} \
+        user={config.SKELETON.DB_UNI.DB_USER} \
+        password={config.SKELETON.DB_UNI.DB_PASSWORD} \
+        port={config.SKELETON.DB_UNI.DB_PORT}"
         )
 
 
@@ -63,17 +71,15 @@ def query_db_for_bridge_across_gap(config: DictConfig, candidate: Candidate) -> 
     # execution of queries
     with db_connector(config) as db_conn:
         with db_conn.cursor() as db_cursor:
-            db_cursor.execute(query_linear)
-            results = db_cursor.fetchall()
-            # if no result with linear bridge, maybe with area bridge...
-            if not results:
-                db_cursor.execute(query_area)
-                results = db_cursor.fetchall()
+            whole_query = query_linear + query_area
+            db_cursor.execute(whole_query)
 
-    if results:
-        pass
-
-    return True if results else False
+            result_linear = db_cursor.fetchone()
+            db_cursor.nextset()
+            result_area = db_cursor.fetchone()
+            if result_linear or result_area:
+                return True
+            return False
 
 
 def select_candidates(
