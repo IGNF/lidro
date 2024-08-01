@@ -47,11 +47,11 @@ virtual_point:
     keep_neighbors_classes: [2, 9]
   vector:
     # distance in meters between 2 consecutive points 
-    distance_meters: 1
-    # buffer for searching the points classification (default. "2") of the input LAS/LAZ file
-    buffer: 1
+    distance_meters: 5
+    # buffer for searching the points classification (default. "1") of the input LAS/LAZ file
+    buffer: 3
     # The number of nearest neighbors to find with KNeighbors
-    k: 6*
+    k: 3
     # Spacing between the grid points in meters
     s: 1
 
