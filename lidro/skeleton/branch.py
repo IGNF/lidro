@@ -78,6 +78,10 @@ class Branch:
         """
         voronoi_lines = self.create_voronoi_lines()
 
+        if  len(voronoi_lines) == 0:
+            self.gdf_skeleton_lines = gpd.GeoDataFrame(geometry=[], crs=self.crs)
+            return
+
         # draw a new line for each point added to closes gaps to the nearest points on voronoi_lines
         np_points = get_df_points_from_gdf(voronoi_lines).to_numpy().transpose()
         for gap_point in self.gap_points:
@@ -85,6 +89,7 @@ class Branch:
             min_index = np.unravel_index(np.argmin(distance_squared, axis=None), distance_squared.shape)[0]
             line_to_close_the_gap = LineString([gap_point, Point(np_points[0][min_index], np_points[1][min_index])])
             voronoi_lines.loc[len(voronoi_lines)] = line_to_close_the_gap
+
         self.gdf_skeleton_lines = line_merge(voronoi_lines, self.crs)
 
     def simplify(self):
