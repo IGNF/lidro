@@ -4,6 +4,7 @@ from hydra import compose, initialize
 import pandas as pd
 import geopandas as gpd
 from dotenv import load_dotenv
+import pytest
 
 from lidro.skeleton.create_skeleton_lines import create_branches_list, create_branches_pair
 from lidro.skeleton.create_skeleton_lines import select_candidates, query_db_for_bridge_across_gap
@@ -11,6 +12,8 @@ from lidro.skeleton.branch import Candidate
 from test.skeleton.test_branch import read_branch
 
 load_dotenv()
+
+IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"   # check if tests runs under github_action
 
 DB_UNI_USER = os.getenv('DB_UNI_USER')
 DB_UNI_PASSWORD = os.getenv('DB_UNI_PASSWORD')
@@ -45,20 +48,22 @@ def test_main_skeleton_1():
         assert (candidate_2.squared_distance < 75)
 
 
-# def test_main_skeleton_2():
-#     """Test : query_db_for_bridge_across_gap """
-#     with initialize(version_base="1.2", config_path="../../configs"):
-#         config = compose(
-#             config_name="configs_lidro.yaml",
-#             overrides=[
-#                 f"SKELETON.DB_UNI.DB_USER={DB_UNI_USER}",
-#                 f'SKELETON.DB_UNI.DB_PASSWORD="{DB_UNI_PASSWORD}"',
-#             ],
-#         )
-#         dummy_candidate_1 = Candidate(None, None, (687575.5, 6748540.586179815), (687594.5, 6748515.586065615), 0)
-#         dummy_candidate_2 = Candidate(None, None, (689272.5, 6760595.5), (689322.5, 6760553.5), 0)
+# do that test only if we are not on github action, since github can't connect to BD UNI
+@pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="BD UNI not reachable from github action")
+def test_main_skeleton_2():
+    """Test : query_db_for_bridge_across_gap """
+    with initialize(version_base="1.2", config_path="../../configs"):
+        config = compose(
+            config_name="configs_lidro.yaml",
+            overrides=[
+                f"SKELETON.DB_UNI.DB_USER={DB_UNI_USER}",
+                f'SKELETON.DB_UNI.DB_PASSWORD="{DB_UNI_PASSWORD}"',
+            ],
+        )
+        dummy_candidate_1 = Candidate(None, None, (687575.5, 6748540.586179815), (687594.5, 6748515.586065615), 0)
+        dummy_candidate_2 = Candidate(None, None, (689272.5, 6760595.5), (689322.5, 6760553.5), 0)
 
-#         is_bridge_1 = query_db_for_bridge_across_gap(config, dummy_candidate_1)
-#         is_bridge_2 = query_db_for_bridge_across_gap(config, dummy_candidate_2)
-#         assert not is_bridge_1
-#         assert is_bridge_2
+        is_bridge_1 = query_db_for_bridge_across_gap(config, dummy_candidate_1)
+        is_bridge_2 = query_db_for_bridge_across_gap(config, dummy_candidate_2)
+        assert not is_bridge_1
+        assert is_bridge_2
