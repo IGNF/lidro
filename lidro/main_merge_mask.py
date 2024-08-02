@@ -43,10 +43,10 @@ def main(config: DictConfig):
           input_dir, 
           output_dir, 
           CRS.from_user_input(config.io.srid),
-          config.vector.min_water_area, 
-          config.vector.buffer_positive, 
-          config.vector.buffer_negative, 
-          config.vector.tolerance)
+          config.mask_generation.vector.min_water_area, 
+          config.mask_generation.vector.buffer_positive, 
+          config.mask_generation.vector.buffer_negative, 
+          config.mask_generation.vector.tolerance)
 
 
 if __name__ == "__main__":
