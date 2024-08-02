@@ -19,14 +19,6 @@ def db_connector(config: DictConfig):
     args:
         - config (DictConfig): the config dict from hydra
     """
-    # return psycopg.connect(
-    #     database=config.SKELETON.DB_UNI.DB_NAME,
-    #     host=config.SKELETON.DB_UNI.DB_HOST,
-    #     user=config.SKELETON.DB_UNI.DB_USER,
-    #     password=config.SKELETON.DB_UNI.DB_PASSWORD,
-    #     port=config.SKELETON.DB_UNI.DB_PORT
-    #     )
-
     return psycopg.connect(
         f"dbname={config.SKELETON.DB_UNI.DB_NAME} \
         host={config.SKELETON.DB_UNI.DB_HOST} \
