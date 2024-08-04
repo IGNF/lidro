@@ -10,6 +10,7 @@ import hydra
 import pandas as pd
 from omegaconf import DictConfig
 from pyproj import CRS
+from shapely.geometry import Point
 
 sys.path.append('../lidro')
 
@@ -100,28 +101,43 @@ def main(config: DictConfig):
 
     # List match Z elevation values every N meters along the hydrographic skeleton
     df = pd.DataFrame(points_clip)
-    # Create a GeoDataFrame from the pandas DataFrame
-    points_gdf = gpd.GeoDataFrame(df, geometry="geometry")
-    points_gdf.set_crs(crs, inplace=True)
-    output_points = os.path.join(output_dir, "points_clips.geojson")
-    points_gdf.to_file(output_points, driver="GeoJSON", crs=crs)
 
-    # Step 4: Smooth Z by hydro's section
-    # Combine skeleton lines into a single polyline for each hydro entity
-    gdf_merged = merge_skeleton_by_mask(input_skeleton, input_mask_hydro, output_dir, crs)
+    if not df.empty and "points_knn" in df.columns and "geometry" in df.columns:
+        # Convert the DataFrame to a GeoDataFrame
+        points_gdf = gpd.GeoDataFrame(df, geometry="geometry")
+        points_gdf.set_crs(crs, inplace=True)
 
-    gdf_virtual_points = [
-        lauch_virtual_points_by_section(
-            points_gdf,
-            gpd.GeoDataFrame([{"geometry": row["geometry_skeleton"]}], crs=crs),
-            gpd.GeoDataFrame([{"geometry": row["geometry_mask"]}], crs=crs),
-            crs,
-            s,
-        )
-        for idx, row in gdf_merged.iterrows()
-    ]
-    # Save the virtual points (.LAS)
-    geodataframe_to_las(gdf_virtual_points, output_dir, crs)
+        # Extract and flatten the 3D points from points_knn column
+        knn_points = []
+        for index, row in points_gdf.iterrows():
+            for point in row["points_knn"]:
+                knn_points.append({"geometry": Point(point[0], point[1], point[2])})
+
+        # Create a GeoDataFrame for the 3D points
+        knn_gdf = gpd.GeoDataFrame(knn_points, geometry="geometry")
+        knn_gdf.set_crs(crs, inplace=True)
+
+        output_knn_points = os.path.join(output_dir, "points_knn_clips.geojson")
+        knn_gdf.to_file(output_knn_points, driver="GeoJSON")
+
+        # Step 4: Smooth Z by hydro's section
+        # Combine skeleton lines into a single polyline for each hydro entity
+        gdf_merged = merge_skeleton_by_mask(input_skeleton, input_mask_hydro, output_dir, crs)
+
+        gdf_virtual_points = [
+            lauch_virtual_points_by_section(
+                points_gdf,
+                gpd.GeoDataFrame([{"geometry": row["geometry_skeleton"]}], crs=crs),
+                gpd.GeoDataFrame([{"geometry": row["geometry_mask"]}], crs=crs),
+                crs,
+                s,
+            )
+            for idx, row in gdf_merged.iterrows()
+        ]
+        # Save the virtual points (.LAS)
+        geodataframe_to_las(gdf_virtual_points, output_dir, crs)
+    else:
+        logging.error("No valid data found in points_clip for processing.")
 
 
 if __name__ == "__main__":

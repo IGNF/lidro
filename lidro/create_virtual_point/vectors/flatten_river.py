@@ -24,12 +24,18 @@ def flatten_little_river(points: gpd.GeoDataFrame, line: gpd.GeoDataFrame, crs: 
     # Inputs
     gdf_points = return_points_by_line(points, line)
 
-    # Merge points and remove duplicates
-    all_points_knn = np.vstack(gdf_points["points_knn"].values)
-    unique_points_knn = np.unique(all_points_knn, axis=0)
-
-    # Calculate the 1st quartile of all points
-    first_quartile = np.percentile(unique_points_knn, 25, axis=0)
-    z_first_quartile = first_quartile[-1]
+    # Check if gdf_points contains "points_knn" and is not empty
+    if "points_knn" not in gdf_points.columns or gdf_points["points_knn"].isnull().all():
+        z_first_quartile = 0
+    else:
+        # Merge points and remove duplicates
+        all_points_knn = np.vstack(gdf_points["points_knn"].dropna().values)
+        if all_points_knn.size == 0:
+            z_first_quartile = 0
+        else:
+            unique_points_knn = np.unique(all_points_knn, axis=0)
+            # Calculate the 1st quartile of all points
+            first_quartile = np.percentile(unique_points_knn, 25, axis=0)
+            z_first_quartile = first_quartile[-1]
 
     return z_first_quartile

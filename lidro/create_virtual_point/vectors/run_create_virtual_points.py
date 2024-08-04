@@ -2,6 +2,7 @@
 """ Run function "virtual points"
 """
 import geopandas as gpd
+import numpy as np
 
 from lidro.create_virtual_point.vectors.apply_Z_from_grid import (
     calculate_grid_z_for_flattening,
@@ -46,6 +47,9 @@ def lauch_virtual_points_by_section(
 
     else:
         predicted_z = flatten_little_river(points, line, crs)
-        gdf_grid_with_z = calculate_grid_z_for_flattening(gdf_grid, line, predicted_z)
+        if np.isnan(predicted_z) or predicted_z is None:
+            gdf_grid_with_z = calculate_grid_z_for_flattening(gdf_grid, line, 0)
+        else:
+            gdf_grid_with_z = calculate_grid_z_for_flattening(gdf_grid, line, predicted_z)
 
     return gdf_grid_with_z
