@@ -32,7 +32,7 @@ def geodataframe_to_las(virtual_points: gpd.GeoDataFrame, output_dir: str, crs: 
             "x": grid_with_z["x"],
             "y": grid_with_z["y"],
             "z": grid_with_z["z"],
-            "classification": np.full(len(grid_with_z), 66, dtype=np.uint8),  # Add classification of 66
+            "classification": np.full(len(grid_with_z), 68, dtype=np.uint8),  # Add classification of 68
         }
     )
 

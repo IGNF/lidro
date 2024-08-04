@@ -59,10 +59,10 @@ def test_geodataframe_to_las_default():
         err_msg="The coordinates in the LAS file do not match the input points",
     )
 
-    # Check that the classification is 66 for all points
-    expected_classification = np.full(len(points), 66, dtype=np.uint8)
+    # Check that the classification is 68 for all points
+    expected_classification = np.full(len(points), 68, dtype=np.uint8)
     np.testing.assert_array_equal(
         las.classification,
         expected_classification,
-        err_msg="The classification in the LAS file should be 66 for all points",
+        err_msg="The classification in the LAS file should be 68 for all points",
     )
