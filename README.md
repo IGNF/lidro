@@ -108,3 +108,28 @@ Pour lancer les tests :
 ```
 python -m pytest -s
 ```
+### paramètres pour créer les squelettes des cours d'eau
+Pour fonctionner, la création de squelettes a besoin d'une série de paramètres, certains ayant une valeur par défaut, d'autres non. Les paramètres se trouvent dans le fichier configs/configs_lidro.yaml. On peut soit les y modifier, soit les modifer en ligne de commande lors de l'exécution du script avec :
+```
+python lidro/main_create_skeleton_lines.py [nom_paramètre_1]=[valeur_du_paramètre_1] [nom_paramètre_2]=[valeur_du_paramètre_2]
+```
+ces paramètres sont :  
+SKELETON.FILE_PATH.MASK_INPUT_PATH : Le chemin d'entrée des masques des cours d'eau
+SKELETON.FILE_PATH.SKELETON_LINES_OUTPUT_PATH : Le chemin de sortie des squelettes uniquement (pas de fichier de sortie si laissé à vide)
+SKELETON.FILE_PATH.GAP_LINES_OUTPUT_PATH : Le chemin de sortie des lignes franchissant des ponts uniquement (pas de fichier de sortie si laissé à vide)
+SKELETON.FILE_PATH.GLOBAL_LINES_OUTPUT_PATH : Le chemin de sortie des lignes et des squelettes ensemble
+
+SKELETON.MAX_GAP_WIDTH : La distance maximale envisagée pour franchir des ponts
+SKELETON.MAX_BRIDGES : Le nombre maximal de ponts entre deux bras séparés de cours d'eau
+SKELETON.GAP_WIDTH_CHECK_DB : La distance à partir de laquelle on vérifie via la base de données s'il y a bien un pont
+SKELETON.RATIO_GAP : la proportion de la ligne franchissant un pont qui est comparé en base pour voir s'il y a bien un pont (trop grande et on pourrait trouver un pont qui ne correspond pas)
+
+SKELETON.DB_UNI.DB_NAME : Le nom de la base de données
+SKELETON.DB_UNI.DB_HOST : l'adresse de la base de données
+SKELETON.DB_UNI.DB_USER : L'utilisateur de la base de données
+SKELETON.DB_UNI.DB_PASSWORD : Le mot de passe de l'utilisateur
+SKELETON.DB_UNI.DB_PORT : La port de connexion avec la base de données
+
+SKELETON.BRANCH.VORONOI_MAX_LENGTH : LA longuer maximum des lignes individuelles des squelettes
+SKELETON.BRANCH.WATER_MIN_SIZE : La longueur minimal à partir de laquelle une ligne de squelette sera automatiquement gardée (trop petite, et il y aura des sortes "d'aiguilles" qui apparaitront. Trop grande, et certains afluents ne seront pas détectés)
+SKELETON.BRANCH.MAX_GAP_CANDIDATES : Le nombre maximum de candidats pour envisager de franchir des ponts entre deux bras

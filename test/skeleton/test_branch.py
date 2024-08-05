@@ -9,7 +9,7 @@ from lidro.skeleton.branch import Branch, get_vertices_dict, get_df_points_from_
 
 sys.path.append('lidro/skeleton')
 
-BRANCH_TEST_1_PATH = "test_files/90.geojson"
+BRANCH_TEST_1_PATH = "data/skeleton_hydro/test_files/90.geojson"
 CRS_FOR_TEST = 2145
 WATER_MIN_SIZE_TEST = 20
 

@@ -1,8 +1,8 @@
 class GroupMaker:
     """
     From a list of elements, GroupMaker is used to
-    group sets of elements according to single element from
-    the sets. For example:
+    put together groups of elements, according to single
+    element from each group. For example:
     At the beginning, we have {A}, {B}, {C}, {D}, {E}
     put_together(A, B) -> {A, B}, {C}, {D}, {E}
     put_together(C, D) -> {A, B}, {C, D}, {E}

@@ -18,9 +18,9 @@ IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"   # check if tests run
 DB_UNI_USER = os.getenv('DB_UNI_USER')
 DB_UNI_PASSWORD = os.getenv('DB_UNI_PASSWORD')
 CRS = 2154
-MAIN_SKELETON_TEST_1_1_PATH = "test_files/40.geojson"
-MAIN_SKELETON_TEST_1_2_PATH = "test_files/43.geojson"
-MAIN_SKELETON_TEST_1_3_PATH = "test_files/44.geojson"
+MAIN_SKELETON_TEST_1_1_PATH = "data/skeleton_hydro/test_files/40.geojson"
+MAIN_SKELETON_TEST_1_2_PATH = "data/skeleton_hydro/test_files/43.geojson"
+MAIN_SKELETON_TEST_1_3_PATH = "data/skeleton_hydro/test_files/44.geojson"
 
 
 def test_main_skeleton_1():
