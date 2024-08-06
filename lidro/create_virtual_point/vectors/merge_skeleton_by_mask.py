@@ -66,16 +66,18 @@ def merge_skeleton_by_mask(
     gdf_mask_hydro = explode_multipart(gdf_mask_hydro)
 
     # # Perform a spatial join to find skeletons within each mask_hydro
-    gdf_joined = gpd.sjoin(gdf_skeleton, gdf_mask_hydro, how="inner", predicate="within")
+    gdf_joined = gpd.sjoin(gdf_skeleton, gdf_mask_hydro, how="inner", predicate="intersects")
+    # geometry intersections with funtion "overlay"
+    gdf_intersections = gpd.overlay(gdf_joined, gdf_mask_hydro, how="intersection")
 
     # Combine skeleton lines into a single polyline for each hydro entity
-    combined_skeletons = gdf_joined.groupby("index_right")["geometry"].apply(combine_and_connect_lines)
+    combined_skeletons = gdf_intersections.groupby("index_right")["geometry"].apply(combine_and_connect_lines)
     gdf_combined_skeletons = gpd.GeoDataFrame(combined_skeletons, columns=["geometry"], crs=crs).reset_index()
-
     # # Re-join with mask_hydro to keep only the combined skeletons within masks
     gdf_joined_combined = gpd.sjoin(
-        gdf_combined_skeletons, gdf_mask_hydro, how="inner", predicate="within", lsuffix="combined", rsuffix="mask"
+        gdf_combined_skeletons, gdf_mask_hydro, how="inner", predicate="intersects", lsuffix="combined", rsuffix="mask"
     )
+
     # # Count the number of skeletons per mask
     skeleton_counts = gdf_joined_combined["index_mask"].value_counts()
 
