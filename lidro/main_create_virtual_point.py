@@ -10,7 +10,6 @@ import hydra
 import pandas as pd
 from omegaconf import DictConfig
 from pyproj import CRS
-from shapely.geometry import Point
 
 sys.path.append('../lidro')
 
@@ -107,19 +106,6 @@ def main(config: DictConfig):
         points_gdf = gpd.GeoDataFrame(df, geometry="geometry")
         points_gdf.set_crs(crs, inplace=True)
 
-        # Extract and flatten the 3D points from points_knn column
-        knn_points = []
-        for index, row in points_gdf.iterrows():
-            for point in row["points_knn"]:
-                knn_points.append({"geometry": Point(point[0], point[1], point[2])})
-
-        # Create a GeoDataFrame for the 3D points
-        knn_gdf = gpd.GeoDataFrame(knn_points, geometry="geometry")
-        knn_gdf.set_crs(crs, inplace=True)
-
-        output_knn_points = os.path.join(output_dir, "points_knn_clips.geojson")
-        knn_gdf.to_file(output_knn_points, driver="GeoJSON")
-
         # Step 4: Smooth Z by hydro's section
         # Combine skeleton lines into a single polyline for each hydro entity
         gdf_merged = merge_skeleton_by_mask(input_skeleton, input_mask_hydro, output_dir, crs)
@@ -134,6 +120,7 @@ def main(config: DictConfig):
             )
             for idx, row in gdf_merged.iterrows()
         ]
+        logging.info("Calculate virtuals points by mask hydro and skeleton")
         # Save the virtual points (.LAS)
         geodataframe_to_las(gdf_virtual_points, output_dir, crs)
     else:
