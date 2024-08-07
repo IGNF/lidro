@@ -1,4 +1,3 @@
-# test_run_create_virtual_point.py
 import os
 import shutil
 from pathlib import Path

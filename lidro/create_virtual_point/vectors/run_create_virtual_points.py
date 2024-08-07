@@ -50,7 +50,6 @@ def lauch_virtual_points_by_section(
         for idx, mask in mask_hydro.iterrows():
             logging.warning(f"No points found within mask hydro {idx}. Adding to masks_without_points.")
             masks_without_points = pd.concat([masks_without_points, gpd.GeoDataFrame([mask], crs=mask_hydro.crs)])
-
         # Save the resulting masks_without_points to a GeoJSON file
         logging.warning("Save the mask Hydro where NON virtual points")
         output_mask_hydro_error = os.path.join(output_dir, "mask_hydro_no_virtual_points.geojson")
@@ -67,13 +66,31 @@ def lauch_virtual_points_by_section(
         # Apply the algo according to the length of the river
         if river_length > 150:
             model, r2 = calculate_linear_regression_line(points, line, crs)
+            if model == np.poly1d([0, 0]) and r2 == 0.0:
+                masks_without_points = gpd.GeoDataFrame(columns=mask_hydro.columns, crs=mask_hydro.crs)
+                for idx, mask in mask_hydro.iterrows():
+                    masks_without_points = pd.concat(
+                        [masks_without_points, gpd.GeoDataFrame([mask], crs=mask_hydro.crs)]
+                    )
+                # Save the resulting masks_without_points because of linear regression is impossible to a GeoJSON file
+                output_mask_hydro_error = os.path.join(
+                    output_dir, "mask_hydro_no_virtual_points_for_regression.geojson"
+                )
+                masks_without_points.to_file(output_mask_hydro_error, driver="GeoJSON")
             gdf_grid_with_z = calculate_grid_z_with_model(gdf_grid, line, model)
-
         else:
             predicted_z = flatten_little_river(points, line)
             if np.isnan(predicted_z) or predicted_z is None:
-                gdf_grid_with_z = calculate_grid_z_for_flattening(gdf_grid, line, 0)
-            else:
-                gdf_grid_with_z = calculate_grid_z_for_flattening(gdf_grid, line, predicted_z)
+                masks_without_points = gpd.GeoDataFrame(columns=mask_hydro.columns, crs=mask_hydro.crs)
+                for idx, mask in mask_hydro.iterrows():
+                    masks_without_points = pd.concat(
+                        [masks_without_points, gpd.GeoDataFrame([mask], crs=mask_hydro.crs)]
+                    )
+                # Save the resulting masks_without_points because of flattening river is impossible to a GeoJSON file
+                output_mask_hydro_error = os.path.join(
+                    output_dir, "mask_hydro_no_virtual_points_for_little_river.geojson"
+                )
+                masks_without_points.to_file(output_mask_hydro_error, driver="GeoJSON")
+            gdf_grid_with_z = calculate_grid_z_for_flattening(gdf_grid, line, predicted_z)
 
         return gdf_grid_with_z
