@@ -2,6 +2,8 @@
 """ This function calculates a linear regression line
 in order to read the Zs along the hydro skeleton to guarantee the flow
 """
+import logging
+
 import geopandas as gpd
 import numpy as np
 from shapely import line_locate_point
@@ -27,16 +29,23 @@ def calculate_linear_regression_line(points: gpd.GeoDataFrame, line: gpd.GeoData
         np.poly1d: Regression model
         numpy.array: Determination coefficient
     """
-    # Inputs
-    gdf_polyline = line
+    if points.empty or line.empty:
+        logging.warning("Input GeoDataFrames 'points' and 'line' must not be empty")
+        return np.poly1d([0, 0]), 0.0
+
+    # Retrieve points along the line
     gdf_points = return_points_by_line(points, line)
+
+    if gdf_points.empty or len(gdf_points) < 3:
+        logging.warning("Not enough points for regression analysis")
+        return np.poly1d([0, 0]), 0.0
 
     # Merge points and remove duplicates
     all_points_knn = np.vstack(gdf_points["points_knn"].values)
     unique_points_knn = np.unique(all_points_knn, axis=0)
 
     # Create a final GeoDataFrame
-    final_data = {"geometry": [gdf_polyline.iloc[0]["geometry"]], "points_knn": [unique_points_knn]}
+    final_data = {"geometry": [line.iloc[0]["geometry"]], "points_knn": [unique_points_knn]}
 
     # Generate projected coordinates
     points_gs = gpd.GeoSeries().from_xy(
@@ -68,10 +77,6 @@ def calculate_linear_regression_line(points: gpd.GeoDataFrame, line: gpd.GeoData
             ],  # Interquartile range of Z values
         }
     )
-    # Weight Matrix
-    # Normalize standard deviation to use as weights
-    # W = temp["z"]["std"] * (-1 / np.max(temp["z"]["std"])) + 1
-
     # Linear regression with weights
     coeff, SSE, *_ = np.polyfit(temp["ac"]["mean"], temp["z"]["quantile"], deg=1, full=True)
 
