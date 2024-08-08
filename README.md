@@ -102,21 +102,24 @@ Voir les tests fonctionnels en bas du README.
 
 ## Tests
 ### Tests fonctionnels
+* 1- Créer des masques hydrographiques à l'échelle de la dalle LIDAR
 Tester sur un seul fichier LAS/LAZ pour créer un/des masques hydrographiques sur une dalle LIDAR
 ```
 example_create_mask_by_tile.sh
 ```
-
 Tester sur un dossier contenant plusieurs dalles LIDAR pour créer un/des masques hydrographiques 
 ```
 example_create_mask_default.sh
 ```
-
+* 2- Créer un masque hydrographiques fusionné et nettoyé à l'échelle de l'ensemble de l'ensemble des dalles LIDAR
 Tester sur un dossier contenant plusieurs dalles LIDAR pour créer fusionner l'ensemble des masques hydrographiques 
 ```
 example_merge_mask_default.sh
 ```
+* 3- Création des tronçons hydrographiques à l'échelle de/des entité(s) hydrographique(s)
 
+
+* 4- Création des points virtuels
 Tester sur un dossier contenant plusieurs dalles LIDAR pour créer des points virtuels 3D à l'intérieurs des masques hydrographiques 
 ```
 example_create_virtual_point_by_tile.sh
