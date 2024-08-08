@@ -1,6 +1,0 @@
-- FILE_PATH.MASK_INPUT_PATH=/home/MDaab/data/squelette_test/Mask_Hydro_without_vegetation.geojson
-- FILE_PATH.SKELETON_LINES_OUTPUT_PATH=/home/MDaab/code/lidro/skeleton_lines.geojson
-- FILE_PATH.GAP_LINES_OUTPUT_PATH=/home/MDaab/code/lidro/gap_lines.geojson
-- FILE_PATH.GLOBAL_LINES_OUTPUT_PATH=/home/MDaab/code/lidro/global_lines.geojson
-- DB_UNI.DB_USER=invite
-- DB_UNI.DB_PASSWORD='28de#'
