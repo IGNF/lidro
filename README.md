@@ -8,22 +8,25 @@ Pour créer des modèles numériques cohérents avec les modèles hydrologiques,
 Cette modélisation des surfaces hydrographiques se décline en 3 grands enjeux :​
 * Mise à plat des surfaces d’eau marine​
 * Mise à plat des plans d’eau intérieurs (lac, marais, etc.)​
-* Mise en plan des grands cours d’eau (>5m large) pour assurer l’écoulement​. A noter que cette étape sera développée en premier.
+* Mise en plan des grands cours d’eau (>5m large) pour assurer l’écoulement​. A noter que pour l'instant seulement cette étape est développée.
 
 ## Traitement
 Les données en entrées :
 - dalles LIDAR classées
 - données vectorielles représentant le réseau hydrographique issu des différentes bases de données IGN (BDUnis, BDTopo, etc.)
 
-Trois grands axes du processus à mettre en place en distanguant l'échelle de traitmeent associé :
+Trois grands axes du processus à mettre en place en distanguant l'échelle de traitement associé :
 * 1- Création de masques hydrographiques à l'échelle de la dalle LIDAR
 * 2- Création de masques hydrographiques pré-filtrés à l'échelle du chantier, soit :
   * la suppression de ces masques dans les zones ZICAD/ZIPVA
-  * la suppression des aires < 150 m²
+  * la suppression des aires < 150 m² (paramètrables)
   * la suppression des aires < 1000 m² hors BD IGN (grands cours d'eau < 5m de large)
 * 3- Création de points virtuels le long de deux entités hydrographiques :
   * Grands cours d'eau (> 5 m de large dans la BD Unis).
-  * Surfaces planes (mer, lac, étang, etc.)
+  * Surfaces planes (mer, lac, étang, etc.) (pas encore développé)
+
+![Chaine de traitement global de LIDRO](images/chaine_traitement_lidro.jpg)
+
 
 ### Traitement des grands cours d'eau (> 5 m de large dans la BD Uns).
 
@@ -31,14 +34,17 @@ Il existe plusieurs étapes intermédiaires :
 * 1- création automatique du tronçon hydrographique ("Squelette hydrographique", soit les tronçons hydrographiques dans la BD Unid) à partir de l'emprise du masque hydrographique "écoulement" apparaier, contrôler et corriger par la "production" (SV3D) en amont (étape manuelle)
 A l'échelle de l'entité hydrographique : 
 * 2- Réccupérer tous les points LIDAR considérés comme du "SOL" situés à la limite de berges (masque hydrographique) moins N mètres
+Pour les cours d'eaux supérieurs à 150 m de long :
 * 3- Transformer les coordonnées de ces points (étape précédente) en abscisses curvilignes
 * 4- Générer un modèle de régression linéaire afin de générer tous les N mètres une valeur d'altitude le long du squelette de cette rivière. A noter que les Z le long du squelette HYDRO doivent assurer l'écoulement.
+/ ! \ Pour les cours d'eaux inférieurs à 150 m de long, le modèle de régression linéaire ne fonctionne pas. Donc, ce type de cours d'eaux est applanie en calculant sur l'ensemble des points d'altitudes du LIDAR "SOL" (étape 2) la valeur du premier quartile.
 * 5- Création de points virtuels nécéssitant plusieurs étapes intermédiaires :
   * Création des points virtuels 2D espacés selon une grille régulière à l'intérieur du masque hydrographique "écoulement"
-  * Affecter une valeur d'altitude à ces points virtuels en fonction des "Z" calculés à l'étape précédente (interpolation linéaire)
+  * Affecter une valeur d'altitude à ces points virtuels en fonction des "Z" calculés à l'étape précédente (interpolation linéaire ou aplanissement)
 
 ### Traitement des surfaces planes (mer, lac, étang, etc.)
 Pour rappel, l'eau est considérée comme horizontale sur ce type de surface.
+/ ! \ Cette étape n'est pas encore développée.
 
 Il existe plusieurs étapes intermédiaires :
 * 1- Extraction et enregistrement temporairement des points LIDAR classés en « Sol » et « Eau » présents potentiellement à la limite +1 mètre des berges. Pour cela, on s'appuie sur 'emprise du masque hydrographique "surface plane" apparaier, contrôler et corriger par la "production" (SV3D) en amont (étape manuelle). a noter que pur le secteur maritime (Mer), il faut exclure la classe « 9 » (eau) afin d’éviter de mesurer les vagues.
