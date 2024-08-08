@@ -11,6 +11,9 @@ Cette modélisation des surfaces hydrographiques se décline en 3 grands enjeux 
 * Mise en plan des grands cours d’eau (>5m large) pour assurer l’écoulement​. A noter que pour l'instant seulement cette étape est développée.
 
 ## Traitement
+
+![Chaine de traitement global de LIDRO](images/chaine_traitement_lidro.jpg)
+
 Les données en entrées :
 - dalles LIDAR classées
 - données vectorielles représentant le réseau hydrographique issu des différentes bases de données IGN (BDUnis, BDTopo, etc.)
@@ -21,17 +24,17 @@ Trois grands axes du processus à mettre en place en distanguant l'échelle de t
   * la suppression de ces masques dans les zones ZICAD/ZIPVA
   * la suppression des aires < 150 m² (paramètrables)
   * la suppression des aires < 1000 m² hors BD IGN (grands cours d'eau < 5m de large)
+A noter que pour l'instant, la suppresion des masques hydrographiques en dehors des grands cours d'eaux et le nettoyage de ces masques s'effectue manuellement. Ce processus sera développé prochainement en automatique.
 * 3- Création de points virtuels le long de deux entités hydrographiques :
   * Grands cours d'eau (> 5 m de large dans la BD Unis).
   * Surfaces planes (mer, lac, étang, etc.) (pas encore développé)
 
-![Chaine de traitement global de LIDRO](images/chaine_traitement_lidro.jpg)
 
-
-### Traitement des grands cours d'eau (> 5 m de large dans la BD Uns).
+### Traitement des grands cours d'eau (> 5 m de large dans la BD Unis).
+![Chaine de traitement des points virtuels](images/process_points_virtuels.jpg)
 
 Il existe plusieurs étapes intermédiaires :
-* 1- création automatique du tronçon hydrographique ("Squelette hydrographique", soit les tronçons hydrographiques dans la BD Unid) à partir de l'emprise du masque hydrographique "écoulement" apparaier, contrôler et corriger par la "production" (SV3D) en amont (étape manuelle)
+* 1- création automatique du tronçon hydrographique ("Squelette hydrographique", soit les tronçons hydrographiques dans la BD Unis) à partir de l'emprise du masque hydrographique "écoulement" apparaier, contrôler et corriger par la "production" (SV3D) en amont (étape manuelle)
 A l'échelle de l'entité hydrographique : 
 * 2- Réccupérer tous les points LIDAR considérés comme du "SOL" situés à la limite de berges (masque hydrographique) moins N mètres
 Pour les cours d'eaux supérieurs à 150 m de long :
@@ -99,14 +102,24 @@ Voir les tests fonctionnels en bas du README.
 
 ## Tests
 ### Tests fonctionnels
-Tester sur un seul fichier LAS/LAZ
+Tester sur un seul fichier LAS/LAZ pour créer un/des masques hydrographiques sur une dalle LIDAR
 ```
-example_lidro_by_tile.sh
+example_create_mask_by_tile.sh
 ```
 
-Tester sur un dossier
+Tester sur un dossier contenant plusieurs dalles LIDAR pour créer un/des masques hydrographiques 
 ```
-example_lidro_default.sh
+example_create_mask_default.sh
+```
+
+Tester sur un dossier contenant plusieurs dalles LIDAR pour créer fusionner l'ensemble des masques hydrographiques 
+```
+example_merge_mask_default.sh
+```
+
+Tester sur un dossier contenant plusieurs dalles LIDAR pour créer des points virtuels 3D à l'intérieurs des masques hydrographiques 
+```
+example_create_virtual_point_by_tile.sh
 ```
 
 ### Tests unitaires
