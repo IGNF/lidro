@@ -41,7 +41,7 @@ def lauch_virtual_points_by_section(
         output_dir (str): folder to output Mask Hydro without virtual points
 
     Returns:
-        gpd.GeoDataFrame: virtual points by Mask Hydro
+        gpd.GeoDataFrame: All virtual points by Mask Hydro
     """
     # Check if points GeoDataFrame is empty or
     if points.empty or points["points_knn"].isnull().all():
@@ -51,7 +51,6 @@ def lauch_virtual_points_by_section(
             logging.warning(f"No points found within mask hydro {idx}. Adding to masks_without_points.")
             masks_without_points = pd.concat([masks_without_points, gpd.GeoDataFrame([mask], crs=mask_hydro.crs)])
         # Save the resulting masks_without_points to a GeoJSON file
-        logging.warning("Save the mask Hydro where NON virtual points")
         output_mask_hydro_error = os.path.join(output_dir, "mask_hydro_no_virtual_points.geojson")
         masks_without_points.to_file(output_mask_hydro_error, driver="GeoJSON")
 
@@ -60,10 +59,9 @@ def lauch_virtual_points_by_section(
         gdf_grid = generate_grid_from_geojson(mask_hydro, spacing)
         # Calculate the length of the river
         river_length = float(line.length.iloc[0])
+        print(river_length)
 
         # Step 2 : Model linear regression for river's lenght > 150 m
-        # Otherwise flattening the river
-        # Apply the algo according to the length of the river
         if river_length > 150:
             model, r2 = calculate_linear_regression_line(points, line, crs)
             if model == np.poly1d([0, 0]) and r2 == 0.0:
@@ -74,13 +72,18 @@ def lauch_virtual_points_by_section(
                     )
                 # Save the resulting masks_without_points because of linear regression is impossible to a GeoJSON file
                 output_mask_hydro_error = os.path.join(
-                    output_dir, "mask_hydro_no_virtual_points_for_regression.geojson"
+                    output_dir, "mask_hydro_no_virtual_points_with_regression.geojson"
+                )
+                logging.warning(
+                    f"Save masks_without_points because of linear regression is impossible: {output_mask_hydro_error}"
                 )
                 masks_without_points.to_file(output_mask_hydro_error, driver="GeoJSON")
+            # Apply linear regression model at the rivers
             gdf_grid_with_z = calculate_grid_z_with_model(gdf_grid, line, model)
-        else:
+        # Step 2 bis: Model flattening for river's lenght < 150 m
+        if river_length < 150:
             predicted_z = flatten_little_river(points, line)
-            if np.isnan(predicted_z) or predicted_z is None:
+            if predicted_z == 0:
                 masks_without_points = gpd.GeoDataFrame(columns=mask_hydro.columns, crs=mask_hydro.crs)
                 for idx, mask in mask_hydro.iterrows():
                     masks_without_points = pd.concat(
@@ -90,7 +93,11 @@ def lauch_virtual_points_by_section(
                 output_mask_hydro_error = os.path.join(
                     output_dir, "mask_hydro_no_virtual_points_for_little_river.geojson"
                 )
+                logging.warning(
+                    f"Save masks_without_points because of flattening river is impossible: {output_mask_hydro_error}"
+                )
                 masks_without_points.to_file(output_mask_hydro_error, driver="GeoJSON")
+            # Apply flattening model at the rivers
             gdf_grid_with_z = calculate_grid_z_for_flattening(gdf_grid, line, predicted_z)
 
         return gdf_grid_with_z
