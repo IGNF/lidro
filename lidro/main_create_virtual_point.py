@@ -117,6 +117,7 @@ def main(config: DictConfig):
                 gpd.GeoDataFrame([{"geometry": row["geometry_mask"]}], crs=crs),
                 crs,
                 s,
+                output_dir,
             )
             for idx, row in gdf_merged.iterrows()
         ]
