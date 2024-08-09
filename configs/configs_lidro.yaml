@@ -53,7 +53,7 @@ virtual_point:
     # The number of nearest neighbors to find with KNeighbors
     k: 3
     # Spacing between the grid points in meters by default "0.5"
-    s: 0.5
+    s: 1
 
 skeleton:
   max_gap_width: 200 # distance max in meter of any gap between 2 branches we will try to close with a line
