@@ -34,21 +34,21 @@ A noter que pour l'instant, la suppresion des masques hydrographiques en dehors 
 ![Chaine de traitement des points virtuels](images/process_points_virtuels.jpg)
 
 Il existe plusieurs étapes intermédiaires :
-* 1- création automatique du tronçon hydrographique ("Squelette hydrographique", soit les tronçons hydrographiques dans la BD Unis) à partir de l'emprise du masque hydrographique "écoulement" apparaier, contrôler et corriger par la "production" (SV3D) en amont (étape manuelle)
+* 1- création automatique du tronçon hydrographique ("Squelette hydrographique", soit les tronçons hydrographiques dans la BD Unis) à partir de l'emprise du masque hydrographique "écoulement" apparaier, contrôler et corriger en amont (étape manuelle)
+
 A l'échelle de l'entité hydrographique : 
 * 2- Réccupérer tous les points LIDAR considérés comme du "SOL" situés à la limite de berges (masque hydrographique) moins N mètres
 Pour les cours d'eaux supérieurs à 150 m de long :
 * 3- Transformer les coordonnées de ces points (étape précédente) en abscisses curvilignes
-* 4- Générer un modèle de régression linéaire afin de générer tous les N mètres une valeur d'altitude le long du squelette de cette rivière. A noter que les Z le long du squelette HYDRO doivent assurer l'écoulement.
-/ ! \ Pour les cours d'eaux inférieurs à 150 m de long, le modèle de régression linéaire ne fonctionne pas. Donc, ce type de cours d'eaux est applanie en calculant sur l'ensemble des points d'altitudes du LIDAR "SOL" (étape 2) la valeur du premier quartile.
+* 4- Générer un modèle de régression linéaire afin de générer tous les N mètres une valeur d'altitude le long du squelette de cette rivière. Les différents Z le long des squelettes HYDRO doivent assurer l'écoulement. Il est important de noter que tous les 50 mètres semble une valeur correcte. Cette valeur s'explique en raison de la précision planimétrique et altimétrique des données LIDAR ET que les rivières françaises correspondent à des cours d’eau naturel dont la pente est inférieure à 1%. 
+/ ! \ Pour les cours d'eaux inférieurs à 150 m de long, le modèle de régression linéaire ne fonctionne pas. La valeur du premier quartile sera calculée sur l'ensemble des points d'altitudes du LIDAR "SOL" (étape 2) et affecter pour ces entités hydrographiques (< 150m de long) : aplanissement. 
 * 5- Création de points virtuels nécéssitant plusieurs étapes intermédiaires :
-  * Création des points virtuels 2D espacés selon une grille régulière à l'intérieur du masque hydrographique "écoulement"
+  * Création des points virtuels 2D espacés selon une grille régulière espacés tous les N mètres (paramètrables) à l'intérieur du masque hydrographique "écoulement"
   * Affecter une valeur d'altitude à ces points virtuels en fonction des "Z" calculés à l'étape précédente (interpolation linéaire ou aplanissement)
 
 ### Traitement des surfaces planes (mer, lac, étang, etc.)
 Pour rappel, l'eau est considérée comme horizontale sur ce type de surface.
-/ ! \ Cette étape n'est pas encore développée.
-
+/ ! \ EN ATTENTE / ! \
 Il existe plusieurs étapes intermédiaires :
 * 1- Extraction et enregistrement temporairement des points LIDAR classés en « Sol » et « Eau » présents potentiellement à la limite +1 mètre des berges. Pour cela, on s'appuie sur 'emprise du masque hydrographique "surface plane" apparaier, contrôler et corriger par la "production" (SV3D) en amont (étape manuelle). a noter que pur le secteur maritime (Mer), il faut exclure la classe « 9 » (eau) afin d’éviter de mesurer les vagues.
 * 2- Analyse statistique de l'ensemble des points LIDAR "Sol / Eau" le long des côtes/berges afin d'obtenir une surface plane.
