@@ -55,7 +55,7 @@ def run(config: DictConfig):
     # putting all skeleton lines together, and save them if there is a path
     branch_lines_list = [branch.gdf_skeleton_lines for branch in branches_list]
     gdf_branch_lines = gpd.GeoDataFrame(pd.concat(branch_lines_list, ignore_index=True))
-    if config.SKELETON.FILE_PATH.GAP_LINES_OUTPUT_PATH:
+    if config.SKELETON.FILE_PATH.SKELETON_LINES_OUTPUT_PATH:
         gdf_branch_lines.to_file(config.SKELETON.FILE_PATH.SKELETON_LINES_OUTPUT_PATH, driver='GeoJSON')
 
     # saving all lines

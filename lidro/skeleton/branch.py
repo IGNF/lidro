@@ -61,16 +61,8 @@ class Branch:
         """
         raw_gdf_branch_mask = gpd.GeoDataFrame(geometry=[branch_mask], crs=self.crs)
 
-        # create simple geometry
-        gdf_simple = raw_gdf_branch_mask.explode(ignore_index=True)
-        gdf_without_duplicates = gdf_simple.drop_duplicates(ignore_index=True)
-        # remove invalid polygons
-        gdf_valid = gdf_without_duplicates.copy()
-        gdf_valid.geometry = gdf_valid.geometry.apply(
-            lambda geom: fix_invalid_geometry(geom)
-        )
         # # we keep only the exterior ring (that should be unique) as our polygon, to simplify the result
-        self.gdf_branch_mask = gpd.GeoDataFrame(geometry=[Polygon(gdf_valid.exterior[0].coords)], crs=self.crs)
+        self.gdf_branch_mask = gpd.GeoDataFrame(geometry=[Polygon(raw_gdf_branch_mask.exterior[0].coords)], crs=self.crs)
 
     def create_skeleton(self):
         """
@@ -305,18 +297,6 @@ def get_df_points_from_gdf(gdf: GeoDataFrame) -> pd.DataFrame:
     all_points = list(all_points)
     return pd.DataFrame(data={'x': [point[0] for point in all_points],
                               'y': [point[1] for point in all_points], })
-
-
-def fix_invalid_geometry(geometry):
-    """
-    return the geometry, fixed
-    Args:
-        - gdf_lines:geodataframe containing a list of lines
-    """
-    if not geometry.is_valid:
-        return make_valid(geometry)
-    else:
-        return geometry
 
 
 def get_vertices_dict(gdf_lines: GeoDataFrame) -> Dict[Point, List[LineString]]:

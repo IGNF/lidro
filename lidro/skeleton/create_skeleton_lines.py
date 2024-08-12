@@ -6,6 +6,7 @@ from pyproj.crs.crs import CRS
 
 from geopandas.geodataframe import GeoDataFrame
 import psycopg
+from shapely import make_valid
 
 from lidro.skeleton.branch import Branch, Candidate
 from lidro.skeleton.group_maker import GroupMaker
@@ -138,6 +139,16 @@ def select_candidates(
                 break
     return validated_candidates
 
+def fix_invalid_geometry(geometry):
+    """
+    return the geometry, fixed
+    Args:
+        - gdf_lines:geodataframe containing a list of lines
+    """
+    if not geometry.is_valid:
+        return make_valid(geometry, "structure")
+    else:
+        return geometry
 
 def create_branches_list(config: DictConfig, gdf_hydro_global_mask: GeoDataFrame, crs: CRS) -> List[Branch]:
     """
@@ -149,8 +160,18 @@ def create_branches_list(config: DictConfig, gdf_hydro_global_mask: GeoDataFrame
         - crs (CRS); the crs of gdf_hydro_global_mask
     """
 
+    # create simple geometry
+    gdf_simple = gdf_hydro_global_mask.explode(ignore_index=True)
+    gdf_without_duplicates = gdf_simple.drop_duplicates(ignore_index=True)
+
+    # make geometry valid and remove unwanted "lone" lines
+    gdf_valid = gdf_without_duplicates.copy()
+    gdf_valid.geometry = gdf_valid.geometry.apply(
+        lambda geom: fix_invalid_geometry(geom)
+    )
+
     branches_list = []
-    for index_branch, branch_mask_row in gdf_hydro_global_mask.iterrows():
+    for index_branch, branch_mask_row in gdf_valid.iterrows():
         mask_branch = branch_mask_row["geometry"]
         new_branch = Branch(config, index_branch, mask_branch, crs)
         branches_list.append(new_branch)
