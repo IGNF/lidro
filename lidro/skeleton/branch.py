@@ -74,7 +74,7 @@ class Branch:
             self.gdf_skeleton_lines = gpd.GeoDataFrame(geometry=[], crs=self.crs)
             return
 
-        # draw a new line for each point added to closes gaps to the nearest points on voronoi_lines
+        # draw a new line for each point added to close gaps to the nearest points on voronoi_lines
         np_points = get_df_points_from_gdf(voronoi_lines).to_numpy().transpose()
         for gap_point in self.gap_points:
             distance_squared = (np_points[0] - gap_point.x)**2 + (np_points[1] - gap_point.y)**2
