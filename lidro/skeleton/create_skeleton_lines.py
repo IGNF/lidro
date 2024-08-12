@@ -4,6 +4,7 @@ import sys
 from omegaconf import DictConfig
 from pyproj.crs.crs import CRS
 
+import geopandas as gpd
 from geopandas.geodataframe import GeoDataFrame
 import psycopg
 from shapely import make_valid
@@ -146,7 +147,7 @@ def fix_invalid_geometry(geometry):
         - gdf_lines:geodataframe containing a list of lines
     """
     if not geometry.is_valid:
-        return make_valid(geometry, "structure")
+        return make_valid(geometry, method="structure", keep_collapsed=False)
     else:
         return geometry
 
@@ -165,10 +166,9 @@ def create_branches_list(config: DictConfig, gdf_hydro_global_mask: GeoDataFrame
     gdf_without_duplicates = gdf_simple.drop_duplicates(ignore_index=True)
 
     # make geometry valid and remove unwanted "lone" lines
-    gdf_valid = gdf_without_duplicates.copy()
-    gdf_valid.geometry = gdf_valid.geometry.apply(
-        lambda geom: fix_invalid_geometry(geom)
-    )
+    # gdf_valid = gdf_without_duplicates.copy()
+    valid_geometry = gdf_without_duplicates.geometry.apply(lambda geom: fix_invalid_geometry(geom))
+    gdf_valid = gpd.GeoDataFrame(geometry=valid_geometry)
 
     branches_list = []
     for index_branch, branch_mask_row in gdf_valid.iterrows():
