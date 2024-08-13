@@ -59,7 +59,6 @@ def lauch_virtual_points_by_section(
         gdf_grid = generate_grid_from_geojson(mask_hydro, spacing)
         # Calculate the length of the river
         river_length = float(line.length.iloc[0])
-        print(river_length)
 
         # Step 2 : Model linear regression for river's lenght > 150 m
         if river_length > 150:
