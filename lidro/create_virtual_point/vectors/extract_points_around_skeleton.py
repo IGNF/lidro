@@ -6,6 +6,7 @@ import os
 from typing import List
 
 import geopandas as gpd
+import numpy as np
 import pandas as pd
 from pdaltools.las_info import las_get_xy_bounds
 from shapely.geometry import Point
@@ -62,10 +63,12 @@ def extract_points_around_skeleton_points_one_tile(
     logging.info(f"\nExtract a Z elevation value along the hydrographic skeleton for tile : {tilename}")
     points_Z = filter_las_around_point(points_skeleton_with_z_clip, points_clip, k)
     df_points_z = pd.DataFrame(points_Z)  # Convert Dataframe
-    # Convert list "points_knn" to string
-    df_points_z["points_knn_str"] = df_points_z["points_knn"].apply(lambda x: str(x))
-    df_points_z = df_points_z[["geometry", "points_knn_str"]]
-    if not df_points_z.empty and "points_knn_str" in df_points_z.columns and "geometry" in df_points_z.columns:
+    if not df_points_z.empty and "points_knn" in df_points_z.columns and "geometry" in df_points_z.columns:
+        # Convert list "points_knn" to string without scientific notation
+        df_points_z["points_knn"] = df_points_z["points_knn"].apply(
+            lambda x: str([[np.round(coord, 3) for coord in point] for point in x])
+        )
+        df_points_z = df_points_z[["geometry", "points_knn"]]
         # Convert the DataFrame to a GeoDataFrame
         points_z_gdf = gpd.GeoDataFrame(df_points_z, geometry="geometry")
         points_z_gdf.set_crs(crs, inplace=True)
