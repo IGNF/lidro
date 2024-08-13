@@ -47,31 +47,31 @@ virtual_point:
     # The number of nearest neighbors to find with KNeighbors
     k: 20
 
-SKELETON:
-  FILE_PATH:
-    MASK_INPUT_PATH: null
-    SKELETON_LINES_OUTPUT_PATH: null # only branches' skeleton (if empty, no file is created)
-    GAP_LINES_OUTPUT_PATH: null # only new lines to close gaps (if empty, no file is created)
-    GLOBAL_LINES_OUTPUT_PATH: null # lines from both the skeletons and the gap lines
+skeleton:
+  file_path:
+    mask_input_path: null
+    skeleton_lines_ouput_path: null # only branches' skeleton (if empty, no file is created)
+    gap_lines_ouput_path: null # only new lines to close gaps (if empty, no file is created)
+    global_lines_output_path: null # lines from both the skeletons and the gap lines
 
-  MAX_GAP_WIDTH: 200 # distance max in meter of any gap between 2 branches we will try to close with a line
-  MAX_BRIDGES: 1 # number max of bridges that can be created between 2 branches
-  GAP_WIDTH_CHECK_DB: 20 # for a gap at least this wide, we check with DB_UNI if there is a bridge. Smaller than that, we assume a line automatically exists
-  RATIO_GAP: 0.25 # when checking if a candidate line to close a gap intersects a bridge in BD UNI, that's the ratio ]0.1] of the line to consider.
+  max_gap_width: 200 # distance max in meter of any gap between 2 branches we will try to close with a line
+  max_bridges: 1 # number max of bridges that can be created between 2 branches
+  gap_width_check_db: 20 # for a gap at least this wide, we check with db_uni if there is a bridge. Smaller than that, we assume a line automatically exists
+  ratio_gap: 0.25 # when checking if a candidate line to close a gap intersects a bridge in BD UNI, that's the ratio ]0.1] of the line to consider.
                   # we only check part of the line, because when the line is really long it can intersect with bridges not corresponding to that line,
                   # so we make the line smaller
 
-  DB_UNI:
-    DB_NAME: bduni_france_consultation
-    DB_HOST: bduni_consult.ign.fr
-    DB_USER: null
-    DB_PASSWORD: null
-    DB_PORT: 5432
+  db_uni:
+    db_name: bduni_france_consultation
+    db_host: bduni_consult.ign.fr
+    db_user: null
+    db_password: null
+    db_port: 5432
 
-  BRANCH:
-    VORONOI_MAX_LENGTH: 2 # max size of a voronoi line
-    WATER_MIN_SIZE: 500 # min size of a skeleton line to be sure not to be removed (should be at least more than half the max river width)
-    MAX_GAP_CANDIDATES: 3 # max number of candidates to close a gap between 2 branches
+  branch:
+    voronoi_max_length: 2 # max size of a voronoi line
+    water_min_size: 500 # min size of a skeleton line to be sure not to be removed (should be at least more than half the max river width)
+    max_gap_candidates: 3 # max number of candidates to close a gap between 2 branches
 
 hydra:
   output_subdir: null

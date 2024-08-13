@@ -109,7 +109,7 @@ class Branch:
 
     def get_candidates(self, other_branch: 'Branch') -> List[Candidate]:
         """
-        Returns all the possible candidates (up to MAX_GAP_CANDIDATES) to close the gap with the other branch
+        Returns all the possible candidates (up to max_gap_candidates) to close the gap with the other branch
         Args:
             - other_branch (Branch): the other branch we want the distance to
         """
@@ -131,11 +131,11 @@ class Branch:
         candidates = []
         for index, (other_index, self_index) in enumerate(zip(indexes[0], indexes[1])):
             # stop if we have enough candidates
-            if index >= self.config.SKELETON.BRANCH.MAX_GAP_CANDIDATES:
+            if index >= self.config.skeleton.branch.max_gap_candidates:
                 break
             # stop if the following candidates
             if distance_squared[other_index][self_index] \
-                    > self.config.SKELETON.MAX_GAP_WIDTH * self.config.SKELETON.MAX_GAP_WIDTH:
+                    > self.config.skeleton.max_gap_width * self.config.skeleton.max_gap_width:
                 break
 
             candidates.append(
@@ -235,7 +235,7 @@ class Branch:
             - vertices_dict (Dict[Point, List[LineString]]) : a dictionary off all the
             lines with a point as an extremity
         """
-        if line.length > self.config.SKELETON.BRANCH.WATER_MIN_SIZE:
+        if line.length > self.config.skeleton.branch.water_min_size:
             return False
 
         point_a, point_b = line.boundary.geoms[0], line.boundary.geoms[1]
@@ -257,7 +257,7 @@ class Branch:
         """
         # divide geometry into segments no longer than max_segment_length
         united_geom = self.gdf_branch_mask['geometry'].unary_union
-        segmentize_geom = united_geom.segmentize(max_segment_length=self.config.SKELETON.BRANCH.VORONOI_MAX_LENGTH)
+        segmentize_geom = united_geom.segmentize(max_segment_length=self.config.skeleton.branch.voronoi_max_length)
         # Create the voronoi diagram and only keep polygon
         regions = voronoi_diagram(segmentize_geom, envelope=segmentize_geom, tolerance=0.0, edges=True)
 

@@ -114,22 +114,22 @@ Pour fonctionner, la création de squelettes a besoin d'une série de paramètre
 python lidro/main_create_skeleton_lines.py [nom_paramètre_1]=[valeur_du_paramètre_1] [nom_paramètre_2]=[valeur_du_paramètre_2]
 ```
 ces paramètres sont :  
-SKELETON.FILE_PATH.MASK_INPUT_PATH : Le chemin d'entrée des masques des cours d'eau
-SKELETON.FILE_PATH.SKELETON_LINES_OUTPUT_PATH : Le chemin de sortie des squelettes uniquement (pas de fichier de sortie si laissé à vide)
-SKELETON.FILE_PATH.GAP_LINES_OUTPUT_PATH : Le chemin de sortie des lignes franchissant des ponts uniquement (pas de fichier de sortie si laissé à vide)
-SKELETON.FILE_PATH.GLOBAL_LINES_OUTPUT_PATH : Le chemin de sortie des lignes et des squelettes ensemble
+skeleton.file_path.mask_input_path : Le chemin d'entrée des masques des cours d'eau
+skeleton.file_path.skeleton_lines_ouput_path : Le chemin de sortie des squelettes uniquement (pas de fichier de sortie si laissé à vide)
+skeleton.file_path.gap_lines_ouput_path : Le chemin de sortie des lignes franchissant des ponts uniquement (pas de fichier de sortie si laissé à vide)
+skeleton.file_path.global_lines_output_path : Le chemin de sortie des lignes et des squelettes ensemble
 
-SKELETON.MAX_GAP_WIDTH : La distance maximale envisagée pour franchir des ponts
-SKELETON.MAX_BRIDGES : Le nombre maximal de ponts entre deux bras séparés de cours d'eau
-SKELETON.GAP_WIDTH_CHECK_DB : La distance à partir de laquelle on vérifie via la base de données s'il y a bien un pont
-SKELETON.RATIO_GAP : la proportion de la ligne franchissant un pont qui est comparé en base pour voir s'il y a bien un pont (trop grande et on pourrait trouver un pont qui ne correspond pas)
+skeleton.max_gap_width : La distance maximale envisagée pour franchir des ponts
+skeleton.max_bridges : Le nombre maximal de ponts entre deux bras séparés de cours d'eau
+skeleton.gap_width_check_db : La distance à partir de laquelle on vérifie via la base de données s'il y a bien un pont
+skeleton.ratio_gap : la proportion de la ligne franchissant un pont qui est comparé en base pour voir s'il y a bien un pont (trop grande et on pourrait trouver un pont qui ne correspond pas)
 
-SKELETON.DB_UNI.DB_NAME : Le nom de la base de données
-SKELETON.DB_UNI.DB_HOST : l'adresse de la base de données
-SKELETON.DB_UNI.DB_USER : L'utilisateur de la base de données
-SKELETON.DB_UNI.DB_PASSWORD : Le mot de passe de l'utilisateur
-SKELETON.DB_UNI.DB_PORT : La port de connexion avec la base de données
+skeleton.db_uni.db_name : Le nom de la base de données
+skeleton.db_uni.db_host : l'adresse de la base de données
+skeleton.db_uni.db_user : L'utilisateur de la base de données
+skeleton.db_uni.db_password : Le mot de passe de l'utilisateur
+skeleton.db_uni.db_port : La port de connexion avec la base de données
 
-SKELETON.BRANCH.VORONOI_MAX_LENGTH : LA longuer maximum des lignes individuelles des squelettes
-SKELETON.BRANCH.WATER_MIN_SIZE : La longueur minimal à partir de laquelle une ligne de squelette sera automatiquement gardée (trop petite, et il y aura des sortes "d'aiguilles" qui apparaitront. Trop grande, et certains afluents ne seront pas détectés)
-SKELETON.BRANCH.MAX_GAP_CANDIDATES : Le nombre maximum de candidats pour envisager de franchir des ponts entre deux bras
+skeleton.branch.voronoi_max_length : LA longuer maximum des lignes individuelles des squelettes
+skeleton.branch.water_min_size : La longueur minimal à partir de laquelle une ligne de squelette sera automatiquement gardée (trop petite, et il y aura des sortes "d'aiguilles" qui apparaitront. Trop grande, et certains afluents ne seront pas détectés)
+skeleton.branch.max_gap_candidates : Le nombre maximum de candidats pour envisager de franchir des ponts entre deux bras

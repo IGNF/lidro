@@ -22,11 +22,11 @@ def db_connector(config: DictConfig):
         - config (DictConfig): the config dict from hydra
     """
     return psycopg.connect(
-        f"dbname={config.SKELETON.DB_UNI.DB_NAME} \
-        host={config.SKELETON.DB_UNI.DB_HOST} \
-        user={config.SKELETON.DB_UNI.DB_USER} \
-        password={config.SKELETON.DB_UNI.DB_PASSWORD} \
-        port={config.SKELETON.DB_UNI.DB_PORT}"
+        f"dbname={config.skeleton.db_uni.db_name} \
+        host={config.skeleton.db_uni.db_host} \
+        user={config.skeleton.db_uni.db_user} \
+        password={config.skeleton.db_uni.db_password} \
+        port={config.skeleton.db_uni.db_port}"
         )
 
 
@@ -42,10 +42,10 @@ def query_db_for_bridge_across_gap(config: DictConfig, candidate: Candidate) -> 
     # bridge from another area)
     middle_x = (candidate.extremity_1[0] + candidate.extremity_2[0]) / 2
     middle_y = (candidate.extremity_1[1] + candidate.extremity_2[1]) / 2
-    new_ext_1_x = (candidate.extremity_1[0] - middle_x) * config.SKELETON.RATIO_GAP + middle_x
-    new_ext_1_y = (candidate.extremity_1[1] - middle_y) * config.SKELETON.RATIO_GAP + middle_y
-    new_ext_2_x = (candidate.extremity_2[0] - middle_x) * config.SKELETON.RATIO_GAP + middle_x
-    new_ext_2_y = (candidate.extremity_2[1] - middle_y) * config.SKELETON.RATIO_GAP + middle_y
+    new_ext_1_x = (candidate.extremity_1[0] - middle_x) * config.skeleton.ratio_gap + middle_x
+    new_ext_1_y = (candidate.extremity_1[1] - middle_y) * config.skeleton.ratio_gap + middle_y
+    new_ext_2_x = (candidate.extremity_2[0] - middle_x) * config.skeleton.ratio_gap + middle_x
+    new_ext_2_y = (candidate.extremity_2[1] - middle_y) * config.skeleton.ratio_gap + middle_y
 
     # creation of queries
     line = f"LINESTRING({new_ext_1_x} {new_ext_1_y}, {new_ext_2_x} {new_ext_2_y})"
@@ -123,7 +123,7 @@ def select_candidates(
 
             # if the gap is wide enough, we check with DB_Uni to see if there is a bridge
             # On the other hand, if it's small enough the candidate is automatically validated
-            if candidate.squared_distance > config.SKELETON.GAP_WIDTH_CHECK_DB * config.SKELETON.GAP_WIDTH_CHECK_DB:
+            if candidate.squared_distance > config.skeleton.gap_width_check_db * config.skeleton.gap_width_check_db:
                 is_bridge = query_db_for_bridge_across_gap(config, candidate)
                 # if the line does not cross any bridge, we don't validate that candidate
                 if not is_bridge:
@@ -136,7 +136,7 @@ def select_candidates(
             # a candidate has been validated between A and B, so we put together A and B
             branch_group.put_together(branch_a, branch_b)
             nb_bridges_crossed += 1
-            if nb_bridges_crossed >= config.SKELETON.MAX_BRIDGES:   # max bridges reached between those 2 branches
+            if nb_bridges_crossed >= config.skeleton.max_bridges:   # max bridges reached between those 2 branches
                 break
     return validated_candidates
 
@@ -191,6 +191,6 @@ def create_branches_pair(config: DictConfig, branches_list: List[Branch]) -> Lis
     for index, branch_a in enumerate(branches_list[:-1]):
         for branch_b in branches_list[index + 1:]:
             distance = branch_a.distance_to_a_branch(branch_b)
-            if distance < config.SKELETON.MAX_GAP_WIDTH:
+            if distance < config.skeleton.max_gap_width:
                 branches_pair_list.append((branch_a, branch_b, distance))
     return branches_pair_list

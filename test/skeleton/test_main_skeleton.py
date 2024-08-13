@@ -56,8 +56,8 @@ def test_main_skeleton_2():
         config = compose(
             config_name="configs_lidro.yaml",
             overrides=[
-                f"SKELETON.DB_UNI.DB_USER={DB_UNI_USER}",
-                f'SKELETON.DB_UNI.DB_PASSWORD="{DB_UNI_PASSWORD}"',
+                f"skeleton.db_uni.db_user={DB_UNI_USER}",
+                f'skeleton.db_uni.db_password="{DB_UNI_PASSWORD}"',
             ],
         )
         dummy_candidate_1 = Candidate(None, None, (687575.5, 6748540.586179815), (687594.5, 6748515.586065615), 0)

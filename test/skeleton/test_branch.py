@@ -81,9 +81,8 @@ def test_creation_skeleton_lines():
         config = compose(
             config_name="configs_lidro.yaml",
             overrides=[
-                f"SKELETON.BRANCH.WATER_MIN_SIZE={WATER_MIN_SIZE_TEST}",
+                f"skeleton.branch.water_min_size={WATER_MIN_SIZE_TEST}",
             ]
-
         )
         branch_1 = read_branch(config, BRANCH_TEST_1_PATH, "test_branch_1")
 

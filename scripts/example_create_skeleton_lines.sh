@@ -1,16 +1,16 @@
 # For lauching create skeleton lines
 python lidro/main_create_skeleton_lines.py \
-SKELETON.FILE_PATH.MASK_INPUT_PATH=[input_filepath] \
-SKELETON.FILE_PATH.GLOBAL_LINES_OUTPUT_PATH=[output_filepath] \
-SKELETON.DB_UNI.DB_USER=[user_name] \
-"SKELETON.DB_UNI.DB_PASSWORD=[password]" \
-SKELETON.FILE_PATH.SKELETON_LINES_OUTPUT_PATH=[out_filepath(optional)] \
-SKELETON.FILE_PATH.GAP_LINES_OUTPUT_PATH=[out_filepath(optional)]
+skeleton.file_path.mask_input_path=[input_filepath] \
+skeleton.file_path.global_lines_output_path=[output_filepath] \
+skeleton.db_uni.db_user=[user_name] \
+"skeleton.db_uni.db_password=[password]" \
+skeleton.file_path.skeleton_lines_ouput_path=[out_filepath(optional)] \
+skeleton.file_path.gap_lines_ouput_path=[out_filepath(optional)]
 
-# SKELETON.FILE_PATH.MASK_INPUT_PATH : input path to the .geojson with the water masks
-# SKELETON.FILE_PATH.GLOBAL_LINES_OUTPUT_PATH : output path for all the skeletons
-# SKELETON.DB_UNI.DB_USER : username for "bduni_france_consultation"
-# SKELETON.DB_UNI.DB_PASSWORD : password for "bduni_france_consultation". WARNING ! If there is a special character in the password,
-# the line must be written like this : "SKELETON.DB_UNI.DB_PASSWORD='$tr@ng€_ch@r@ct€r$'" (note the " and the ')
-# SKELETON.FILE_PATH.SKELETON_LINES_OUTPUT_PATH : (optional) output path for only the skeleton inside water beds defined by the input masks
-# SKELETON.FILE_PATH.GAP_LINES_OUTPUT_PATH : (optional) output path for only the lines between water beds defined by the input masks
+# skeleton.file_path.mask_input_path : input path to the .geojson with the water masks
+# skeleton.file_path.global_lines_output_path : output path for all the skeletons
+# skeleton.db_uni.db_user : username for "bduni_france_consultation"
+# skeleton.db_uni.db_password : password for "bduni_france_consultation". WARNING ! If there is a special character in the password,
+# the line must be written like this : "skeleton.db_uni.db_password='$tr@ng€_ch@r@ct€r$'" (note the " and the ')
+# skeleton.file_path.skeleton_lines_ouput_path : (optional) output path for only the skeleton inside water beds defined by the input masks
+# skeleton.file_path.gap_lines_ouput_path : (optional) output path for only the lines between water beds defined by the input masks
