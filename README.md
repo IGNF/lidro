@@ -16,7 +16,21 @@ Cette modélisation des surfaces hydrographiques se décline en 3 grands enjeux 
 
 Les données en entrées :
 - dalles LIDAR classées
-- données vectorielles représentant le réseau hydrographique issu des différentes bases de données IGN (BDUnis, BDTopo, etc.)
+- données vectorielles représentant le réseau hydrographique issu des différentes bases de données IGN (BDUnis, BDTopo, etc.) / ! \ requête SQL fait manuellement pour le moment. Exemple de requête SQL sur le bloc PM du LIDAR HD
+```
+WITH emprise_PM AS (SELECT st_GeomFromText('POLYGON((875379.222972973 6431750.0,
+875379.222972973 6484250.0,
+946620.777027027 6484250.0,
+946620.777027027 6431750.0,
+875379.222972973 6431750.0))') as geom)
+
+SELECT geometrie, nature, fictif, persistance, classe_de_largeur, position_par_rapport_au_sol
+FROM troncon_hydrographique
+JOIN emprise_PM ON st_intersects(troncon_hydrographique.geometrie,emprise_PM.geom) 
+WHERE NOT gcms_detruit 
+AND classe_de_largeur NOT IN ('Entre 0 et 5 m', 'Sans objet') 
+AND position_par_rapport_au_sol='0'
+```
 
 Trois grands axes du processus à mettre en place en distanguant l'échelle de traitement associé :
 * 1- Création de masques hydrographiques à l'échelle de la dalle LIDAR
@@ -34,7 +48,8 @@ A noter que pour l'instant, la suppresion des masques hydrographiques en dehors 
 ![Chaine de traitement des points virtuels](images/process_points_virtuels.jpg)
 
 Il existe plusieurs étapes intermédiaires :
-* 1- création automatique du tronçon hydrographique ("Squelette hydrographique", soit les tronçons hydrographiques dans la BD Unis) à partir de l'emprise du masque hydrographique "écoulement" apparaier, contrôler et corriger en amont (étape manuelle)
+* 1- création automatique du tronçon hydrographique ("Squelette hydrographique", soit les tronçons hydrographiques dans la BD Unis) à partir de l'emprise du masque hydrographique "écoulement".
+/ ! \ EN AMONT : Appariement, contrôle et correction manuels des masques hydrographiques "écoulement" (rivières) et du squelette hydrographique
 
 A l'échelle de l'entité hydrographique : 
 * 2- Réccupérer tous les points LIDAR considérés comme du "SOL" situés à la limite de berges (masque hydrographique) moins N mètres
@@ -117,12 +132,19 @@ Tester sur un dossier contenant plusieurs dalles LIDAR pour créer fusionner l'e
 example_merge_mask_default.sh
 ```
 * 3- Création des tronçons hydrographiques à l'échelle de/des entité(s) hydrographique(s)
-
+```
+example_create_skeleton_lines.sh
+```
 
 * 4- Création des points virtuels
-Tester sur un dossier contenant plusieurs dalles LIDAR pour créer des points virtuels 3D à l'intérieurs des masques hydrographiques 
+A. Tester sur un dossier contenant plusieurs dalles LIDAR pour créer des points tous les N mètres le long du squelette hydrographique, et réccupérer les N plus proches voisins points LIDAR "SOL"
 ```
-example_create_virtual_point_by_tile.sh
+example_extract_points_around_skeleton_default.sh
+```
+
+B. Tester sur un dossier contenant plusieurs dalles LIDAR pour créer des points virtuels 3D à l'intérieurs des masques hydrographiques 
+```
+example_create_virtual_point_default.sh
 ```
 
 ### Tests unitaires
