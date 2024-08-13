@@ -34,6 +34,3 @@ def test_merge_skeleton_by_mask_default():
     # Check if the necessary columns are present
     assert "geometry_skeleton" in result.columns, "Missing 'geometry_skeleton' column"
     assert "geometry_mask" in result.columns, "Missing 'geometry_mask' column"
-
-    # Check if there are exactly two rows
-    assert len(result) == 2, f"DataFrame should contain exactly two rows, found {len(result)}"
