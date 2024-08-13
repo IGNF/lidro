@@ -40,18 +40,23 @@ def calculate_linear_regression_line(points: gpd.GeoDataFrame, line: gpd.GeoData
         logging.warning("Not enough points for regression analysis")
         return np.poly1d([0, 0]), 0.0
 
-    # Merge points and remove duplicates
-    all_points_knn = np.vstack(gdf_points["points_knn"].values)
-    unique_points_knn = np.unique(all_points_knn, axis=0)
+    # Combine all `points_knn` into a single list
+    all_points_knn = []
+    for knn_list in gdf_points["points_knn"]:
+        all_points_knn.extend(knn_list)
 
-    # Create a final GeoDataFrame
-    final_data = {"geometry": [line.iloc[0]["geometry"]], "points_knn": [unique_points_knn]}
+    # Convert the list of points to a numpy array and remove duplicates
+    all_points_knn_array = np.array(all_points_knn)
+    unique_points_knn = np.unique(all_points_knn_array, axis=0)
+
+    # Create final data structure
+    final_data = {"geometry": [line.iloc[0]["geometry"]], "points_knn": unique_points_knn}
 
     # Generate projected coordinates
     points_gs = gpd.GeoSeries().from_xy(
-        final_data["points_knn"][0][:, 0],  # X coordinates
-        final_data["points_knn"][0][:, 1],  # Y coordinates
-        final_data["points_knn"][0][:, 2],  # Z coordinates
+        final_data["points_knn"][:, 0],  # X coordinates
+        final_data["points_knn"][:, 1],  # Y coordinates
+        final_data["points_knn"][:, 2],  # Z coordinates
         crs=crs,  # Coordinate reference system
     )
 
