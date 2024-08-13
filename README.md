@@ -77,7 +77,7 @@ pre-commit install
 ```
 
 ## Données de test
-Les données de test se trouvent dans un autre projet ici : http://gitlab.forge-idi.ign.fr/Lidar/lidro-data
+Les données de test se trouvent dans un autre projet ici : https://github.com/IGNF/lidro-data
 
 Ce projet est un sous module git, qui sera téléchargé dans le dossier `data`, via la commande:
 
