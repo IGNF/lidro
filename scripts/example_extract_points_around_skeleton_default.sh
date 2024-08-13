@@ -1,5 +1,5 @@
 # Launch hydro mask merging
-python -m lidro.main_create_virtual_point \
+python -m lidro.main_extract_points_from_skeleton \
 io.input_dir=./data/ \
 io.input_mask_hydro=./data/merge_mask_hydro/MaskHydro_merge.geosjon \
 io.input_skeleton=./data/skeleton_hydro/Skeleton_Hydro.geojson \
