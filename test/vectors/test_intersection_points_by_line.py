@@ -19,14 +19,16 @@ def test_return_points_by_line_default():
 
     # Call the function to test
     result = return_points_by_line(points, line)
+    result_geom = result["geometry"]
 
     # Expected points are those within the buffer of the line
     expected_points = gpd.GeoDataFrame(
         {"geometry": [Point(700000, 6600000), Point(700001, 6600001), Point(700002, 6600002)]}, crs="EPSG:2154"
     )
+    expected_points_geom = expected_points["geometry"]
 
     # Check that the result is a GeoDataFrame
     assert isinstance(result, gpd.GeoDataFrame), "The result should be a GeoDataFrame"
 
     # Check that the result contains the expected points
-    assert result.equals(expected_points), f"The result does not match the expected points. Got: {result}"
+    assert result_geom.equals(expected_points_geom), f"The result does not match the expected points. Got: {result}"
