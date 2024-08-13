@@ -21,7 +21,7 @@ def test_main_run_okay():
         io.input_dir="{repo_dir}/lidro/data/"\
         io.input_filename=Semis_2021_0830_6291_LA93_IGN69.laz \
         io.input_mask_hydro="{repo_dir}/lidro/data/merge_mask_hydro/MaskHydro_merge.geojson"\
-        io.input_skeleton="{repo_dir}/lidro/data/skeleton_hydro/Skeleton_Hydro.geojson"\
+        io.input_skeleton="{repo_dir}/lidro/data/skeleton_hydro/Skeleton_Hydro_small.geojson"\
         io.output_dir="{repo_dir}/lidro/tmp/create_virtual_point/main/"
         """
     sp.run(cmd, shell=True, check=True)
@@ -29,13 +29,10 @@ def test_main_run_okay():
 
 def test_main_lidro_default():
     input_dir = INPUT_DIR
-    output_dir = OUTPUT_DIR / "main_lidro_default"
+    output_dir = OUTPUT_DIR / "main_lidro_default/"
     input_mask_hydro = INPUT_DIR / "merge_mask_hydro/MaskHydro_merge.geojson"
-    input_skeleton = INPUT_DIR / "skeleton_hydro/Skeleton_Hydro.geojson"
-    distances_meters = 5
-    buffer = 3
+    input_skeleton = INPUT_DIR / "skeleton_hydro/Skeleton_Hydro_small.geojson"
     srid = 2154
-    k = 3
     s = 1
 
     with initialize(version_base="1.2", config_path="../configs"):
@@ -47,9 +44,6 @@ def test_main_lidro_default():
                 f"io.output_dir={output_dir}",
                 f"io.input_mask_hydro={input_mask_hydro}",
                 f"io.input_skeleton={input_skeleton}",
-                f"virtual_point.vector.distance_meters={distances_meters}",
-                f"virtual_point.vector.buffer={buffer}",
-                f"virtual_point.vector.k={k}",
                 f"virtual_point.vector.s={s}",
                 f"io.srid={srid}",
             ],
@@ -63,11 +57,9 @@ def test_main_lidro_input_file():
     output_dir = OUTPUT_DIR / "main_lidro_input_file"
     input_filename = "Semis_2021_0830_6291_LA93_IGN69.laz"
     input_mask_hydro = INPUT_DIR / "merge_mask_hydro/MaskHydro_merge.geojson"
-    input_skeleton = INPUT_DIR / "skeleton_hydro/Skeleton_Hydro.geojson"
-    distances_meters = 5
-    buffer = 2
+    input_skeleton = INPUT_DIR / "skeleton_hydro/Skeleton_Hydro_small.geojson"
     srid = 2154
-    k = 10
+    s = 1
     with initialize(version_base="1.2", config_path="../configs"):
         # config is relative to a module
         cfg = compose(
@@ -78,10 +70,8 @@ def test_main_lidro_input_file():
                 f"io.output_dir={output_dir}",
                 f"io.input_mask_hydro={input_mask_hydro}",
                 f"io.input_skeleton={input_skeleton}",
-                f"virtual_point.vector.distance_meters={distances_meters}",
-                f"virtual_point.vector.buffer={buffer}",
-                f"virtual_point.vector.k={k}",
                 f"io.srid={srid}",
+                f"virtual_point.vector.s={s}",
             ],
         )
     main(cfg)
@@ -91,11 +81,9 @@ def test_main_lidro_input_file():
 def test_main_lidro_fail_no_input_dir():
     output_dir = OUTPUT_DIR / "main_no_input_dir"
     input_mask_hydro = INPUT_DIR / "merge_mask_hydro/MaskHydro_merge.geojson"
-    input_skeleton = INPUT_DIR / "skeleton_hydro/Skeleton_Hydro.geojson"
-    distances_meters = 5
-    buffer = 2
+    input_skeleton = INPUT_DIR / "skeleton_hydro/Skeleton_Hydro_small.geojson"
     srid = 2154
-    k = 10
+    s = 1
     with initialize(version_base="1.2", config_path="../configs"):
         # config is relative to a module
         cfg = compose(
@@ -104,9 +92,7 @@ def test_main_lidro_fail_no_input_dir():
                 f"io.input_mask_hydro={input_mask_hydro}",
                 f"io.input_skeleton={input_skeleton}",
                 f"io.output_dir={output_dir}",
-                f"virtual_point.vector.distance_meters={distances_meters}",
-                f"virtual_point.vector.buffer={buffer}",
-                f"virtual_point.vector.k={k}",
+                f"virtual_point.vector.s={s}",
                 f"io.srid={srid}",
             ],
         )
@@ -117,11 +103,9 @@ def test_main_lidro_fail_no_input_dir():
 def test_main_lidro_fail_wrong_input_dir():
     output_dir = OUTPUT_DIR / "main_wrong_input_dir"
     input_mask_hydro = INPUT_DIR / "merge_mask_hydro/MaskHydro_merge.geojson"
-    input_skeleton = INPUT_DIR / "skeleton_hydro/Skeleton_Hydro.geojson"
-    distances_meters = 5
-    buffer = 2
+    input_skeleton = INPUT_DIR / "skeleton_hydro/Skeleton_Hydro_small.geojson"
     srid = 2154
-    k = 10
+    s = 1
     with initialize(version_base="1.2", config_path="../configs"):
         # config is relative to a module
         cfg = compose(
@@ -131,9 +115,7 @@ def test_main_lidro_fail_wrong_input_dir():
                 f"io.input_mask_hydro={input_mask_hydro}",
                 f"io.input_skeleton={input_skeleton}",
                 f"io.output_dir={output_dir}",
-                f"virtual_point.vector.distance_meters={distances_meters}",
-                f"virtual_point.vector.buffer={buffer}",
-                f"virtual_point.vector.k={k}",
+                f"virtual_point.vector.s={s}",
                 f"io.srid={srid}",
             ],
         )
@@ -144,11 +126,9 @@ def test_main_lidro_fail_wrong_input_dir():
 def test_main_lidro_fail_no_output_dir():
     input_dir = INPUT_DIR
     input_mask_hydro = INPUT_DIR / "merge_mask_hydro/MaskHydro_merge.geojson"
-    input_skeleton = INPUT_DIR / "skeleton_hydro/Skeleton_Hydro.geojson"
-    distances_meters = 5
-    buffer = 2
+    input_skeleton = INPUT_DIR / "skeleton_hydro/Skeleton_Hydro_small.geojson"
     srid = 2154
-    k = 10
+    s = 1
     with initialize(version_base="1.2", config_path="../configs"):
         # config is relative to a module
         cfg = compose(
@@ -157,9 +137,7 @@ def test_main_lidro_fail_no_output_dir():
                 f"io.input_dir={input_dir}",
                 f"io.input_mask_hydro={input_mask_hydro}",
                 f"io.input_skeleton={input_skeleton}",
-                f"virtual_point.vector.distance_meters={distances_meters}",
-                f"virtual_point.vector.buffer={buffer}",
-                f"virtual_point.vector.k={k}",
+                f"virtual_point.vector.s={s}",
                 f"io.srid={srid}",
             ],
         )
@@ -170,11 +148,9 @@ def test_main_lidro_fail_no_output_dir():
 def test_main_lidro_fail_no_input_mask_hydro():
     input_dir = INPUT_DIR
     output_dir = OUTPUT_DIR / "main_no_input_dir"
-    input_skeleton = INPUT_DIR / "skeleton_hydro/Skeleton_Hydro.geojson"
-    distances_meters = 5
-    buffer = 2
+    input_skeleton = INPUT_DIR / "skeleton_hydro/Skeleton_Hydro_small.geojson"
     srid = 2154
-    k = 10
+    s = 1
     with initialize(version_base="1.2", config_path="../configs"):
         cfg = compose(
             config_name="configs_lidro",
@@ -183,9 +159,7 @@ def test_main_lidro_fail_no_input_mask_hydro():
                 f"io.output_dir={output_dir}",
                 "io.input_mask_hydro=some_random_input_mask_hydro",
                 f"io.input_skeleton={input_skeleton}",
-                f"virtual_point.vector.distance_meters={distances_meters}",
-                f"virtual_point.vector.buffer={buffer}",
-                f"virtual_point.vector.k={k}",
+                f"virtual_point.vector.s={s}",
                 f"io.srid={srid}",
             ],
         )
@@ -197,10 +171,8 @@ def test_main_lidro_fail_no_input_skeleton():
     input_dir = INPUT_DIR
     output_dir = OUTPUT_DIR / "main_no_input_dir"
     input_mask_hydro = INPUT_DIR / "merge_mask_hydro/MaskHydro_merge.geojson"
-    distances_meters = 5
-    buffer = 2
     srid = 2154
-    k = 10
+    s = 1
     with initialize(version_base="1.2", config_path="../configs"):
         cfg = compose(
             config_name="configs_lidro",
@@ -209,9 +181,7 @@ def test_main_lidro_fail_no_input_skeleton():
                 f"io.output_dir={output_dir}",
                 f"io.input_mask_hydro={input_mask_hydro}",
                 "io.input_skeleton=some_random_input_skeleton",
-                f"virtual_point.vector.distance_meters={distances_meters}",
-                f"virtual_point.vector.buffer={buffer}",
-                f"virtual_point.vector.k={k}",
+                f"virtual_point.vector.s={s}",
                 f"io.srid={srid}",
             ],
         )
