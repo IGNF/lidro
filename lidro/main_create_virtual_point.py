@@ -54,12 +54,11 @@ def main(config: DictConfig):
     # Parameters for creating virtual point
     input_mask_hydro = config.io.input_mask_hydro
     input_skeleton = config.io.input_skeleton
+    input_dir_points_skeleton = config.io.input_dir_points_skeleton
     crs = CRS.from_user_input(config.io.srid)
     s = config.virtual_point.vector.s
 
     # Step 1 : Merged all "points_aron_skeleton" by lidar tile
-    input_dir_points = os.path.join(output_dir, "points_skeleton")
-
     def process_points_knn(points_knn):
         # Check if points_knn is a string and convert it to a list if necessary
         if isinstance(points_knn, str):
@@ -70,9 +69,9 @@ def main(config: DictConfig):
 
     points_clip_list = [
         {"geometry": row["geometry"], "points_knn": process_points_knn(row["points_knn"])}
-        for filename in os.listdir(input_dir_points)
+        for filename in os.listdir(input_dir_points_skeleton)
         if filename.endswith(".geojson")
-        for _, row in gpd.read_file(os.path.join(input_dir_points, filename)).iterrows()
+        for _, row in gpd.read_file(os.path.join(input_dir_points_skeleton, filename)).iterrows()
     ]
     # List match Z elevation values every N meters along the hydrographic skeleton
     df = pd.DataFrame(points_clip_list)

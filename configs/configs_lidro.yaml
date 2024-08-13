@@ -12,6 +12,7 @@ io:
   input_skeleton: null
   input_dir: null
   output_dir: null
+  input_dir_point_skeleton: null
   srid: 2154
   extension: .tif
   raster_driver: GTiff
