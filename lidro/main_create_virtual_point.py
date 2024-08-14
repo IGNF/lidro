@@ -54,7 +54,7 @@ def main(config: DictConfig):
     # Parameters for creating virtual point
     input_mask_hydro = config.io.input_mask_hydro
     input_skeleton = config.io.input_skeleton
-    input_dir_point_skeleton = config.io.input_dir_points_skeleton
+    input_dir_point_skeleton = config.io.input_dir_point_skeleton
     crs = CRS.from_user_input(config.io.srid)
     s = config.virtual_point.vector.s
 
