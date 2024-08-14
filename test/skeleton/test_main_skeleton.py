@@ -50,7 +50,7 @@ def test_main_skeleton_1():
 
 # do that test only if we are not on github action, since github can't connect to BD UNI
 @pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="BD UNI not reachable from github action")
-def test_main_skeleton_2():
+def test_query_db_for_bridge_across_gap():
     """Test : query_db_for_bridge_across_gap """
     with initialize(version_base="1.2", config_path="../../configs"):
         config = compose(
