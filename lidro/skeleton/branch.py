@@ -9,7 +9,6 @@ import pandas as pd
 import numpy as np
 from shapely import LineString, Point, Geometry
 from shapely.geometry import Polygon, MultiLineString
-from shapely.validation import make_valid
 from shapely.ops import voronoi_diagram, linemerge
 from pyproj.crs.crs import CRS
 
@@ -62,7 +61,8 @@ class Branch:
         raw_gdf_branch_mask = gpd.GeoDataFrame(geometry=[branch_mask], crs=self.crs)
 
         # # we keep only the exterior ring (that should be unique) as our polygon, to simplify the result
-        self.gdf_branch_mask = gpd.GeoDataFrame(geometry=[Polygon(raw_gdf_branch_mask.exterior[0].coords)], crs=self.crs)
+        exterior_ring = Polygon(raw_gdf_branch_mask.exterior[0].coords)
+        self.gdf_branch_mask = gpd.GeoDataFrame(geometry=[exterior_ring], crs=self.crs)
 
     def create_skeleton(self):
         """
@@ -70,7 +70,7 @@ class Branch:
         """
         voronoi_lines = self.create_voronoi_lines()
 
-        if  len(voronoi_lines) == 0:
+        if len(voronoi_lines) == 0:
             self.gdf_skeleton_lines = gpd.GeoDataFrame(geometry=[], crs=self.crs)
             return
 

@@ -3,7 +3,7 @@ import sys
 from hydra import compose, initialize
 import geopandas as gpd
 from omegaconf import DictConfig
-from shapely import LineString
+from shapely import LineString, Point
 
 from lidro.skeleton.branch import Branch, get_vertices_dict, get_df_points_from_gdf, line_merge
 
@@ -98,3 +98,41 @@ def test_creation_skeleton_lines():
                 extremities_cpt += 1
 
         assert extremities_cpt == 3  # check that this branch's skeleton has exactly 3 extremities
+
+
+def test_get_vertices_dict():
+    point_0_0 = [0, 0]
+    point_0_1 = [0, 1]
+    point_0_2 = [0, 2]
+    point_0_3 = [0, 3]
+    point_0_4 = [0, 4]
+    point_0_5 = [0, 5]
+    point_0_6 = [0, 6]
+    point_1_4 = [1, 4]
+    point_2_4 = [2, 4]
+
+    line_1 = LineString([point_0_0, point_0_1, point_0_2])
+    line_2 = LineString([point_0_2, point_0_3, point_0_4])
+    line_3 = LineString([point_0_4, point_0_5])
+    line_4 = LineString([point_0_5, point_0_6])
+    line_5 = LineString([point_0_4, point_1_4])
+    line_6 = LineString([point_1_4, point_2_4])
+
+    line_list = [line_1,
+                 line_2,
+                 line_3,
+                 line_4,
+                 line_5,
+                 line_6
+                 ]
+
+    gdf_gap_lines = gpd.GeoDataFrame(geometry=line_list).set_crs(CRS_FOR_TEST, allow_override=True)
+
+    vertices_dict = get_vertices_dict(gdf_gap_lines)
+
+    assert len(vertices_dict) == 7
+    assert vertices_dict[Point(point_0_0)] == [line_1]
+    assert vertices_dict[Point(point_0_6)] == [line_4]
+    assert vertices_dict[Point(point_2_4)] == [line_6]
+    assert len(vertices_dict[Point(point_0_2)]) == 2
+    assert len(vertices_dict[Point(point_0_4)]) == 3

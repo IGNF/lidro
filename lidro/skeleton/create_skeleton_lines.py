@@ -140,6 +140,7 @@ def select_candidates(
                 break
     return validated_candidates
 
+
 def fix_invalid_geometry(geometry):
     """
     return the geometry, fixed
@@ -150,6 +151,7 @@ def fix_invalid_geometry(geometry):
         return make_valid(geometry, method="structure", keep_collapsed=False)
     else:
         return geometry
+
 
 def create_branches_list(config: DictConfig, gdf_hydro_global_mask: GeoDataFrame, crs: CRS) -> List[Branch]:
     """
