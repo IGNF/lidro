@@ -50,8 +50,8 @@ virtual_point:
 skeleton:
   file_path:
     mask_input_path: null
-    skeleton_lines_ouput_path: null # only branches' skeleton (if empty, no file is created)
-    gap_lines_ouput_path: null # only new lines to close gaps (if empty, no file is created)
+    skeleton_lines_output_path: null # only branches' skeleton (if empty, no file is created)
+    gap_lines_output_path: null # only new lines to close gaps (if empty, no file is created)
     global_lines_output_path: null # lines from both the skeletons and the gap lines
 
   max_gap_width: 200 # distance max in meter of any gap between 2 branches we will try to close with a line
