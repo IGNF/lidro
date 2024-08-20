@@ -7,7 +7,10 @@ import pytest
 import rasterio
 from rasterio.transform import from_origin
 
-from lidro.create_mask_hydro.rasters.create_mask_raster import create_occupancy_map, detect_hydro_by_tile
+from lidro.create_mask_hydro.rasters.create_mask_raster import (
+    create_occupancy_map,
+    detect_hydro_by_tile,
+)
 
 TMP_PATH = Path("./tmp/create_mask_hydro/rasters/create_mask_raster")
 
@@ -43,7 +46,9 @@ def test_create_occupancy_map_default():
 @pytest.mark.returnfile
 def test_detect_hydro_by_tile_return_file():
     output_tif = TMP_PATH / "Semis_2021_0830_6291_LA93_IGN69_size.tif"
-    array, origin = detect_hydro_by_tile(LAS_FILE, tile_size, pixel_size, classes=[0, 1, 2, 3, 4, 5, 6, 17, 66], dilation_size=1)
+    array, origin = detect_hydro_by_tile(
+        LAS_FILE, tile_size, pixel_size, classes=[0, 1, 2, 3, 4, 5, 6, 17, 66], dilation_size=1
+    )
 
     assert isinstance(array, np.ndarray) is True
     assert list(array.shape) == [tile_size / pixel_size] * 2
