@@ -62,6 +62,7 @@ skeleton:
                   # so we make the line smaller
 
   db_uni:
+    db_using_db: True # if false, the DB won't be queried
     db_name: bduni_france_consultation
     db_host: bduni_consult.ign.fr
     db_user: null
