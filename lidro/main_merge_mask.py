@@ -3,10 +3,13 @@
 
 import logging
 import os
+import sys
 
 import hydra
 from omegaconf import DictConfig
 from pyproj import CRS
+
+sys.path.append('../lidro')
 
 from lidro.merge_mask_hydro.vectors.merge_vector import merge_geom
 
