@@ -10,7 +10,7 @@ from lidro.skeleton.branch import Branch, get_vertices_dict, get_df_points_from_
 sys.path.append('lidro/skeleton')
 
 BRANCH_TEST_1_PATH = "data/skeleton_hydro/test_files/90.geojson"
-CRS_FOR_TEST = 2145
+CRS_FOR_TEST = 2154
 WATER_MIN_SIZE_TEST = 20
 
 
@@ -75,31 +75,6 @@ def test_line_merge():
             assert point_0_4 in line.coords
 
 
-def test_creation_skeleton_lines():
-    """test creation/simplification of skeleton lines for a branch"""
-    with initialize(version_base="1.2", config_path="../../configs"):
-        config = compose(
-            config_name="configs_lidro.yaml",
-            overrides=[
-                f"skeleton.branch.water_min_size={WATER_MIN_SIZE_TEST}",
-            ]
-        )
-        branch_1 = read_branch(config, BRANCH_TEST_1_PATH, "test_branch_1")
-
-        # create branch_1's skeleton
-        branch_1.create_skeleton()
-        branch_1.simplify()
-
-        # number of extremity of branch_1's skeleton
-        vertices_dict = get_vertices_dict(branch_1.gdf_skeleton_lines)
-        extremities_cpt = 0
-        for lines_list in vertices_dict.values():
-            if len(lines_list) == 1:
-                extremities_cpt += 1
-
-        assert extremities_cpt == 3  # check that this branch's skeleton has exactly 3 extremities
-
-
 def test_get_vertices_dict():
     point_0_0 = [0, 0]
     point_0_1 = [0, 1]
@@ -136,3 +111,51 @@ def test_get_vertices_dict():
     assert vertices_dict[Point(point_2_4)] == [line_6]
     assert len(vertices_dict[Point(point_0_2)]) == 2
     assert len(vertices_dict[Point(point_0_4)]) == 3
+
+
+def test_create_voronoi_lines():
+    with initialize(version_base="1.2", config_path="../../configs"):
+        config = compose(
+            config_name="configs_lidro.yaml",
+            overrides=[
+                f"skeleton.branch.water_min_size={WATER_MIN_SIZE_TEST}",
+            ]
+        )
+        branch_1 = read_branch(config, BRANCH_TEST_1_PATH, "test_branch_1")
+        voronoi_lines = branch_1.create_voronoi_lines()
+        assert len(voronoi_lines) == 1028
+
+        voronoi_merged = line_merge(voronoi_lines, CRS_FOR_TEST)
+        assert len(voronoi_merged) == 157
+        vertices_dict = get_vertices_dict(voronoi_merged)
+        # count number of extremities :
+        nb_extremities = 0
+        for lines_list in vertices_dict.values():
+            if len(lines_list) == 1:
+                nb_extremities += 1
+        assert nb_extremities == 80
+
+
+def test_creation_skeleton_lines():
+    """test creation/simplification of skeleton lines for a branch"""
+    with initialize(version_base="1.2", config_path="../../configs"):
+        config = compose(
+            config_name="configs_lidro.yaml",
+            overrides=[
+                f"skeleton.branch.water_min_size={WATER_MIN_SIZE_TEST}",
+            ]
+        )
+        branch_1 = read_branch(config, BRANCH_TEST_1_PATH, "test_branch_1")
+
+        # create branch_1's skeleton
+        branch_1.create_skeleton()
+        branch_1.simplify()
+
+        # number of extremity of branch_1's skeleton
+        vertices_dict = get_vertices_dict(branch_1.gdf_skeleton_lines)
+        extremities_cpt = 0
+        for lines_list in vertices_dict.values():
+            if len(lines_list) == 1:
+                extremities_cpt += 1
+
+        assert extremities_cpt == 3  # check that this branch's skeleton has exactly 3 extremities

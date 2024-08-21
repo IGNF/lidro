@@ -123,8 +123,10 @@ def select_candidates(
 
             # if the gap is wide enough, we check with DB_Uni to see if there is a bridge
             # On the other hand, if it's small enough the candidate is automatically validated
+            # All that, ONLy if we want to interrogate the DB
             if config.skeleton.db_uni.db_using_db and \
-                    candidate.squared_distance > config.skeleton.gap_width_check_db * config.skeleton.gap_width_check_db:
+                    candidate.squared_distance \
+                    > config.skeleton.gap_width_check_db * config.skeleton.gap_width_check_db:
                 is_bridge = query_db_for_bridge_across_gap(config, candidate)
                 # if the line does not cross any bridge, we don't validate that candidate
                 if not is_bridge:
