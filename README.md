@@ -114,10 +114,10 @@ Pour fonctionner, la création de squelettes a besoin d'une série de paramètre
 python lidro/main_create_skeleton_lines.py [nom_paramètre_1]=[valeur_du_paramètre_1] [nom_paramètre_2]=[valeur_du_paramètre_2]
 ```
 ces paramètres sont :  
-skeleton.file_path.mask_input_path : Le chemin d'entrée des masques des cours d'eau
-skeleton.file_path.skeleton_lines_output_path : Le chemin de sortie des squelettes uniquement (pas de fichier de sortie si laissé à vide)
-skeleton.file_path.gap_lines_output_path : Le chemin de sortie des lignes franchissant des ponts uniquement (pas de fichier de sortie si laissé à vide)
-skeleton.file_path.global_lines_output_path : Le chemin de sortie des lignes et des squelettes ensemble
+io.skeleton.mask_input_path : Le chemin d'entrée des masques des cours d'eau
+io.skeleton.skeleton_lines_output_path : Le chemin de sortie des squelettes uniquement (pas de fichier de sortie si laissé à vide)
+io.skeleton.gap_lines_output_path : Le chemin de sortie des lignes franchissant des ponts uniquement (pas de fichier de sortie si laissé à vide)
+io.skeleton.global_lines_output_path : Le chemin de sortie des lignes et des squelettes ensemble
 
 skeleton.max_gap_width : La distance maximale envisagée pour franchir des ponts
 skeleton.max_bridges : Le nombre maximal de ponts entre deux bras séparés de cours d'eau

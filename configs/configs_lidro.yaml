@@ -19,6 +19,12 @@ io:
   no_data_value: -9999
   tile_size: 1000
 
+  skeleton:
+    mask_input_path: null
+    skeleton_lines_output_path: null # only branches' skeleton (if empty, no file is created)
+    gap_lines_output_path: null # only new lines to close gaps (if empty, no file is created)
+    global_lines_output_path: null # lines from both the skeletons and the gap lines
+
 mask_generation:
   raster:
     # size for dilatation
@@ -48,12 +54,6 @@ virtual_point:
     k: 20
 
 skeleton:
-  file_path:
-    mask_input_path: null
-    skeleton_lines_output_path: null # only branches' skeleton (if empty, no file is created)
-    gap_lines_output_path: null # only new lines to close gaps (if empty, no file is created)
-    global_lines_output_path: null # lines from both the skeletons and the gap lines
-
   max_gap_width: 200 # distance max in meter of any gap between 2 branches we will try to close with a line
   max_bridges: 1 # number max of bridges that can be created between 2 branches
   gap_width_check_db: 20 # for a gap at least this wide, we check with db_uni if there is a bridge. Smaller than that, we assume a line automatically exists
