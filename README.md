@@ -124,7 +124,7 @@ skeleton.max_bridges : Le nombre maximal de ponts entre deux bras séparés de c
 skeleton.gap_width_check_db : La distance à partir de laquelle on vérifie via la base de données s'il y a bien un pont
 skeleton.ratio_gap : la proportion de la ligne franchissant un pont qui est comparé en base pour voir s'il y a bien un pont (trop grande et on pourrait trouver un pont qui ne correspond pas)
 
-skeleton.db_uni.db_using_db : # Si à faux, la base de données ne sera pas utilisée
+skeleton.db_uni.db_using_db : # Si à faux, la base de données ne sera pas utilisée (prévu pour être utilisé que s'il n'y pas d'accès à la base de données)
 skeleton.db_uni.db_name : Le nom de la base de données
 skeleton.db_uni.db_host : l'adresse de la base de données
 skeleton.db_uni.db_user : L'utilisateur de la base de données
