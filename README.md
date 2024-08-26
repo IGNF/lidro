@@ -77,7 +77,7 @@ pre-commit install
 ```
 
 ## Données de test
-Les données de test se trouvent dans un autre projet ici : http://gitlab.forge-idi.ign.fr/Lidar/lidro-data
+Les données de test se trouvent dans un autre projet ici : https://github.com/IGNF/lidro-data
 
 Ce projet est un sous module git, qui sera téléchargé dans le dossier `data`, via la commande:
 
@@ -108,3 +108,29 @@ Pour lancer les tests :
 ```
 python -m pytest -s
 ```
+### paramètres pour créer les squelettes des cours d'eau
+Pour fonctionner, la création de squelettes a besoin d'une série de paramètres, certains ayant une valeur par défaut, d'autres non. Les paramètres se trouvent dans le fichier configs/configs_lidro.yaml. On peut soit les y modifier, soit les modifer en ligne de commande lors de l'exécution du script avec :
+```
+python lidro/main_create_skeleton_lines.py [nom_paramètre_1]=[valeur_du_paramètre_1] [nom_paramètre_2]=[valeur_du_paramètre_2]
+```
+ces paramètres sont :  
+io.skeleton.mask_input_path : Le chemin d'entrée des masques des cours d'eau
+io.skeleton.skeleton_lines_output_path : Le chemin de sortie des squelettes uniquement (pas de fichier de sortie si laissé à vide)
+io.skeleton.gap_lines_output_path : Le chemin de sortie des lignes franchissant des ponts uniquement (pas de fichier de sortie si laissé à vide)
+io.skeleton.global_lines_output_path : Le chemin de sortie des lignes et des squelettes ensemble
+
+skeleton.max_gap_width : La distance maximale envisagée pour franchir des ponts
+skeleton.max_bridges : Le nombre maximal de ponts entre deux bras séparés de cours d'eau
+skeleton.gap_width_check_db : La distance à partir de laquelle on vérifie via la base de données s'il y a bien un pont
+skeleton.ratio_gap : la proportion de la ligne franchissant un pont qui est comparé en base pour voir s'il y a bien un pont (trop grande et on pourrait trouver un pont qui ne correspond pas)
+
+skeleton.db_uni.db_using_db : # Si à faux, la base de données ne sera pas utilisée (prévu pour être utilisé que s'il n'y pas d'accès à la base de données)
+skeleton.db_uni.db_name : Le nom de la base de données
+skeleton.db_uni.db_host : l'adresse de la base de données
+skeleton.db_uni.db_user : L'utilisateur de la base de données
+skeleton.db_uni.db_password : Le mot de passe de l'utilisateur
+skeleton.db_uni.db_port : La port de connexion avec la base de données
+
+skeleton.branch.voronoi_max_length : LA longuer maximum des lignes individuelles des squelettes
+skeleton.branch.water_min_size : La longueur minimal à partir de laquelle une ligne de squelette sera automatiquement gardée (trop petite, et il y aura des sortes "d'aiguilles" qui apparaitront. Trop grande, et certains afluents ne seront pas détectés)
+skeleton.branch.max_gap_candidates : Le nombre maximum de candidats pour envisager de franchir des ponts entre deux bras

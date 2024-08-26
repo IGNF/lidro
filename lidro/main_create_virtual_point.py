@@ -3,12 +3,15 @@
 
 import logging
 import os
+import sys
 
 import geopandas as gpd
 import hydra
 import pandas as pd
 from omegaconf import DictConfig
 from pyproj import CRS
+
+sys.path.append('../lidro')
 
 from lidro.create_virtual_point.vectors.extract_points_around_skeleton import (
     extract_points_around_skeleton_points_one_tile,

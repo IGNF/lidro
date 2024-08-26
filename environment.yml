@@ -16,6 +16,8 @@ dependencies:
   - pdal>=2.6
   - python-pdal>=3.2.1
   - shapely>=2.0.3
+  - psycopg[binary]
+  - python-dotenv
     # --------- hydra configs --------- #
   - hydra-core
   - hydra-colorlog

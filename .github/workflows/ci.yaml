@@ -30,5 +30,8 @@ jobs:
           generate-run-shell: true
       - name: Unit test
         shell: micromamba-shell {0}
-        run: python -m pytest -s --log-cli-level DEBUG
-
+        run: |
+          cp .env_example .env
+          sed -i "s/DB_UNI_USER='TO_BE_DEFINED'/DB_UNI_USER=${{ secrets.DB_UNI_USER }}/g" .env
+          sed -i "s/DB_UNI_PASSWORD='TO_BE_DEFINED'/DB_UNI_PASSWORD=${{ secrets.DB_UNI_PASSWORD }}/g" .env
+          python -m pytest -s --log-cli-level DEBUG

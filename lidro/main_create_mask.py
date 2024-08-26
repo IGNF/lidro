@@ -3,10 +3,13 @@
 
 import logging
 import os
+import sys
 
 import hydra
 from omegaconf import DictConfig
 from pyproj import CRS
+
+sys.path.append('../lidro')
 
 from lidro.create_mask_hydro.vectors.convert_to_vector import create_hydro_vector_mask
 
