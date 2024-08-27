@@ -43,7 +43,7 @@ def test_geodataframe_to_las_default():
     geodataframe_to_las([points], TMP_PATH, crs, 68)
 
     # Verify the output LAS file
-    output_las = os.path.join(TMP_PATH, "virtual_points.las")
+    output_las = os.path.join(TMP_PATH, "virtual_points.laz")
     assert os.path.exists(output_las), "The output LAS file should exist"
 
     # Read the LAS file

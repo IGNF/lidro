@@ -3,6 +3,7 @@
 """
 import logging
 import os
+from typing import List
 
 import geopandas as gpd
 import laspy
@@ -10,11 +11,11 @@ import numpy as np
 import pandas as pd
 
 
-def geodataframe_to_las(virtual_points: gpd.GeoDataFrame, output_dir: str, crs: str, classes: int):
+def geodataframe_to_las(virtual_points: List, output_dir: str, crs: str, classes: int):
     """This function convert virtual points (GeoDataframe) to LIDAR points with classification for virtual points
 
     Args:
-        virtual_points (gpd.GeoDataFrame): A GeoDataFrame containing virtuals points from Mask Hydro
+        virtual_points (List): A list containing virtuals points by hydrological entity
         output_dir (str): folder to output LAS
         crs (str): a pyproj CRS object used to create the output GeoJSON file
         classes (int): The number of the classe assign those virtual points
@@ -52,6 +53,8 @@ def geodataframe_to_las(virtual_points: gpd.GeoDataFrame, output_dir: str, crs: 
     las.vlrs.append(vlr)
 
     # Save the LAS file
-    output_las = os.path.join(output_dir, "virtual_points.las")
-    las.write(output_las)
-    logging.info(f"Virtual points LAS file saved to {output_las}")
+    output_laz = os.path.join(output_dir, "virtual_points.laz")
+    with laspy.open(output_laz, mode="w", header=las.header, do_compress=True) as writer:
+        writer.write_points(las.points)
+
+    logging.info(f"Virtual points LAS file saved to {output_laz}")
