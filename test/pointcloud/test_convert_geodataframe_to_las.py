@@ -40,7 +40,7 @@ def test_geodataframe_to_las_default():
     crs = pyproj.CRS("EPSG:2154")
 
     # Call the function to test
-    geodataframe_to_las([points], TMP_PATH, crs)
+    geodataframe_to_las([points], TMP_PATH, crs, 68)
 
     # Verify the output LAS file
     output_las = os.path.join(TMP_PATH, "virtual_points.las")

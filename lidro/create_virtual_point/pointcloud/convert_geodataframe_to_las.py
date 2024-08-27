@@ -10,13 +10,14 @@ import numpy as np
 import pandas as pd
 
 
-def geodataframe_to_las(virtual_points: gpd.GeoDataFrame, output_dir: str, crs: str):
-    """This function convert virtual points (GeoDataframe) to LIDAR points with classification (66) for virtual points
+def geodataframe_to_las(virtual_points: gpd.GeoDataFrame, output_dir: str, crs: str, classes: int):
+    """This function convert virtual points (GeoDataframe) to LIDAR points with classification for virtual points
 
     Args:
         virtual_points (gpd.GeoDataFrame): A GeoDataFrame containing virtuals points from Mask Hydro
         output_dir (str): folder to output LAS
         crs (str): a pyproj CRS object used to create the output GeoJSON file
+        classes (int): The number of the classe assign those virtual points
     """
     # Combine all virtual points into a single GeoDataFrame
     grid_with_z = gpd.GeoDataFrame(pd.concat(virtual_points, ignore_index=True))
@@ -32,7 +33,7 @@ def geodataframe_to_las(virtual_points: gpd.GeoDataFrame, output_dir: str, crs: 
             "x": grid_with_z["x"],
             "y": grid_with_z["y"],
             "z": grid_with_z["z"],
-            "classification": np.full(len(grid_with_z), 68, dtype=np.uint8),  # Add classification of 68
+            "classification": np.full(len(grid_with_z), classes, dtype=np.uint8),  # Add classification of 68
         }
     )
 

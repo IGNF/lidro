@@ -28,7 +28,7 @@ io:
 
 mask_generation:
   raster:
-    # size for dilatation
+    # Size for dilatation
     dilation_size: 3
   filter:
     # Classes to be considered as "non-water"
@@ -47,14 +47,17 @@ virtual_point:
     # Keep ground and water pointclouds between Hydro Mask and Hydro Mask buffer
     keep_neighbors_classes: [2, 9]
   vector:
-    # distance in meters between 2 consecutive points from Skeleton Hydro
+    # Distance in meters between 2 consecutive points from Skeleton Hydro
     distance_meters: 5
-    # buffer for searching the points classification (default. "3") of the input LAS/LAZ file
+    # Buffer for searching the points classification (default. "3") of the input LAS/LAZ file
     buffer: 3
     # The number of nearest neighbors to find with KNeighbors
     k: 3
     # Spacing between the grid points in meters by default "0.5"
     s: 1
+  pointcloud:
+    # The number of the classe assign those virtual points
+    virtual_points_classes : 68
 
 skeleton:
   max_gap_width: 200 # distance max in meter of any gap between 2 branches we will try to close with a line

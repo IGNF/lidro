@@ -57,6 +57,7 @@ def main(config: DictConfig):
     input_dir_point_skeleton = config.io.input_dir_point_skeleton
     crs = CRS.from_user_input(config.io.srid)
     s = config.virtual_point.vector.s
+    classes = config.virtual_point.pointcloud.virtual_points_classes
 
     # Step 1 : Merged all "points_aron_skeleton" by lidar tile
     def process_points_knn(points_knn):
@@ -96,7 +97,7 @@ def main(config: DictConfig):
         ]
         logging.info("Calculate virtuals points by mask hydro and skeleton")
         # Save the virtual points (.LAS)
-        geodataframe_to_las(gdf_virtual_points, output_dir, crs)
+        geodataframe_to_las(gdf_virtual_points, output_dir, crs, classes)
     else:
         logging.error("No valid data found in points_clip for processing.")
 
