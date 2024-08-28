@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """ Extract points around skeleton by tile
 """
+import json
 import logging
 import os
 from typing import List
 
 import geopandas as gpd
-import numpy as np
 import pandas as pd
 from pdaltools.las_info import las_get_xy_bounds
 from shapely.geometry import Point
@@ -62,17 +62,26 @@ def extract_points_around_skeleton_points_one_tile(
     # Step 2 : Extract a Z elevation value along the hydrographic skeleton
     logging.info(f"\nExtract a Z elevation value along the hydrographic skeleton for tile : {tilename}")
     points_Z = filter_las_around_point(points_skeleton_with_z_clip, points_clip, k)
-    df_points_z = pd.DataFrame(points_Z)  # Convert Dataframe
-    if not df_points_z.empty and "points_knn" in df_points_z.columns and "geometry" in df_points_z.columns:
-        # Convert list "points_knn" to string without scientific notation
-        df_points_z["points_knn"] = df_points_z["points_knn"].apply(
-            lambda x: str([[np.round(coord, 3) for coord in point] for point in x])
-        )
-        df_points_z = df_points_z[["geometry", "points_knn"]]
-        # Convert the DataFrame to a GeoDataFrame
-        points_z_gdf = gpd.GeoDataFrame(df_points_z, geometry="geometry")
-        points_z_gdf.set_crs(crs, inplace=True)
-        # Save the result by LIDAR tile
+
+    if isinstance(points_Z, list) and len(points_Z) > 0:
+        # Limit the precision of coordinates using numpy arrays or tuples
+        knn_points = [
+            [[round(coord, 3) for coord in point] for point in item["points_knn"]]
+            for item in points_Z
+            if len(item["points_knn"]) > 0 and isinstance(item["geometry"], Point)
+        ]
+        # Create a DataFrame with lists or numpy arrays
+        df_points_z = pd.DataFrame({"geometry": [item["geometry"] for item in points_Z], "points_knn": knn_points})
+
+        # Encode the 'points_knn' lists as JSON
+        df_points_z["points_knn"] = df_points_z["points_knn"].apply(lambda x: json.dumps(x))
+
+        # Convert DataFrame to GeoDataFrame
+        gdf_points_z = gpd.GeoDataFrame(df_points_z, geometry="geometry")
+        gdf_points_z.set_crs(crs, inplace=True)
+
+        # Save the GeoDataFrame to a GeoJSON file
         output_geojson_path = os.path.join(output_dir, "_points_skeleton".join([tilename, ".geojson"]))
-        points_z_gdf.to_file(output_geojson_path, driver="GeoJSON")
+        gdf_points_z.to_file(output_geojson_path, driver="GeoJSON")
+
         logging.info(f"Result saved to {output_geojson_path}")
