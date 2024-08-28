@@ -6,7 +6,8 @@ from shapely import line_locate_point
 
 
 def calculate_grid_z_with_model(points: gpd.GeoDataFrame, line: gpd.GeoDataFrame, model) -> gpd.GeoDataFrame:
-    """Calculate Z with regression model
+    """Calculate Z with regression model.
+    If points are not on the line, these points will be projected on this line
 
     Args:
         points (gpd.GeoDataFrame): A GeoDataFrame containing the grid points
