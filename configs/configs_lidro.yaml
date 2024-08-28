@@ -54,7 +54,7 @@ virtual_point:
     # The number of nearest neighbors to find with KNeighbors
     k: 3
     # Spacing between the grid points in meters by default "0.5"
-    s: 1
+    space_grid_points: 0.5
   pointcloud:
     # The number of the classe assign those virtual points
     virtual_points_classes : 68

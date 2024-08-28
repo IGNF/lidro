@@ -6,14 +6,14 @@ import numpy as np
 import shapely.vectorized
 
 
-def generate_grid_from_geojson(mask_hydro: gpd.GeoDataFrame, spacing: float, margin=0):
+def generate_grid_from_geojson(mask_hydro: gpd.GeoDataFrame, spacing=0.5, margin=0):
     """
     Generates a regular 2D grid of evenly spaced points within a polygon defined
     in a GeoJSON file.
 
     Args:
         mask_hydro (gpd.GeoDataFrame): A GeoDataFrame containing each mask hydro from Hydro's Skeleton
-        spacing (float): Spacing between the grid points in meters. The default value is 1 meter.
+        spacing (float, optional): Spacing between the grid points in meters. The default value is 0.5 meter.
         margin (int, optional): Margin around mask for grid creation. The default value is 0 meter.
 
     Returns:

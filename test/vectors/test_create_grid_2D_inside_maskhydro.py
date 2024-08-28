@@ -13,7 +13,7 @@ def test_generate_grid_from_geojson():
 
     # Define the spacing and margin
     spacing = 1.0  # 1 meter spacing
-    margin = 0
+    margin = 0  # à marging
 
     # Call the function to test
     result = generate_grid_from_geojson(mask_hydro, spacing, margin)

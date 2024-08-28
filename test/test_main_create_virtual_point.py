@@ -35,7 +35,7 @@ def test_main_lidro_input_file():
     input_skeleton = INPUT_DIR / "skeleton_hydro/Skeleton_Hydro_small.geojson"
     input_dir_point_skeleton = INPUT_DIR / "point_virtual/"
     srid = 2154
-    s = 1
+    space_grid_points = 1
 
     with initialize(version_base="1.2", config_path="../configs"):
         # config is relative to a module
@@ -49,7 +49,7 @@ def test_main_lidro_input_file():
                 f"io.input_skeleton={input_skeleton}",
                 f"io.input_dir_point_skeleton={input_dir_point_skeleton}",
                 f"io.srid={srid}",
-                f"virtual_point.vector.s={s}",
+                f"virtual_point.vector.space_grid_points={space_grid_points}",
             ],
         )
     main(cfg)

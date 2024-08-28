@@ -56,7 +56,7 @@ def main(config: DictConfig):
     input_skeleton = config.io.input_skeleton
     input_dir_point_skeleton = config.io.input_dir_point_skeleton
     crs = CRS.from_user_input(config.io.srid)
-    s = config.virtual_point.vector.s
+    space_grid_points = config.virtual_point.vector.space_grid_points
     classes = config.virtual_point.pointcloud.virtual_points_classes
 
     # Step 1 : Merged all "points_aron_skeleton" by lidar tile
@@ -90,7 +90,7 @@ def main(config: DictConfig):
                 gpd.GeoDataFrame([{"geometry": row["geometry_skeleton"]}], crs=crs),
                 gpd.GeoDataFrame([{"geometry": row["geometry_mask"]}], crs=crs),
                 crs,
-                s,
+                space_grid_points,
                 output_dir,
             )
             for idx, row in gdf_merged.iterrows()
