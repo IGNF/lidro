@@ -40,5 +40,6 @@ def return_points_by_line(points: gpd.GeoDataFrame, line: gpd.GeoDataFrame) -> g
 
     # Filter out rows where 'index_right' is NaN
     pts_intersect = pts_intersect.dropna(subset=["index_right"])
+    pts_intersect = pts_intersect.dropna()  # Drop lines which contain one or more NaN values
 
     return pts_intersect
