@@ -24,13 +24,12 @@ def flatten_little_river(points: gpd.GeoDataFrame, line: gpd.GeoDataFrame):
     """
     # Inputs
     gdf_points = return_points_by_line(points, line)
-
     # Extract points_knn and drop NaNs
-    points_knn_values = gdf_points["points_knn"].dropna().values
+    points_knn_values = gdf_points["points_knn"].values
 
     # Check if points_knn_values is empty
     if points_knn_values.size == 0:
-        logging.warning("For little river : no valid points found, returning default Z quartile as 0")
+        logging.warning("For little river: no neighbor found to calculate Z quartile: set Z to 0")
         z_first_quartile = 0
         return z_first_quartile
 
@@ -44,8 +43,13 @@ def flatten_little_river(points: gpd.GeoDataFrame, line: gpd.GeoDataFrame):
 
     unique_points_knn = np.unique(all_points_knn, axis=0)
 
-    # Calculate the 1st quartile of all points
-    first_quartile = np.percentile(unique_points_knn, 25, axis=0)
-    z_first_quartile = first_quartile[-1]
+    # Check if unique_points_knn is empty before calculating the first quartile
+    if unique_points_knn.size == 0:
+        logging.warning("No unique points found after filtering. Setting Z to 0.")
+        z_first_quartile = 0
+    else:
+        # Calculate the 1st quartile of all points
+        first_quartile = np.percentile(unique_points_knn, 25, axis=0)
+        z_first_quartile = first_quartile[-1]
 
     return z_first_quartile
