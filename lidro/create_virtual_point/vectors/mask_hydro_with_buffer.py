@@ -22,8 +22,5 @@ def import_mask_hydro_with_buffer(file_mask: str, buffer: float, crs: str | int)
     # Apply negative's buffer + difference from Mask Hydro
     # Return a polygon representing the limit of the bank with a buffer of N meters
     gdf_buffer = gdf.difference(gdf.buffer(-abs(buffer), cap_style=CAP_STYLE.square))
-    # gdf_buffer = gdf.buffer(0.1, cap_style=CAP_STYLE.square).difference(
-    #     gdf.buffer(-abs(buffer), cap_style=CAP_STYLE.square)
-    # )
 
     return gdf_buffer
