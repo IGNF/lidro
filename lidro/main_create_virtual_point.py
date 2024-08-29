@@ -1,4 +1,4 @@
-""" Main script for calculate Mask HYDRO 1
+""" Main script for create virtual point (1 output)
 """
 
 import ast
@@ -21,7 +21,7 @@ from lidro.create_virtual_point.vectors.merge_skeleton_by_mask import (
     merge_skeleton_by_mask,
 )
 from lidro.create_virtual_point.vectors.run_create_virtual_points import (
-    lauch_virtual_points_by_section,
+    launch_virtual_points_by_section,
 )
 
 
@@ -54,25 +54,26 @@ def main(config: DictConfig):
     # Parameters for creating virtual point
     input_mask_hydro = config.io.input_mask_hydro
     input_skeleton = config.io.input_skeleton
-    input_dir_point_skeleton = config.io.input_dir_point_skeleton
+    input_dir_points_skeleton = config.io.input_dir_points_skeleton
     crs = CRS.from_user_input(config.io.srid)
-    space_grid_points = config.virtual_point.vector.space_grid_points
+    river_length = config.virtual_point.vector.river_length
+    points_grid_spacing = config.virtual_point.vector.points_grid_spacing
     classes = config.virtual_point.pointcloud.virtual_points_classes
 
-    # Step 1 : Merged all "points_aron_skeleton" by lidar tile
+    # Step 1 : Merged all "points around skeleton" by lidar tile
     def process_points_knn(points_knn):
         # Check if points_knn is a string and convert it to a list if necessary
         if isinstance(points_knn, str):
             points_knn = ast.literal_eval(points_knn)  # Convert the string to a list of lists
 
         # Round each coordinate to 8 decimal places
-        return [[round(coord, 8) for coord in point] for point in points_knn]
+        return [[round(coord, 3) for coord in point] for point in points_knn]
 
     points_clip_list = [
         {"geometry": row["geometry"], "points_knn": process_points_knn(row["points_knn"])}
-        for filename in os.listdir(input_dir_point_skeleton)
+        for filename in os.listdir(input_dir_points_skeleton)
         if filename.endswith(".geojson")
-        for _, row in gpd.read_file(os.path.join(input_dir_point_skeleton, filename)).iterrows()
+        for _, row in gpd.read_file(os.path.join(input_dir_points_skeleton, filename)).iterrows()
     ]
     # List match Z elevation values every N meters along the hydrographic skeleton
     df = pd.DataFrame(points_clip_list)
@@ -85,12 +86,13 @@ def main(config: DictConfig):
         gdf_merged = merge_skeleton_by_mask(input_skeleton, input_mask_hydro, output_dir, crs)
 
         gdf_virtual_points = [
-            lauch_virtual_points_by_section(
+            launch_virtual_points_by_section(
                 points_gdf,
                 gpd.GeoDataFrame([{"geometry": row["geometry_skeleton"]}], crs=crs),
                 gpd.GeoDataFrame([{"geometry": row["geometry_mask"]}], crs=crs),
                 crs,
-                space_grid_points,
+                points_grid_spacing,
+                river_length,
                 output_dir,
             )
             for idx, row in gdf_merged.iterrows()
@@ -99,7 +101,7 @@ def main(config: DictConfig):
         # Save the virtual points (.LAS)
         geodataframe_to_las(gdf_virtual_points, output_dir, crs, classes)
     else:
-        logging.error("No valid data found in points_clip for processing.")
+        logging.error("Error when merged all points around skeleton by lidar tile")
 
 
 if __name__ == "__main__":

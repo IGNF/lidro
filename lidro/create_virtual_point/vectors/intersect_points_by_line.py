@@ -2,27 +2,11 @@
 """ Identifies all points that intersect each line
 """
 import geopandas as gpd
-from shapely.geometry import CAP_STYLE, Polygon
-
-
-def apply_buffers_to_geometry(line: gpd.GeoDataFrame, buffer: float) -> Polygon:
-    """Buffer geometry
-    Objective: apply buffer from hydro's section
-
-    Args:
-        line (gpd.GeoDataFrame): geopandas dataframe with input geometry
-        buffer (float): buffer to apply to the input geometry
-
-    Returns:
-        Polygon: Hydro' section with buffer
-    """
-    # Buffer
-    geom = line.buffer(buffer, cap_style=CAP_STYLE.square)
-    return geom
+from shapely.geometry import CAP_STYLE
 
 
 def return_points_by_line(points: gpd.GeoDataFrame, line: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-    """This function identifies all points that intersect each hydro's section
+    """This function identifies all points that intersect each Skeleton by hydro's section
 
     Args:
         points (gpd.GeoDataFrame): A GeoDataFrame containing points along Hydro's Skeleton
@@ -31,8 +15,8 @@ def return_points_by_line(points: gpd.GeoDataFrame, line: gpd.GeoDataFrame) -> g
     Returns:
         gpd.GeoDataFrame: A GeoDataframe containing only points that intersect each hydro's section
     """
-    # Apply buffer (2 meters by default) from Mask Hydro
-    line_buffer = apply_buffers_to_geometry(line, 0.1)
+    # Apply buffer (0.1 meters) from Mask Hydro
+    line_buffer = line.buffer(0.1, cap_style=CAP_STYLE.square)
     gdf_line_buffer = gpd.GeoDataFrame(geometry=line_buffer)
 
     # Perform spatial join to find intersections

@@ -12,7 +12,7 @@ io:
   input_skeleton: null
   input_dir: null
   output_dir: null
-  input_dir_point_skeleton: null
+  input_dir_points_skeleton: null
   srid: 2154
   extension: .tif
   raster_driver: GTiff
@@ -53,8 +53,10 @@ virtual_point:
     buffer: 3
     # The number of nearest neighbors to find with KNeighbors
     k: 3
+    # The minimum length of a river to use the linear regression model
+    river_length: 150 
     # Spacing between the grid points in meters by default "0.5"
-    space_grid_points: 0.5
+    points_grid_spacing: 0.5
   pointcloud:
     # The number of the classe assign those virtual points
     virtual_points_classes : 68

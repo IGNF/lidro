@@ -1,4 +1,4 @@
-""" Main script for calculate Mask HYDRO 1
+""" Main script for creating N points along Skeleton
 """
 
 import logging
@@ -22,7 +22,7 @@ from lidro.create_virtual_point.vectors.points_along_skeleton import (
 @hydra.main(config_path="../configs/", config_name="configs_lidro.yaml", version_base="1.2")
 def main(config: DictConfig):
     """Create N points along Skeleton from the points classification of
-    the input LAS/LAZ file and the Hyro Skeleton (GeoJSON). Save a result by LIDAR tiles.
+    the input LAS/LAZ file and the Hydro Skeleton (GeoJSON). Save a result by LIDAR tiles.
 
     It can run either on a single file, or on each file of a folder
 

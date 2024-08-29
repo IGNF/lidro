@@ -21,12 +21,13 @@ from lidro.create_virtual_point.vectors.linear_regression_model import (
 )
 
 
-def lauch_virtual_points_by_section(
+def launch_virtual_points_by_section(
     points: gpd.GeoDataFrame,
     line: gpd.GeoDataFrame,
     mask_hydro: gpd.GeoDataFrame,
     crs: str,
     spacing: float,
+    length: int,
     output_dir: str,
 ) -> gpd.GeoDataFrame:
     """This function generates a regular grid of 3D points spaced every N meters inside each hydro entity
@@ -36,14 +37,17 @@ def lauch_virtual_points_by_section(
         points (gpd.GeoDataFrame): A GeoDataFrame containing points along Hydro's Skeleton
         line (gpd.GeoDataFrame): A GeoDataFrame containing each line from Hydro's Skeleton
         mask_hydro (gpd.GeoDataFrame): A GeoDataFrame containing each mask hydro from Hydro's Skeleton
-        crs (str): a pyproj CRS object used to create the output GeoJSON file
-        spacing (float, optional): Spacing between the grid points in meters. The default value is 1 meter
-        output_dir (str): folder to output Mask Hydro without virtual points
+        crs (str): A pyproj CRS object used to create the output GeoJSON file
+        spacing (float, optional): Spacing between the grid points in meters.
+                                   The default value is 0.5 meter
+        length (int, optional): Minimum length of a river to use the linear regression model.
+                                      The default value is 150 meters.
+        output_dir (str): Folder to output Mask Hydro without virtual points
 
     Returns:
         gpd.GeoDataFrame: All virtual points by Mask Hydro
     """
-    # Check if points GeoDataFrame is empty or
+    # Check if the points DataFrame is empty and all the values in the "points_knn" column are null
     if points.empty or points["points_knn"].isnull().all():
         logging.warning("The points GeoDataFrame is empty. Saving the skeleton and mask hydro to GeoJSON.")
         masks_without_points = gpd.GeoDataFrame(columns=mask_hydro.columns, crs=mask_hydro.crs)
@@ -60,8 +64,8 @@ def lauch_virtual_points_by_section(
         # Calculate the length of the river
         river_length = float(line.length.iloc[0])
 
-        # Step 2 : Model linear regression for river's lenght > 150 m
-        if river_length > 150:
+        # Step 2 : Model linear regression for river's length > 150 m
+        if river_length > length:
             model, r2 = calculate_linear_regression_line(points, line, crs)
             if model == np.poly1d([0, 0]) and r2 == 0.0:
                 masks_without_points = gpd.GeoDataFrame(columns=mask_hydro.columns, crs=mask_hydro.crs)
@@ -74,13 +78,13 @@ def lauch_virtual_points_by_section(
                     output_dir, "mask_hydro_no_virtual_points_with_regression.geojson"
                 )
                 logging.warning(
-                    f"Save masks_without_points because of linear regression is impossible: {output_mask_hydro_error}"
+                    f"Save masks_without_points because linear regression is impossible: {output_mask_hydro_error}"
                 )
                 masks_without_points.to_file(output_mask_hydro_error, driver="GeoJSON")
             # Apply linear regression model at the rivers
             gdf_grid_with_z = calculate_grid_z_with_model(gdf_grid, line, model)
-        # Step 2 bis: Model flattening for river's lenght < 150 m
-        if river_length < 150:
+        # Step 2 bis: Model flattening for river's length < 150 m or river's length == 150 m
+        else:
             predicted_z = flatten_little_river(points, line)
             if predicted_z == 0:
                 masks_without_points = gpd.GeoDataFrame(columns=mask_hydro.columns, crs=mask_hydro.crs)

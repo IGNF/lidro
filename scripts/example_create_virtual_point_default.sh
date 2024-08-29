@@ -3,9 +3,9 @@ python -m lidro.main_create_virtual_point \
 io.input_dir=./data/ \
 io.input_mask_hydro=./data/merge_mask_hydro/MaskHydro_merge.geojson \
 io.input_skeleton=./data/skeleton_hydro/Skeleton_Hydro.geojson \
-io.input_dir_point_skeleton=./tmp/point_skeleton/ \
+io.input_dir_points_skeleton=./tmp/point_skeleton/ \
 io.output_dir=./tmp/ \
-#io.virtual_point.vector.s=0.5 \ #Spacing between the grid points in meters
+io.virtual_point.vector.points_grid_spacing=0.5 \
 
 
 
