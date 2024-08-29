@@ -18,7 +18,8 @@ def filter_las_around_point(points_skeleton: List, points_clip: np.array, k: int
         k (int): The number of nearest neighbors to find
 
     Returns:
-        List : Result {'geometry': Point 2D on skeleton, 'points_knn': List of LIDAR points from}
+        List : Result {'geometry': Point 2D on skeleton,
+               'points_knn': List of N "ground" points closest to 2D points of the hydro skeleton}
     """
     # Finds the K nearest neighbors of a given point from a list of 3D points
     points_knn_list = [
