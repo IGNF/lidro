@@ -53,4 +53,4 @@ def test_main_lidro_input_file():
             ],
         )
     main(cfg)
-    assert (Path(output_dir) / "virtual_points.las").is_file()
+    assert (Path(output_dir) / "virtual_points.laz").is_file()
