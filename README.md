@@ -128,7 +128,7 @@ skeleton.db_uni.db_using_db : # Si à faux, la base de données ne sera pas util
 skeleton.db_uni.db_name : Le nom de la base de données
 skeleton.db_uni.db_host : l'adresse de la base de données
 skeleton.db_uni.db_user : L'utilisateur de la base de données
-skeleton.db_uni.db_password : Le mot de passe de l'utilisateur
+skeleton.db_uni.db_password : Le mot de passe de l'utilisateur. ATTENTION ! S'il y a des charactères spéciaux, il peut être nécessaire de les écrire ainsi : "skeleton.db_uni.db_password='$tr@ng€_ch@r@ct€r$'" (notez les " et les '). Si cela ne fonctionne toujours pas, peut-être essayer de jongler un peu avec ces ponctuations pour trouver celle qui fonctionne.  
 skeleton.db_uni.db_port : La port de connexion avec la base de données
 
 skeleton.branch.voronoi_max_length : LA longuer maximum des lignes individuelles des squelettes
