@@ -49,7 +49,7 @@ def test_main_lidro_input_file():
                 f"io.input_skeleton={input_skeleton}",
                 f"io.dir_points_skeleton={dir_points_skeleton}",
                 f"io.srid={srid}",
-                f"virtual_point.vector.points_grid_spacing={points_grid_spacing}",
+                f"virtual_point.pointcloud.points_grid_spacing={points_grid_spacing}",
             ],
         )
     main(cfg)

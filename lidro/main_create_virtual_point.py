@@ -5,7 +5,6 @@ import ast
 import logging
 import os
 import sys
-
 import geopandas as gpd
 import hydra
 import pandas as pd
@@ -57,7 +56,7 @@ def main(config: DictConfig):
     input_dir_points_skeleton = config.io.dir_points_skeleton
     crs = CRS.from_user_input(config.io.srid)
     river_length = config.virtual_point.vector.river_length
-    points_grid_spacing = config.virtual_point.vector.points_grid_spacing
+    points_grid_spacing = config.virtual_point.pointcloud.points_grid_spacing
     classes = config.virtual_point.pointcloud.virtual_points_classes
 
     # Step 1 : Merged all "points around skeleton" by lidar tile
