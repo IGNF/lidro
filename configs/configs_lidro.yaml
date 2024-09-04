@@ -42,25 +42,6 @@ mask_generation:
     # Tolerance from Douglas-Peucker
     tolerance: 1
 
-virtual_point:
-  filter:
-    # Keep ground and water pointclouds between Hydro Mask and Hydro Mask buffer
-    keep_neighbors_classes: [2, 9]
-  vector:
-    # Distance in meters between 2 consecutive points from Skeleton Hydro
-    distance_meters: 5
-    # Buffer for searching the points classification (default. "3") of the input LAS/LAZ file
-    buffer: 3
-    # The number of nearest neighbors to find with KNeighbors
-    k: 3
-    # The minimum length of a river to use the linear regression model
-    river_length: 150 
-    # Spacing between the grid points in meters by default "0.5"
-    points_grid_spacing: 0.5
-  pointcloud:
-    # The number of the classe assign those virtual points
-    virtual_points_classes : 68
-
 skeleton:
   max_gap_width: 200 # distance max in meter of any gap between 2 branches we will try to close with a line
   max_bridges: 1 # number max of bridges that can be created between 2 branches
@@ -81,6 +62,28 @@ skeleton:
     voronoi_max_length: 2 # max size of a voronoi line
     water_min_size: 500 # min size of a skeleton line to be sure not to be removed (should be at least more than half the max river width)
     max_gap_candidates: 3 # max number of candidates to close a gap between 2 branches
+
+virtual_point:
+  filter:
+    # Keep ground and water pointclouds between Hydro Mask and Hydro Mask buffer
+    keep_neighbors_classes: [2, 9]
+  vector:
+    # Distance in meters between 2 consecutive points from Skeleton Hydro
+    distance_meters: 5
+    # Buffer for searching the points classification (default. "3") of the input LAS/LAZ file
+    buffer: 3
+    # The number of nearest neighbors to find with KNeighbors
+    k: 3
+    # The minimum length of a river to use the linear regression model
+    river_length: 150 
+  pointcloud:
+    # Spacing between the grid points in meters by default "0.5"
+    points_grid_spacing: 0.5
+    # The number of the classe assign those virtual points
+    virtual_points_classes : 68
+
+
+
 
 hydra:
   output_subdir: null

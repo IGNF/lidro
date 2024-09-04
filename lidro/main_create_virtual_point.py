@@ -1,4 +1,4 @@
-""" Main script for create virtual point (1 output)
+""" Main script for create virtuals points
 """
 
 import ast
@@ -54,7 +54,7 @@ def main(config: DictConfig):
     # Parameters for creating virtual point
     input_mask_hydro = config.io.input_mask_hydro
     input_skeleton = config.io.input_skeleton
-    input_dir_points_skeleton = config.io.input_dir_points_skeleton
+    input_dir_points_skeleton = config.io.dir_points_skeleton
     crs = CRS.from_user_input(config.io.srid)
     river_length = config.virtual_point.vector.river_length
     points_grid_spacing = config.virtual_point.vector.points_grid_spacing
