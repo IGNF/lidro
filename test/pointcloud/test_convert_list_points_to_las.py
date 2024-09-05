@@ -9,8 +9,8 @@ import pyproj
 from shapely.geometry import Point
 
 # Import the function from your module
-from lidro.create_virtual_point.pointcloud.convert_geodataframe_to_las import (
-    geodataframe_to_las,
+from lidro.create_virtual_point.pointcloud.convert_list_points_to_las import (
+    list_points_to_las,
 )
 
 TMP_PATH = Path("./tmp/virtual_points/pointcloud/convert_geodataframe_to_las")
@@ -40,7 +40,7 @@ def test_geodataframe_to_las_default():
     crs = pyproj.CRS("EPSG:2154")
 
     # Call the function to test
-    geodataframe_to_las([points], TMP_PATH, crs, 68)
+    list_points_to_las([points], TMP_PATH, crs, 68)
 
     # Verify the output LAS file
     output_las = os.path.join(TMP_PATH, "virtual_points.laz")
