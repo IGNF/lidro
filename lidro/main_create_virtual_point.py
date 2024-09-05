@@ -13,8 +13,8 @@ from pyproj import CRS
 
 sys.path.append('../lidro')
 
-from lidro.create_virtual_point.pointcloud.convert_geodataframe_to_las import (
-    geodataframe_to_las,
+from lidro.create_virtual_point.pointcloud.convert_list_points_to_las import (
+    list_points_to_las,
 )
 from lidro.create_virtual_point.vectors.merge_skeleton_by_mask import (
     merge_skeleton_by_mask,
@@ -98,7 +98,7 @@ def main(config: DictConfig):
         ]
         logging.info("Calculate virtuals points by mask hydro and skeleton")
         # Save the virtual points (.LAS)
-        geodataframe_to_las(gdf_virtual_points, output_dir, crs, classes)
+        list_points_to_las(gdf_virtual_points, output_dir, crs, classes)
     else:
         logging.error("Error when merged all points around skeleton by lidar tile")
 

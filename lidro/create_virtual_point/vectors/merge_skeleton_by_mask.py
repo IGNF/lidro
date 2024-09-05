@@ -68,7 +68,7 @@ def merge_skeleton_by_mask(
     # # Perform a spatial join to find skeletons within each mask_hydro
     gdf_joined = gpd.sjoin(gdf_skeleton, gdf_mask_hydro, how="inner", predicate="intersects")
     # geometry intersections with funtion "overlay"
-    gdf_intersections = gpd.overlay(gdf_joined, gdf_mask_hydro, how="intersection")
+    gdf_intersections = gpd.overlay(gdf_joined, gdf_mask_hydro, how="intersection", keep_geom_type=True)
 
     # Combine skeleton lines into a single polyline for each hydro entity
     combined_skeletons = gdf_intersections.groupby("index_right")["geometry"].apply(combine_and_connect_lines)
@@ -103,7 +103,7 @@ def merge_skeleton_by_mask(
             gdf_mask_hydro, left_on="index_mask", right_index=True, suffixes=("_skeleton", "_mask")
         )
         # Keep only necessary columns
-        df_exclusion = df_exclusion[["geometry_skeleton", "geometry_mask"]]
+        df_exclusion = df_exclusion[["geometry_mask"]]  # df_exclusion[["geometry_skeleton", "geometry_mask"]]
         # Save the results and exclusions to separate GeoJSON files
         # Convert DataFrame to GeoDataFrame
         gdf_exclusion = gpd.GeoDataFrame(df_exclusion, geometry="geometry_mask")
