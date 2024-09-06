@@ -77,13 +77,14 @@ def main(config: DictConfig):
     # List match Z elevation values every N meters along the hydrographic skeleton
     df = pd.DataFrame(points_clip_list)
 
-    # Step 2: Smooth Z by hydro's section
+    # Step 2: Combine skeleton lines into a single polyline for each hydro entity
     if not df.empty and "points_knn" in df.columns and "geometry" in df.columns:
         points_gdf = gpd.GeoDataFrame(df, geometry="geometry")
         points_gdf.set_crs(crs, inplace=True)
         # Combine skeleton lines into a single polyline for each hydro entity
         gdf_merged = merge_skeleton_by_mask(input_skeleton, input_mask_hydro, output_dir, crs)
 
+        # Step 3 : Generate a regular grid of 3D points spaced every N meters inside each hydro entity
         list_virtual_points = [
             launch_virtual_points_by_section(
                 points_gdf,
@@ -97,7 +98,7 @@ def main(config: DictConfig):
             for idx, row in gdf_merged.iterrows()
         ]
         logging.info("Calculate virtuals points by mask hydro and skeleton")
-        # Save the virtual points (.LAS)
+        # Step 4 : Save the virtual points in a file (.LAZ)
         list_points_to_las(list_virtual_points, output_dir, crs, classes)
     else:
         logging.error("Error when merged all points around skeleton by lidar tile")
