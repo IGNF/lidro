@@ -22,7 +22,7 @@ def setup_module(module):
     os.makedirs(TMP_PATH)
 
 
-def test_geodataframe_to_las_default():
+def test_list_points_to_las_default():
     # Create a sample GeoDataFrame with virtual points (EPSG:2154)
     points = gpd.GeoDataFrame(
         {
