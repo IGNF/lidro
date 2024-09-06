@@ -6,7 +6,7 @@ import numpy as np
 import shapely.vectorized
 
 
-def generate_grid_from_geojson(mask_hydro: gpd.GeoDataFrame, spacing=0.5, margin=0):
+def generate_grid_from_geojson(mask_hydro: gpd.GeoDataFrame, spacing: float = 0.5, margin: float = 0):
     """
     Generates a regular 2D grid of evenly spaced points within a polygon defined
     in a GeoJSON file.
