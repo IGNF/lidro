@@ -83,13 +83,13 @@ def calculate_linear_regression_line(points: gpd.GeoDataFrame, line: gpd.GeoData
         }
     )
     # Linear regression with weights
-    coeff, SSE, *_ = np.polyfit(temp["ac"]["mean"], temp["z"]["quantile"], deg=1, full=True)
+    coeff, sse, _ = np.polyfit(temp["ac"]["mean"], temp["z"]["quantile"], deg=1, full=True)
 
-    # Calculate SST (TOTAL SQUARE SUN)
-    SST = np.sum((temp["z"]["quantile"] - np.mean(temp["z"]["quantile"])) ** 2)
+    # Calculate SST (TOTAL SQUARE SUM)
+    sst = np.sum((temp["z"]["quantile"] - np.mean(temp["z"]["quantile"])) ** 2)
 
     # Determination coefficient [0, 1]
-    r2 = 1 - (SSE / SST)
+    r2 = 1 - (sse / sst)
 
     model = np.poly1d(coeff)
 
