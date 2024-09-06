@@ -22,8 +22,7 @@ def return_points_by_line(points: gpd.GeoDataFrame, line: gpd.GeoDataFrame) -> g
     # Perform spatial join to find intersections
     pts_intersect = gpd.sjoin(points, gdf_line_buffer, how="left", predicate="intersects")
 
-    # Filter out rows where 'index_right' is NaN
-    pts_intersect = pts_intersect.dropna(subset=["index_right"])
-    pts_intersect = pts_intersect.dropna()  # Drop lines which contain one or more NaN values
+    # Drop lines which contain one or more NaN values
+    pts_intersect = pts_intersect.dropna()
 
     return pts_intersect
