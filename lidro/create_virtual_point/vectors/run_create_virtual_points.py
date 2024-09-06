@@ -57,8 +57,7 @@ def launch_virtual_points_by_section(
         # Save the resulting masks_without_points to a GeoJSON file
         output_mask_hydro_error = os.path.join(output_dir, "mask_hydro_no_virtual_points.geojson")
         masks_without_points.to_file(output_mask_hydro_error, driver="GeoJSON")
-
-    if not points.empty and not points["points_knn"].isnull().all():
+    else:
         # Step 1: Generates a regular 2D grid of evenly spaced points within a Mask Hydro
         gdf_grid = generate_grid_from_geojson(mask_hydro, spacing)
         # Calculate the length of the river
