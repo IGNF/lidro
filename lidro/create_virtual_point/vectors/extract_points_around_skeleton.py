@@ -63,7 +63,7 @@ def extract_points_around_skeleton_points_one_tile(
     logging.info(f"\nExtract a Z elevation value along the hydrographic skeleton for tile : {tilename}")
     points_Z = filter_las_around_point(points_skeleton_with_z_clip, points_clip, k)
 
-    if isinstance(points_Z, list) and len(points_Z) > 0:
+    if len(points_Z) > 0:
         # Limit the precision of coordinates using numpy arrays or tuples
         knn_points = [
             [[round(coord, 3) for coord in point] for point in item["points_knn"]]
