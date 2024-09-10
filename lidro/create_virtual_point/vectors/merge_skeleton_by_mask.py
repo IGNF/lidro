@@ -103,7 +103,7 @@ def merge_skeleton_by_mask(
             gdf_mask_hydro, left_on="index_mask", right_index=True, suffixes=("_skeleton", "_mask")
         )
         # Keep only necessary columns
-        df_exclusion = df_exclusion[["geometry_mask"]]  # df_exclusion[["geometry_skeleton", "geometry_mask"]]
+        df_exclusion = df_exclusion[["geometry_mask"]]
         # Save the results and exclusions to separate GeoJSON files
         # Convert DataFrame to GeoDataFrame
         gdf_exclusion = gpd.GeoDataFrame(df_exclusion, geometry="geometry_mask")
