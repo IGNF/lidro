@@ -25,22 +25,17 @@ def calculate_grid_z_with_model(points: gpd.GeoDataFrame, line: gpd.GeoDataFrame
     predicted_z = model(curvilinear_abs)
 
     # Generate a new geodataframe, with 3D points
-    grid_with_z = gpd.GeoDataFrame(
-        geometry=gpd.GeoSeries().from_xy(points.geometry.x, points.geometry.y, predicted_z), crs=points.crs
-    )
+    grid_with_z = calculate_grid_z(points, predicted_z)
 
     return grid_with_z
 
 
-def calculate_grid_z_for_flattening(
-    points: gpd.GeoDataFrame, line: gpd.GeoDataFrame, predicted_z: float
-) -> gpd.GeoDataFrame:
-    """Calculate Z for flattening
+def calculate_grid_z(points: gpd.GeoDataFrame, predicted_z: float) -> gpd.GeoDataFrame:
+    """Calculate Z grid
 
     Args:
         points (gpd.GeoDataFrame): A GeoDataFrame containing the grid points
-        line (gpd.GeoDataFrame): A GeoDataFrame containing each line from Hydro's Skeleton
-        predicted_z (float): predicted Z for flattening river
+        predicted_z (float): predicted Z for river
 
     Returns:
         gpd.GeoDataFrame: A GeoDataFrame of initial points, but with a Z.

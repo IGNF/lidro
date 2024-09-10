@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 
 from lidro.create_virtual_point.vectors.apply_Z_from_grid import (
-    calculate_grid_z_for_flattening,
+    calculate_grid_z,
     calculate_grid_z_with_model,
 )
 from lidro.create_virtual_point.vectors.create_grid_2D_inside_maskhydro import (
@@ -100,6 +100,6 @@ def launch_virtual_points_by_section(
                 )
                 masks_without_points.to_file(output_mask_hydro_error, driver="GeoJSON")
             # Apply flattening model at the rivers
-            gdf_grid_with_z = calculate_grid_z_for_flattening(gdf_grid, line, predicted_z)
+            gdf_grid_with_z = calculate_grid_z(gdf_grid, predicted_z)
 
         return gdf_grid_with_z

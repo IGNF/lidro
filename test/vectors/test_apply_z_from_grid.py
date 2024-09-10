@@ -3,7 +3,7 @@ import numpy as np
 from shapely.geometry import LineString, Point
 
 from lidro.create_virtual_point.vectors.apply_Z_from_grid import (
-    calculate_grid_z_for_flattening,
+    calculate_grid_z,
     calculate_grid_z_with_model,
 )
 
@@ -43,14 +43,11 @@ def test_calculate_grid_z_for_flattening():
     # Create a sample GeoDataFrame of points
     points = gpd.GeoDataFrame({"geometry": [Point(0, 0), Point(1, 1), Point(2, 2)]}, crs="EPSG:4326")
 
-    # Create a sample GeoDataFrame of line
-    line = gpd.GeoDataFrame({"geometry": [LineString([(0, 0), (2, 2)])]}, crs="EPSG:4326")
-
     # Predicted Z for flattening
     predicted_z = 10.0
 
     # Call the function to test
-    result = calculate_grid_z_for_flattening(points, line, predicted_z)
+    result = calculate_grid_z(points, predicted_z)
 
     # Check that the result is a GeoDataFrame
     assert isinstance(result, gpd.GeoDataFrame), "The result should be a GeoDataFrame"
