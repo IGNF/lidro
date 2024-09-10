@@ -64,8 +64,6 @@ def main(config: DictConfig):
         # Check if points_knn is a string and convert it to a list if necessary
         if isinstance(points_knn, str):
             points_knn = ast.literal_eval(points_knn)  # Convert the string to a list of lists
-
-        # Round each coordinate to 8 decimal places
         return [[round(coord, 3) for coord in point] for point in points_knn]
 
     points_clip_list = [
