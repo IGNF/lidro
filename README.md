@@ -39,7 +39,8 @@ Trois grands axes du processus à mettre en place en distanguant l'échelle de t
   * la suppression des aires < 150 m² (paramétrable)
   * la suppression des aires < 1000 m² hors BD IGN (grands cours d'eau < 5m de large)
 A noter que pour l'instant, la suppresion des masques hydrographiques en dehors des grands cours d'eau et le nettoyage de ces masques s'effectuent manuellement. Ce processus sera développé prochainement en automatique.
-* 3- Création de points virtuels le long de deux entités hydrographiques :
+* 3*- Pour les grands cours d'eaux, il existe une étape intermédaire : Création des squelettes internes des masques hydrographiques, c'est-à-dire les lignes internes indiquant le sens de l'écoulement de l'eau pour les grands cours d'eaux.
+* 4- Création de points virtuels le long de deux entités hydrographiques :
   * Grands cours d'eau (> 5 m de large dans la BD Unis).
   * Surfaces planes (mer, lac, étang, etc.) (pas encore développé)
 
@@ -131,7 +132,7 @@ Tester sur un dossier contenant plusieurs dalles LIDAR pour créer fusionner l'e
 ```
 example_merge_mask_default.sh
 ```
-* 3- Création des tronçons hydrographiques à l'échelle de/des entité(s) hydrographique(s)
+* 3- Création des tronçons hydrographiques à l'échelle de/des entité(s) hydrographique(s) (grands cours d'eaux)
 ```
 example_create_skeleton_lines.sh
 ```
@@ -158,24 +159,25 @@ Pour fonctionner, la création de squelettes a besoin d'une série de paramètre
 ```
 python lidro/main_create_skeleton_lines.py [nom_paramètre_1]=[valeur_du_paramètre_1] [nom_paramètre_2]=[valeur_du_paramètre_2]
 ```
-ces paramètres sont :  
-io.skeleton.mask_input_path : Le chemin d'entrée des masques des cours d'eau
-io.skeleton.skeleton_lines_output_path : Le chemin de sortie des squelettes uniquement (pas de fichier de sortie si laissé à vide)
-io.skeleton.gap_lines_output_path : Le chemin de sortie des lignes franchissant des ponts uniquement (pas de fichier de sortie si laissé à vide)
-io.skeleton.global_lines_output_path : Le chemin de sortie des lignes et des squelettes ensemble
+Généralement, sont mis dans le fichier de config ceux qui changent rarement (srid par défaut, port de connexion à la base de données...), et sont passés en paramètres les éléments qui changent souvent (chemins de fichiers d'entrée et de sortie) ou ce qu'il ne faut théoriquement pas stocker (credentials).
 
-skeleton.max_gap_width : La distance maximale envisagée pour franchir des ponts
-skeleton.max_bridges : Le nombre maximal de ponts entre deux bras séparés de cours d'eau
-skeleton.gap_width_check_db : La distance à partir de laquelle on vérifie via la base de données s'il y a bien un pont
-skeleton.ratio_gap : la proportion de la ligne franchissant un pont qui est comparé en base pour voir s'il y a bien un pont (trop grande et on pourrait trouver un pont qui ne correspond pas)
+Options généralement passées en paramètres :
+* io.skeleton.mask_input_path : Le chemin du fichier d'entrée contenant les masques de cours d'eau
+* io.skeleton.global_lines_output_path : Le chemin du fichier de sortie contenant toutes les lignes
+* io.skeleton.skeleton_lines_output_path : Le chemin du fichier de sortie contenant uniquement les lignes internes (facultatif) 
 
-skeleton.db_uni.db_using_db : # Si à faux, la base de données ne sera pas utilisée (prévu pour être utilisé que s'il n'y pas d'accès à la base de données)
-skeleton.db_uni.db_name : Le nom de la base de données
-skeleton.db_uni.db_host : l'adresse de la base de données
-skeleton.db_uni.db_user : L'utilisateur de la base de données
-skeleton.db_uni.db_password : Le mot de passe de l'utilisateur. ATTENTION ! S'il y a des charactères spéciaux, il peut être nécessaire de les écrire ainsi : "skeleton.db_uni.db_password='$tr@ng€_ch@r@ct€r$'" (notez les " et les '). Si cela ne fonctionne toujours pas, peut-être essayer de jongler un peu avec ces ponctuations pour trouver celle qui fonctionne.  
-skeleton.db_uni.db_port : La port de connexion avec la base de données
+* skeleton.max_gap_width : La distance maximale envisagée pour franchir des ponts.
+* skeleton.max_bridges : Le nombre maximal de ponts entre deux bras séparés de cours d'eau différent.
+* skeleton.gap_width_check_db : La distance à partir de laquelle on vérifie via la base de données s'il y a bien un pont.
+* skeleton.ratio_gap : La proportion de la ligne franchissant un pont qui est comparé en base pour voir s'il y a bien un pont (trop grande et on pourrait trouver un pont qui ne correspond pas).
 
-skeleton.branch.voronoi_max_length : LA longuer maximum des lignes individuelles des squelettes
-skeleton.branch.water_min_size : La longueur minimal à partir de laquelle une ligne de squelette sera automatiquement gardée (trop petite, et il y aura des sortes "d'aiguilles" qui apparaitront. Trop grande, et certains afluents ne seront pas détectés)
-skeleton.branch.max_gap_candidates : Le nombre maximum de candidats pour envisager de franchir des ponts entre deux bras
+* skeleton.db_uni.db_using_db : Si le paramètre est à faux, la base de données ne sera pas utilisée (prévu pour être utilisé que s'il n'y pas d'accès à la base de données).
+* skeleton.db_uni.db_name : Le nom de la base de données.
+* skeleton.db_uni.db_host : L'adresse de la base de données.
+* skeleton.db_uni.db_user : L'utilisateur de la base de données.
+* skeleton.db_uni.db_password : Le mot de passe de l'utilisateur. ATTENTION ! S'il y a des charactères spéciaux, il peut être nécessaire de les écrire ainsi : "skeleton.db_uni.db_password='$tr@ng€_ch@r@ct€r$'" (notez les " et les '). Si cela ne fonctionne toujours pas, peut-être essayer de jongler un peu avec ces ponctuations pour trouver celle qui fonctionne.  
+* skeleton.db_uni.db_port : La port de connexion avec la base de données.
+
+* skeleton.branch.voronoi_max_length : La longueur maximum des lignes individuelles des squelettes.
+* skeleton.branch.water_min_size : La longueur minimal à partir de laquelle une ligne de squelette sera automatiquement gardée (trop petite, et il y aura des sortes "d'aiguilles" qui apparaitront. Trop grande, et certains afluents ne seront pas détectés).
+* skeleton.branch.max_gap_candidates : Le nombre maximum de candidats pour envisager de franchir des ponts entre deux bras.
