@@ -32,6 +32,5 @@ def find_k_nearest_neighbors(points_skeleton: np.array, points_ground_3d: np.arr
     # Retrieve the points corresponding to the indices
     # Use indices  to retrieve the closest 3D points
     k_nearest_points = points_ground_3d[indices[0]]
-    # = points_3d[indices.flatten()]
 
     return k_nearest_points

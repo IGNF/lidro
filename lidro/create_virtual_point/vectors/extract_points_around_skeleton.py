@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 """ Extract points around skeleton by tile
 """
+import json
 import logging
 import os
 from typing import List
 
 import geopandas as gpd
+import pandas as pd
 from pdaltools.las_info import las_get_xy_bounds
 from shapely.geometry import Point
 
@@ -21,8 +23,10 @@ from lidro.create_virtual_point.vectors.las_around_point import filter_las_aroun
 def extract_points_around_skeleton_points_one_tile(
     filename: str,
     input_dir: str,
+    output_dir: str,
     input_mask_hydro_buffer: gpd.GeoDataFrame,
     points_skeleton_gdf: gpd.GeoDataFrame,
+    crs: str | int,
     classes: List[int:int],
     k: int,
 ):
@@ -33,13 +37,12 @@ def extract_points_around_skeleton_points_one_tile(
     Args:
         filename (str): filename to the LAS file
         input_dir (str): input folder
+        output_dir (str): ouput folder
         input_mask_hydro_buffer (gpd.GeoDataFrame): hydro mask with buffer
-        points_skeleton_gdf (gpd.GeoDataFrame): Points every 2 meters (by default) along skeleton hydro
+        points_skeleton_gdf (gpd.GeoDataFrame): Points every N meters along skeleton hydro
+        crs (str | int): Make a CRS from an EPSG code : CRS WKT string
         classes (List):  List of classes to use for the filtering
         k (int): the number of nearest neighbors to find
-
-    Returns:
-        points_clip (np.array) : Numpy array containing point coordinates (X, Y, Z) after filtering and croping
     """
     # Step 1 : Crop filtered pointcloud by Mask Hydro with buffer
     input_dir_points = os.path.join(input_dir, "pointcloud")
@@ -58,6 +61,27 @@ def extract_points_around_skeleton_points_one_tile(
     ]
     # Step 2 : Extract a Z elevation value along the hydrographic skeleton
     logging.info(f"\nExtract a Z elevation value along the hydrographic skeleton for tile : {tilename}")
-    result = filter_las_around_point(points_skeleton_with_z_clip, points_clip, k)
+    points_Z = filter_las_around_point(points_skeleton_with_z_clip, points_clip, k)
 
-    return result
+    if len(points_Z) > 0:
+        # Limit the precision of coordinates using numpy arrays or tuples
+        knn_points = [
+            [[round(coord, 3) for coord in point] for point in item["points_knn"]]
+            for item in points_Z
+            if len(item["points_knn"]) > 0 and isinstance(item["geometry"], Point)
+        ]
+        # Create a DataFrame with lists or numpy arrays
+        df_points_z = pd.DataFrame({"geometry": [item["geometry"] for item in points_Z], "points_knn": knn_points})
+
+        # Encode the 'points_knn' lists as JSON
+        df_points_z["points_knn"] = df_points_z["points_knn"].apply(lambda x: json.dumps(x))
+
+        # Convert DataFrame to GeoDataFrame
+        gdf_points_z = gpd.GeoDataFrame(df_points_z, geometry="geometry")
+        gdf_points_z.set_crs(crs, inplace=True)
+
+        # Save the GeoDataFrame to a GeoJSON file
+        output_geojson_path = os.path.join(output_dir, "_points_skeleton".join([tilename, ".geojson"]))
+        gdf_points_z.to_file(output_geojson_path, driver="GeoJSON")
+
+        logging.info(f"Result saved to {output_geojson_path}")
