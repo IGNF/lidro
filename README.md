@@ -162,10 +162,15 @@ On peut soit les y modifier, soit les modifer en ligne de commande lors de l'ex�
 python -m lidro.main_create_mask [nom_paramètre_1]=[valeur_du_paramètre_1] [nom_paramètre_2]=[valeur_du_paramètre_2]
 ```
 Options généralement passées en paramètres :
+* io.input_dir : Le chemin du dossier contenant les tuiles LIDAR
+* io.output_dir : Le chemin du dossier de sortie (Les masques hydro à l'échelle de la dalle LIDAR)
 * io.pixel_size : La distance entre chaque nœud de la grille raster en mètres (taille du pixel)
 * io.tile_size : La taille de la grille raster (en mètres)
+
+Autres paramètres disponibles :
 * mask_generation.filter.keep_classes : Les classes LIDAR considérées comme "non eau" utilisées pour générer les masques hydro
 * mask_generation.raster.dilatation_size : La taille pour la dilation du raster binaire "eau"
+
 
 Lors de la fusion des masques hydro, plusieurs paramètres peuvent également être utilisés.
 On peut soit les y modifier, soit les modifer en ligne de commande lors de l'exécution du script avec :
@@ -173,6 +178,10 @@ On peut soit les y modifier, soit les modifer en ligne de commande lors de l'ex�
 python -m lidro.main_merge_mask  [nom_paramètre_1]=[valeur_du_paramètre_1] [nom_paramètre_2]=[valeur_du_paramètre_2]
 ```
 Options généralement passées en paramètres :
+* io.input_dir : Le chemin du dossier contenant les différents masques hydrographiques (.GeoJSON)
+* io.output_dir : Le chemin du dossier de sortie (Masque Hydro fusionné)
+
+Autres paramètres disponibles :
 * mask_generation.vector.min_water_area : La superficie minimal en m² des masques hydro à conserver
 * mask_generation.vector.buffer_positive : La taille en mètres de la zone tampon "positive" appliquée aux masques hydro
 * mask_generation.vector.buffer_negative : La taille en mètres de la zone tampon "négative" appliquée aux masques hydro
@@ -191,18 +200,17 @@ Options généralement passées en paramètres :
 * io.skeleton.global_lines_output_path : Le chemin du fichier de sortie contenant toutes les lignes
 * io.skeleton.skeleton_lines_output_path : Le chemin du fichier de sortie contenant uniquement les lignes internes (facultatif) 
 
+Autres paramètres disponibles :
 * skeleton.max_gap_width : La distance maximale envisagée pour franchir des ponts.
 * skeleton.max_bridges : Le nombre maximal de ponts entre deux bras séparés de cours d'eau différent.
 * skeleton.gap_width_check_db : La distance à partir de laquelle on vérifie via la base de données s'il y a bien un pont.
 * skeleton.ratio_gap : La proportion de la ligne franchissant un pont qui est comparé en base pour voir s'il y a bien un pont (trop grande et on pourrait trouver un pont qui ne correspond pas).
-
 * skeleton.db_uni.db_using_db : Si le paramètre est à faux, la base de données ne sera pas utilisée (prévu pour être utilisé que s'il n'y pas d'accès à la base de données).
 * skeleton.db_uni.db_name : Le nom de la base de données.
 * skeleton.db_uni.db_host : L'adresse de la base de données.
 * skeleton.db_uni.db_user : L'utilisateur de la base de données.
 * skeleton.db_uni.db_password : Le mot de passe de l'utilisateur. ATTENTION ! S'il y a des charactères spéciaux, il peut être nécessaire de les écrire ainsi : "skeleton.db_uni.db_password='$tr@ng€_ch@r@ct€r$'" (notez les " et les '). Si cela ne fonctionne toujours pas, peut-être essayer de jongler un peu avec ces ponctuations pour trouver celle qui fonctionne.  
 * skeleton.db_uni.db_port : La port de connexion avec la base de données.
-
 * skeleton.branch.voronoi_max_length : La longueur maximum des lignes individuelles des squelettes.
 * skeleton.branch.water_min_size : La longueur minimal à partir de laquelle une ligne de squelette sera automatiquement gardée (trop petite, et il y aura des sortes "d'aiguilles" qui apparaitront. Trop grande, et certains afluents ne seront pas détectés).
 * skeleton.branch.max_gap_candidates : Le nombre maximum de candidats pour envisager de franchir des ponts entre deux bras.
@@ -214,6 +222,13 @@ On peut soit les y modifier, soit les modifer en ligne de commande lors de l'ex�
 python -m lidro.main_create_virtual_points [nom_paramètre_1]=[valeur_du_paramètre_1] [nom_paramètre_2]=[valeur_du_paramètre_2]
 ```
 Options généralement passées en paramètres :
+* io.input_dir : Le chemin du dossier contenant l'ensemble des données d'entrée (ex. "./data/")
+* io.input_mask_hydro : Le chemin contenant le masque hydro fusionné (ex."./data/merge_mask_hydro/MaskHydro_merge.geosjon")
+* io.input_skeleton= Le chemin contenant le squelette hydrographique (ex. "./data/skeleton_hydro/Skeleton_Hydro.geojson")
+* io.dir_points_skeleton : Le chemin contenant l'ensemble des N points du squelette créés à l'échelle des dalles LIDAR ( ex. "./tmp/point_skeleton/")
+* io.output_dir :  Le chemin du dossier de sortie (les points virtuels intégrés dans chaque dalle LIDAR)
+
+Autres paramètres disponibles :
 * virtual_point.filter.keep_neighbors_classes : Les classes LIDAR (par défaut "sol" et "eau") à conserver pour analyser les bordures de berges le long des grands cours d'eaux
 * virtual_point.vector.distance_meter : La distance en mètres entre deux points consécutifs le long des squelettes hydrographiques
 * virtual_point.vector.buffer : La taille de la zone tampon en mètres pour trouver les points LIDAR
