@@ -62,7 +62,7 @@ Pour les cours d'eau supérieurs à 150 m de long :
   * Création des points virtuels 2D espacés selon une grille régulière tous les N mètres (paramétrable) à l'intérieur du masque hydrographique "écoulement"
   * Affecter une valeur d'altitude à ces points virtuels en fonction des "Z" calculés à l'étape précédente (interpolation linéaire ou aplanissement)
 
-### Traitement des surfaces planes (mer, lac, étang, etc.)
+### Traitement des surfaces planes (mer, lac, étang, etc.) (EN ATTENTE)
 Pour rappel, l'eau est considérée comme horizontale sur ce type de surface.
 / ! \ EN ATTENTE / ! \
 Il existe plusieurs étapes intermédiaires :
@@ -127,24 +127,24 @@ Tester sur un dossier contenant plusieurs dalles LIDAR pour créer un/des masque
 ```
 example_create_mask_default.sh
 ```
+
 * 2- Créer un masque hydrographiques fusionné et nettoyé à l'échelle de l'ensemble de l'ensemble des dalles LIDAR
 Tester sur un dossier contenant plusieurs dalles LIDAR pour créer fusionner l'ensemble des masques hydrographiques 
 ```
 example_merge_mask_default.sh
 ```
-* 3- Création des tronçons hydrographiques à l'échelle de/des entité(s) hydrographique(s) (grands cours d'eaux)
+
+* 3*- Création des tronçons hydrographiques à l'échelle de/des entité(s) hydrographique(s) (A FAIRE uniquement pour les grands cours d'eaux)
 ```
 example_create_skeleton_lines.sh
 ```
 
-* 4- Création des points virtuels
-
+* 4- Création des points virtuels (grille régulière tous les N mètres) à l'intérieur des grands cours d'eaux
 A. Tester sur un dossier contenant plusieurs dalles LIDAR pour créer des points tous les N mètres le long du squelette hydrographique, et réccupérer les N plus proches voisins points LIDAR "SOL"
 ```
 example_extract_points_around_skeleton_default.sh
 ```
-
-B. Tester sur un dossier contenant plusieurs dalles LIDAR pour créer des points virtuels 3D à l'intérieurs des masques hydrographiques 
+B. Tester sur un dossier contenant plusieurs dalles LIDAR pour créer des points virtuels 3D à l'intérieurs des grands cours d'eaux
 ```
 example_create_virtual_point_default.sh
 ```
@@ -154,7 +154,32 @@ Pour lancer les tests :
 ```
 python -m pytest -s
 ```
-### paramètres pour créer les squelettes des cours d'eau
+
+### Paramètres pour créer les masques hydro des grands cours d'eaux
+Pour fonctionner, la création des masques hydro a besoin d'une série de paramètres, certains ayant une valeur par défaut, d'autres non. Les paramètres se trouvent dans le fichier configs/configs_lidro.yaml. 
+On peut soit les y modifier, soit les modifer en ligne de commande lors de l'exécution du script avec :
+```
+python -m lidro.main_create_mask [nom_paramètre_1]=[valeur_du_paramètre_1] [nom_paramètre_2]=[valeur_du_paramètre_2]
+```
+Options généralement passées en paramètres :
+* io.pixel_size : La distance entre chaque nœud de la grille raster en mètres (taille du pixel)
+* io.tile_size : La taille de la grille raster (en mètres)
+* mask_generation.filter.keep_classes : Les classes LIDAR considérées comme "non eau" utilisées pour générer les masques hydro
+* mask_generation.raster.dilatation_size : La taille pour la dilation du raster binaire "eau"
+
+Lors de la fusion des masques hydro, plusieurs paramètres peuvent également être utilisés.
+On peut soit les y modifier, soit les modifer en ligne de commande lors de l'exécution du script avec :
+```
+python -m lidro.main_merge_mask  [nom_paramètre_1]=[valeur_du_paramètre_1] [nom_paramètre_2]=[valeur_du_paramètre_2]
+```
+Options généralement passées en paramètres :
+* mask_generation.vector.min_water_area : La superficie minimal en m² des masques hydro à conserver
+* mask_generation.vector.buffer_positive : La taille en mètres de la zone tampon "positive" appliquée aux masques hydro
+* mask_generation.vector.buffer_negative : La taille en mètres de la zone tampon "négative" appliquée aux masques hydro
+* mask_generation.vector.tolerance : La distance de tolérance en mètres pour appliquer l'algorithme de Douglas-Peucker sur les masques hydro
+
+
+### Paramètres pour créer les squelettes hydrographiques des grands cours d'eaux
 Pour fonctionner, la création de squelettes a besoin d'une série de paramètres, certains ayant une valeur par défaut, d'autres non. Les paramètres se trouvent dans le fichier configs/configs_lidro.yaml. On peut soit les y modifier, soit les modifer en ligne de commande lors de l'exécution du script avec :
 ```
 python lidro/main_create_skeleton_lines.py [nom_paramètre_1]=[valeur_du_paramètre_1] [nom_paramètre_2]=[valeur_du_paramètre_2]
@@ -181,3 +206,18 @@ Options généralement passées en paramètres :
 * skeleton.branch.voronoi_max_length : La longueur maximum des lignes individuelles des squelettes.
 * skeleton.branch.water_min_size : La longueur minimal à partir de laquelle une ligne de squelette sera automatiquement gardée (trop petite, et il y aura des sortes "d'aiguilles" qui apparaitront. Trop grande, et certains afluents ne seront pas détectés).
 * skeleton.branch.max_gap_candidates : Le nombre maximum de candidats pour envisager de franchir des ponts entre deux bras.
+
+### Paramètres pour créer les points virtuels (grille régulière tous les N mètres) à l'intérieur des grands cours d'eaux
+Pour fonctionner, la création des points virtuels a besoin d'une série de paramètres, certains ayant une valeur par défaut, d'autres non. Les paramètres se trouvent dans le fichier configs/configs_lidro.yaml. 
+On peut soit les y modifier, soit les modifer en ligne de commande lors de l'exécution du script avec :
+```
+python -m lidro.main_create_virtual_points [nom_paramètre_1]=[valeur_du_paramètre_1] [nom_paramètre_2]=[valeur_du_paramètre_2]
+```
+Options généralement passées en paramètres :
+* virtual_point.filter.keep_neighbors_classes : Les classes LIDAR (par défaut "sol" et "eau") à conserver pour analyser les bordures de berges le long des grands cours d'eaux
+* virtual_point.vector.distance_meter : La distance en mètres entre deux points consécutifs le long des squelettes hydrographiques
+* virtual_point.vector.buffer : La taille de la zone tampon en mètres pour trouver les points LIDAR
+* virtual_point.vector.k : Le nombre de voisins les plus proches à trouver avec KNN
+* virtual_point.vector.river_length : La longueur minimale en mètres d'une rivière pour utiliser le modèle de régression linéaire
+* pointcloud.points_grid_spacing : L'espacement entre les points de la grille en mètres
+* pointcloud.virtual_points_classes : Le choix du numéro de classification pour les points virtuels dans les nuages de points LIDAR
