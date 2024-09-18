@@ -2,6 +2,7 @@
 """ This function automatically creates the tiling of lidar tiles (.GeoJSON)
 """
 import logging
+import math
 import os
 from typing import List
 
@@ -78,7 +79,8 @@ def create_geojson_from_laz_files(laz_files: List, output_geojson_path: str, crs
     # Create a list of dictionaries representing the tiles
     tiles = [
         {
-            "tile_id": os.path.basename(laz_file),
+            "tile_id": str(int(min_x)) + "_" + str(math.ceil(max_y / 1000) * 1000),
+            "tilename_las": os.path.basename(laz_file),
             "geometry": Polygon([(min_x, min_y), (max_x, min_y), (max_x, max_y), (min_x, max_y)]),
         }
         for laz_file in laz_files
