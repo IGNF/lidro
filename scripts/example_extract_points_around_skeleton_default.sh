@@ -4,10 +4,10 @@ io.input_dir=./data/ \
 io.input_mask_hydro=./data/merge_mask_hydro/MaskHydro_merge.geosjon \
 io.input_skeleton=./data/skeleton_hydro/Skeleton_Hydro.geojson \
 io.output_dir=./tmp/points_skeleton/ \
-io.virtual_point.vector.distance_meters=5 \
-io.virtual_point.vector.buffer=3 \
-io.virtual_point.vector.k=3 \
-io.virtual_point.filter.keep_neighbors_classes="[2, 9]" \ 
+virtual_point.vector.distance_meters=5 \
+virtual_point.vector.buffer=3 \
+virtual_point.vector.k=3 \
+virtual_point.filter.keep_neighbors_classes="[2, 9]" \ 
 
 
 
