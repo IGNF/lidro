@@ -54,3 +54,4 @@ def test_main_lidro_input_file():
         )
     main(cfg)
     assert (Path(output_dir) / "virtual_points.laz").is_file()
+    assert (Path(output_dir) / "tiles_from_las.GeoJSON").is_file()
