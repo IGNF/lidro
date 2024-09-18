@@ -51,6 +51,7 @@ def run(config: DictConfig):
         branch: Branch
         branch.create_skeleton()
         branch.simplify()
+        branch.shorten_lines()
 
     # putting all skeleton lines together, and save them if there is a path
     branch_lines_list = [branch.gdf_skeleton_lines for branch in branches_list]
