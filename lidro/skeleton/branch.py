@@ -324,15 +324,14 @@ def cut(line: LineString, distance: float)  -> LineString:
             previous_point = point
             continue
         elif distance == segment.length:
-            return LineString(reversed(coords[:1 + index]))  # reversed to put the line back in the correct order 
+            return LineString(reversed(coords[:2 + index]))  # reversed to put the line back in the correct order 
         else:  # distance < segment.length
             cutting_point = segment.interpolate(distance)
             return LineString(reversed(coords[:index + 1] + [(cutting_point.x, cutting_point.y)]))
 
 
 def cut_both_ends(line: LineString, distance: float)  -> LineString:
-    # get a cut distance equal on each side
-    half_distance = max(0, min(line.length - 2, distance) / 2)  # max(0,...) to garanty a positive distance
+    half_distance = max(0, min(line.length - 1, distance * 2) / 2)  # max(0,...) to garanty a positive distance
     half_line = cut(line, half_distance)
     return cut(LineString(reversed(half_line.coords)), half_distance)
 

@@ -170,6 +170,7 @@ Options généralement passées en paramètres :
 * skeleton.max_bridges : Le nombre maximal de ponts entre deux bras séparés de cours d'eau différent.
 * skeleton.gap_width_check_db : La distance à partir de laquelle on vérifie via la base de données s'il y a bien un pont.
 * skeleton.ratio_gap : La proportion de la ligne franchissant un pont qui est comparé en base pour voir s'il y a bien un pont (trop grande et on pourrait trouver un pont qui ne correspond pas).
+* skeleton.clipping_length : Indique de quelle longueur doivent être raccourcies les lignes des squelettes. Ces lignes feront toujorus au moins 1m de longueur.
 
 * skeleton.db_uni.db_using_db : Si le paramètre est à faux, la base de données ne sera pas utilisée (prévu pour être utilisé que s'il n'y pas d'accès à la base de données).
 * skeleton.db_uni.db_name : Le nom de la base de données.
