@@ -306,12 +306,13 @@ class Branch:
             new_line = cut_both_ends(line, self.config.skeleton.clipping_length)
             self.gdf_skeleton_lines.loc[self.gdf_skeleton_lines['geometry'] == line, 'geometry'] = new_line
 
-def cut(line: LineString, distance: float)  -> LineString:
+
+def cut(line: LineString, distance: float) -> LineString:
     """Cuts a line at a distance from its ending point. The minimum length left is 1"""
     # limit the distance cut so we are left with 1m at least
     distance = max(0, min(line.length - 1, distance))  # max(0,...) to garanty a positive distance
 
-    # reverse the distance and the coords so we don't measure the distance cut but the 
+    # reverse the distance and the coords so we don't measure the distance cut but the
     # distance kept to avoid dragging "reverse" and -index
     distance = line.length - distance
     coords = list(reversed(line.coords))
@@ -324,13 +325,13 @@ def cut(line: LineString, distance: float)  -> LineString:
             previous_point = point
             continue
         elif distance == segment.length:
-            return LineString(reversed(coords[:2 + index]))  # reversed to put the line back in the correct order 
+            return LineString(reversed(coords[:2 + index]))  # reversed to put the line back in the correct order
         else:  # distance < segment.length
             cutting_point = segment.interpolate(distance)
             return LineString(reversed(coords[:index + 1] + [(cutting_point.x, cutting_point.y)]))
 
 
-def cut_both_ends(line: LineString, distance: float)  -> LineString:
+def cut_both_ends(line: LineString, distance: float) -> LineString:
     half_distance = max(0, min(line.length - 1, distance * 2) / 2)  # max(0,...) to garanty a positive distance
     half_line = cut(line, half_distance)
     return cut(LineString(reversed(half_line.coords)), half_distance)

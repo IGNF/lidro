@@ -161,6 +161,7 @@ def test_creation_skeleton_lines():
 
         assert extremities_cpt == 3  # check that this branch's skeleton has exactly 3 extremities
 
+
 def test_cut():
     point_0_0 = [0, 0]
     point_0_1 = [0, 1]
@@ -179,7 +180,7 @@ def test_cut():
 
     # check that a correct new point has been created
     result_line = cut(line, 3)
-    assert (0,3) in result_line.coords
+    assert (0, 3) in result_line.coords
 
     # check that the cut keeps 1m of the line
     result_line = cut(line, 8)
@@ -210,6 +211,7 @@ def test_cut_both_ends():
     # check that the cut keeps 1m of the line
     result_line = cut_both_ends(line, 8)
     assert result_line.length == 1
+
 
 def test_shorten_lines():
     """test creation/simplification of skeleton lines for a branch"""
