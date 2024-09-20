@@ -271,6 +271,71 @@ class Branch:
 
         return gpd.GeoDataFrame(lines_filter, crs=self.crs)
 
+    def shorten_lines(self):
+        vertices_dict = get_vertices_dict(self.gdf_skeleton_lines)
+
+        single_cut_dict = {}
+        double_cut_list = []
+
+        for vertex, line_list in vertices_dict.items():
+
+            # we care only about lines that are extremities (i.e: with no other line on the same vertex)
+            if not len(line_list) == 1:
+                continue
+
+            # determine with the line is cut both ends (i.e: the line has twice an extremity)
+            line = line_list[0]
+            if line in single_cut_dict:
+                single_cut_dict.pop(line)
+                double_cut_list.append(line)
+            else:
+                single_cut_dict[line] = vertex
+
+        # single cut
+        for line, vertex in single_cut_dict.items():
+            start_point = Point(line.coords[0])
+            end_point = Point(line.coords[-1])
+            if start_point == vertex:
+                new_line = cut(line, self.config.skeleton.clipping_length)
+            elif end_point == vertex:
+                new_line = cut(LineString(reversed(line.coords)), self.config.skeleton.clipping_length)
+            self.gdf_skeleton_lines.loc[self.gdf_skeleton_lines['geometry'] == line, 'geometry'] = new_line
+
+        # double cut
+        for line in double_cut_list:
+            new_line = cut_both_ends(line, self.config.skeleton.clipping_length)
+            self.gdf_skeleton_lines.loc[self.gdf_skeleton_lines['geometry'] == line, 'geometry'] = new_line
+
+
+def cut(line: LineString, distance: float) -> LineString:
+    """Cuts a line at a distance from its ending point. The minimum length left is 1"""
+    # limit the distance cut so we are left with 1m at least
+    distance = max(0, min(line.length - 1, distance))  # max(0,...) to garanty a positive distance
+
+    # reverse the distance and the coords so we don't measure the distance cut but the
+    # distance kept to avoid dragging "reverse" and -index
+    distance = line.length - distance
+    coords = list(reversed(line.coords))
+
+    previous_point = coords[0]
+    for index, point in enumerate(coords[1:]):
+        segment = LineString([previous_point, point])
+        if distance > segment.length:
+            distance = distance - segment.length
+            previous_point = point
+            continue
+        elif distance == segment.length:
+            return LineString(reversed(coords[:2 + index]))  # reversed to put the line back in the correct order
+        else:  # distance < segment.length
+            cutting_point = segment.interpolate(distance)
+            return LineString(reversed(coords[:index + 1] + [(cutting_point.x, cutting_point.y)]))
+
+
+def cut_both_ends(line: LineString, distance: float) -> LineString:
+    half_distance = max(0, min(line.length - 1, distance * 2) / 2)  # max(0,...) to garanty a positive distance
+    half_line = cut(line, half_distance)
+    return cut(LineString(reversed(half_line.coords)), half_distance)
+
 
 def get_df_points_from_gdf(gdf: GeoDataFrame) -> pd.DataFrame:
     """

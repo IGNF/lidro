@@ -196,15 +196,18 @@ python lidro/main_create_skeleton_lines.py [nom_paramètre_1]=[valeur_du_paramè
 Généralement, sont mis dans le fichier de config ceux qui changent rarement (srid par défaut, port de connexion à la base de données...), et sont passés en paramètres les éléments qui changent souvent (chemins de fichiers d'entrée et de sortie) ou ce qu'il ne faut théoriquement pas stocker (credentials).
 
 Options généralement passées en paramètres :
-* io.skeleton.mask_input_path : Le chemin du fichier d'entrée contenant les masques de cours d'eau
-* io.skeleton.global_lines_output_path : Le chemin du fichier de sortie contenant toutes les lignes
-* io.skeleton.skeleton_lines_output_path : Le chemin du fichier de sortie contenant uniquement les lignes internes (facultatif) 
+* io.skeleton.mask_input_path : Le chemin du fichier d'entrée contenant les masques de cours d'eau 
+* io.skeleton.skeleton_lines_output_path : Le chemin du fichier de sortie contenant uniquement les lignes reliant les emprises de cours d'eau (optionnel)
+* io.skeleton.skeleton_lines_output_path : Le chemin du fichier de sortie contenant uniquement les lignes internes (optionnel)
+* io.skeleton.global_lines_output_path : Le chemin du fichier de sortie contenant toutes les lignes (optionnel)
 
 Autres paramètres disponibles :
 * skeleton.max_gap_width : La distance maximale envisagée pour franchir des ponts.
 * skeleton.max_bridges : Le nombre maximal de ponts entre deux bras séparés de cours d'eau différent.
 * skeleton.gap_width_check_db : La distance à partir de laquelle on vérifie via la base de données s'il y a bien un pont.
 * skeleton.ratio_gap : La proportion de la ligne franchissant un pont qui est comparé en base pour voir s'il y a bien un pont (trop grande et on pourrait trouver un pont qui ne correspond pas).
+* skeleton.clipping_length : Indique de quelle longueur doivent être raccourcies les lignes des squelettes. Ces lignes feront toujorus au moins 1m de longueur.
+
 * skeleton.db_uni.db_using_db : Si le paramètre est à faux, la base de données ne sera pas utilisée (prévu pour être utilisé que s'il n'y pas d'accès à la base de données).
 * skeleton.db_uni.db_name : Le nom de la base de données.
 * skeleton.db_uni.db_host : L'adresse de la base de données.

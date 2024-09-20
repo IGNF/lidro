@@ -49,6 +49,7 @@ skeleton:
   ratio_gap: 0.25 # when checking if a candidate line to close a gap intersects a bridge in BD UNI, that's the ratio ]0.1] of the line to consider.
                   # we only check part of the line, because when the line is really long it can intersect with bridges not corresponding to that line,
                   # so we make the line smaller
+  clipping_length: 1 #  length removed from extremities (min length of a line : 1m)
 
   db_uni:
     db_using_db: True # if false, the DB won't be queried (expected to be used only in case you don't have access to the database)
