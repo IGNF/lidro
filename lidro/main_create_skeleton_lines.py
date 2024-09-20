@@ -59,10 +59,11 @@ def run(config: DictConfig):
     if config.io.skeleton.skeleton_lines_output_path:
         gdf_branch_lines.to_file(config.io.skeleton.skeleton_lines_output_path, driver='GeoJSON')
 
-    # saving all lines
-    gdf_global_lines = gpd.GeoDataFrame(pd.concat([gdf_branch_lines, gdf_gap_lines], ignore_index=True))
-    gdf_global_lines = line_merge(gdf_global_lines, crs)  # merge lines into polylines
-    gdf_global_lines.to_file(config.io.skeleton.global_lines_output_path, driver='GeoJSON')
+    # saving all lines if there is a path
+    if config.io.skeleton.global_lines_output_path:
+        gdf_global_lines = gpd.GeoDataFrame(pd.concat([gdf_branch_lines, gdf_gap_lines], ignore_index=True))
+        gdf_global_lines = line_merge(gdf_global_lines, crs)  # merge lines into polylines
+        gdf_global_lines.to_file(config.io.skeleton.global_lines_output_path, driver='GeoJSON')
 
 
 if __name__ == "__main__":

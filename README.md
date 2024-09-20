@@ -196,9 +196,10 @@ python lidro/main_create_skeleton_lines.py [nom_paramètre_1]=[valeur_du_paramè
 Généralement, sont mis dans le fichier de config ceux qui changent rarement (srid par défaut, port de connexion à la base de données...), et sont passés en paramètres les éléments qui changent souvent (chemins de fichiers d'entrée et de sortie) ou ce qu'il ne faut théoriquement pas stocker (credentials).
 
 Options généralement passées en paramètres :
-* io.skeleton.mask_input_path : Le chemin du fichier d'entrée contenant les masques de cours d'eau
-* io.skeleton.global_lines_output_path : Le chemin du fichier de sortie contenant toutes les lignes
-* io.skeleton.skeleton_lines_output_path : Le chemin du fichier de sortie contenant uniquement les lignes internes (facultatif) 
+* io.skeleton.mask_input_path : Le chemin du fichier d'entrée contenant les masques de cours d'eau 
+* io.skeleton.skeleton_lines_output_path : Le chemin du fichier de sortie contenant uniquement les lignes reliant les emprises de cours d'eau (optionnel)
+* io.skeleton.skeleton_lines_output_path : Le chemin du fichier de sortie contenant uniquement les lignes internes (optionnel)
+* io.skeleton.global_lines_output_path : Le chemin du fichier de sortie contenant toutes les lignes (optionnel)
 
 Autres paramètres disponibles :
 * skeleton.max_gap_width : La distance maximale envisagée pour franchir des ponts.
