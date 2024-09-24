@@ -3,16 +3,26 @@ import shutil
 from pathlib import Path
 
 import pdal
-import pytest
 from shapely.geometry import Polygon
 
-# Import the function to test
 from lidro.create_virtual_point.pointcloud.add_virtual_points_to_pointcloud import (
     add_virtual_points_by_tiles,
 )
 
 # Path to temporary directory for output files
 TMP_PATH = Path("./tmp/virtual_points/pointcloud/add_virtual_points_by_tiles")
+input_file = str("./data/point_virtual/virtual_points.laz")
+input_las = str("./data/pointcloud/Semis_2021_0830_6291_LA93_IGN69.laz")
+output_laz_file = str(TMP_PATH / "output_0830_6291_with_virtual_points.laz")
+geom = Polygon(
+    [
+        (830000.0, 6290000.0),
+        (831000.0, 6290000.0),
+        (831000.0, 6291000.0),
+        (830000.0, 6291000.0),
+        (830000.0, 6290000.0),
+    ]
+)
 
 
 def setup_module():
@@ -22,52 +32,28 @@ def setup_module():
     os.makedirs(TMP_PATH)
 
 
-@pytest.fixture
-def mock_input_files():
-    """Fixture providing mock input files for testing."""
-    return {
-        "input_file": "./data/point_virtual/virtual_points.laz",
-        "input_las": "./data/pointcloud/Semis_2021_0830_6291_LA93_IGN69.laz",
-        "output_laz_file": str(TMP_PATH / "output_0830_6291_with_virtual_points.laz"),
-        "geom": Polygon(
-            [
-                (830000.0, 6290000.0),
-                (831000.0, 6290000.0),
-                (831000.0, 6291000.0),
-                (830000.0, 6291000.0),
-                (830000.0, 6290000.0),
-            ]
-        ),
-    }
-
-
-def test_add_virtual_points_by_tiles_success(mock_input_files):
-    """Test the function with valid input files and ensure the output is created."""
-    add_virtual_points_by_tiles(**mock_input_files)
-
-    # Verify that the output file is created
-    assert os.path.exists(mock_input_files["output_laz_file"]), "Output LAZ file should be created."
-
-
-def test_output_laz_file_format(mock_input_files):
+def test_add_virtual_points_by_tiles():
     """Test that the output file is in the correct LAZ format."""
-    add_virtual_points_by_tiles(**mock_input_files)
+    add_virtual_points_by_tiles(input_file, input_las, output_laz_file, geom)
 
     # Check that the output file exists
-    output_file = mock_input_files["output_laz_file"]
-    assert os.path.exists(output_file), "Output LAZ file should be created."
+    assert os.path.exists(output_laz_file), "Output LAZ file should be created."
 
     # Verify the format using PDAL
-    pipeline = pdal.Pipeline(
-        f"""
-    [
-        {{"type": "readers.las", "filename": "{output_file}"}}
-    ]
-    """
-    )
-    pipeline.execute()
+    pipeline_input = pdal.Pipeline() | pdal.Reader.las(input_file, nosrs=True)
+    pipeline_input.execute()
 
-    # Check if the point count is greater than 0, meaning the output is valid
-    point_count = pipeline.metadata["metadata"]["readers.las"]["count"]
+    pipeline_virtual_point = pdal.Pipeline() | pdal.Reader.las(input_las, nosrs=True)
+    pipeline_virtual_point.execute()
 
-    assert point_count > 0, "The output LAZ file should contain points."
+    pipeline_output = pdal.Pipeline() | pdal.Reader.las(output_laz_file, nosrs=True)
+    pipeline_output.execute()
+
+    # Check if the point count for input, virtual points and output
+    point_count_input = pipeline_input.metadata["metadata"]["readers.las"]["count"]
+    point_count_virtual_point = pipeline_virtual_point.metadata["metadata"]["readers.las"]["count"]
+    point_count_output = pipeline_output.metadata["metadata"]["readers.las"]["count"]
+
+    assert point_count_output == int(
+        point_count_input + point_count_virtual_point
+    ), "The output LAZ file should contain points."
