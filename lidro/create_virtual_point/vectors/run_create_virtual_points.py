@@ -21,7 +21,7 @@ from lidro.create_virtual_point.vectors.linear_regression_model import (
 )
 
 
-def launch_virtual_points_by_section(
+def compute_virtual_points_by_section(
     points: gpd.GeoDataFrame,
     line: gpd.GeoDataFrame,
     mask_hydro: gpd.GeoDataFrame,
