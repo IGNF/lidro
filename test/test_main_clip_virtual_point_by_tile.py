@@ -7,7 +7,7 @@ from hydra import compose, initialize
 from lidro.main_create_virtual_point import main
 
 INPUT_DIR = Path("data/pointcloud")
-OUTPUT_DIR = Path("tmp") / "create_virtual_point/main"
+OUTPUT_DIR = Path("tmp") / "clip_virtual_point_by_tile/main"
 
 
 def setup_module(module):
