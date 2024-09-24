@@ -11,20 +11,14 @@ import pandas as pd
 from omegaconf import DictConfig
 from pyproj import CRS
 
-from lidro.create_virtual_point.pointcloud.auto_tiling_from_las import (
-    create_geojson_from_laz_files,
-)
 from lidro.create_virtual_point.pointcloud.convert_list_points_to_las import (
     list_points_to_las,
 )
 from lidro.create_virtual_point.vectors.merge_skeleton_by_mask import (
     merge_skeleton_by_mask,
 )
-from lidro.create_virtual_point.vectors.run_add_virtual_points_by_tile import (
-    lauch_virtual_points_by_tiles,
-)
 from lidro.create_virtual_point.vectors.run_create_virtual_points import (
-    launch_virtual_points_by_section,
+    compute_virtual_points_by_section,
 )
 
 
@@ -88,7 +82,7 @@ def main(config: DictConfig):
 
         # Step 3 : Generate a regular grid of 3D points spaced every N meters inside each hydro entity
         list_virtual_points = [
-            launch_virtual_points_by_section(
+            compute_virtual_points_by_section(
                 points_gdf,
                 gpd.GeoDataFrame([{"geometry": row["geometry_skeleton"]}], crs=crs),
                 gpd.GeoDataFrame([{"geometry": row["geometry_mask"]}], crs=crs),
@@ -103,18 +97,6 @@ def main(config: DictConfig):
 
         # Step 4 : Save the virtual points in a file (.LAZ)
         list_points_to_las(list_virtual_points, output_dir, crs, classes)
-
-        # Step 5 : Clip virtual points file by LIDAR tiles
-        # Create the tiling of lidar tiles
-        json_tiles = os.path.join(output_dir, "tiles_from_las.GeoJSON")
-        input_dir_pointcloud = os.path.join(input_dir, "pointcloud")
-        create_geojson_from_laz_files(
-            [os.path.join(input_dir_pointcloud, file) for file in os.listdir(input_dir_pointcloud)], json_tiles, crs
-        )
-        # Clip virtual points (3D point grid in LAZ format) by LIDAR tiles (tiling file)
-        virtul_points_file = os.path.join(output_dir, "virtual_points.laz")
-        lauch_virtual_points_by_tiles(virtul_points_file, json_tiles, input_dir_pointcloud, output_dir)
-
     else:
         logging.error("Error when merged all points around skeleton by lidar tile")
 
