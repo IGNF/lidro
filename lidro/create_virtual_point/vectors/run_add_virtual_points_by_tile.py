@@ -12,7 +12,7 @@ from lidro.create_virtual_point.pointcloud.add_virtual_points_to_pointcloud impo
 )
 
 
-def lauch_virtual_points_by_tiles(input_virtual_points: str, tile_geojson: str, input_dir: str, output_dir: str):
+def compute_virtual_points_by_tiles(input_virtual_points: str, tile_geojson: str, input_dir: str, output_dir: str):
     """
     Loops through the tiles in the GeoJSON file and clips a LAZ file into multiple files based on polygons.
 
@@ -26,15 +26,12 @@ def lauch_virtual_points_by_tiles(input_virtual_points: str, tile_geojson: str, 
     with open(tile_geojson, "r") as f:
         geojson_data = json.load(f)
 
-    tile_geometries = [
-        [feature["properties"]["tile_id"], feature["properties"]["tilename_las"], shape(feature["geometry"])]
-        for feature in geojson_data["features"]
-        if feature["geometry"]["type"] == "Polygon"
-    ]
-
     # Clip the virtual points by each tile
-    for i, tile in enumerate(tile_geometries):
-        input_las = os.path.join(input_dir, tile[1])
-        output_file = os.path.join(output_dir, tile[1])
-        add_virtual_points_by_tiles(input_virtual_points, input_las, output_file, tile[2])
-        logging.info(f"Clip virtual points by tiles : {tile[0]}")
+    for feature in geojson_data:
+        if feature["geometry"]["type"] == "Polygon":
+            name = feature["properties"]["tilename_las"]
+            input_las = os.path.join(input_dir, name)
+            output_file = os.path.join(output_dir, name)
+            shapely_polygon = shape(feature["geometry"])
+            add_virtual_points_by_tiles(input_virtual_points, input_las, output_file, shapely_polygon)
+            logging.info(f"Clip virtual points by tiles : {input_las}")
