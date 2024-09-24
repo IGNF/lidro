@@ -6,7 +6,6 @@ import geopandas as gpd
 import pytest
 from shapely.geometry import Polygon
 
-# Import the function from your module
 from lidro.create_virtual_point.pointcloud.auto_tiling_from_las import (
     create_geojson_from_laz_files,
     extract_bounds_from_laz,
