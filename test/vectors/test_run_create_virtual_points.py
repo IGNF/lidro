@@ -8,7 +8,7 @@ from pyproj import CRS
 from shapely.geometry import LineString, Point, Polygon
 
 from lidro.create_virtual_point.vectors.run_create_virtual_points import (
-    launch_virtual_points_by_section,
+    compute_virtual_points_by_section,
 )
 
 TMP_PATH = Path("./tmp/create_virtual_point/vectors/run_create_virtual_points/")
@@ -216,68 +216,68 @@ def create_test_data_with_flattening_failure():
     return points, lines, mask_hydro
 
 
-def test_launch_virtual_points_by_section_with_geometry_only():
+def test_compute_virtual_points_with_geometry_only():
     points, lines, mask_hydro = create_test_data_with_geometry_only()
     crs = CRS.from_epsg(2154)
     spacing = 1.0
     river_length = 150
     output_filename = os.path.join(TMP_PATH, "mask_hydro_no_virtual_points.geojson")
 
-    launch_virtual_points_by_section(points, lines, mask_hydro, crs, spacing, river_length, TMP_PATH)
+    compute_virtual_points_by_section(points, lines, mask_hydro, crs, spacing, river_length, TMP_PATH)
 
     assert (Path(TMP_PATH) / "mask_hydro_no_virtual_points.geojson").is_file()
     masks_without_points = gpd.read_file(output_filename)
     assert len(masks_without_points) == len(mask_hydro)
 
 
-def test_launch_virtual_points_by_section_no_points():
+def test_compute_virtual_points_no_points():
     points, line, mask_hydro = create_test_data_no_points()
     crs = CRS.from_epsg(2154)
     river_length = 150
     spacing = 1.0
     output_filename = os.path.join(TMP_PATH, "mask_hydro_no_virtual_points.geojson")
 
-    launch_virtual_points_by_section(points, line, mask_hydro, crs, spacing, river_length, TMP_PATH)
+    compute_virtual_points_by_section(points, line, mask_hydro, crs, spacing, river_length, TMP_PATH)
 
     assert (Path(TMP_PATH) / "mask_hydro_no_virtual_points.geojson").is_file()
     masks_without_points = gpd.read_file(output_filename)
     assert len(masks_without_points) == len(mask_hydro)
 
 
-def test_launch_virtual_points_by_section_with_points():
+def test_compute_virtual_points_with_points():
     points, lines, mask_hydro = create_test_data_with_points()
     crs = CRS.from_epsg(2154)
     spacing = 1.0
     river_length = 150
 
-    grid_with_z = launch_virtual_points_by_section(points, lines, mask_hydro, crs, spacing, river_length, TMP_PATH)
+    grid_with_z = compute_virtual_points_by_section(points, lines, mask_hydro, crs, spacing, river_length, TMP_PATH)
 
     assert all(isinstance(geom, Point) for geom in grid_with_z.geometry)
     assert all(geom.has_z for geom in grid_with_z.geometry)  # Check that all points have a Z coordinate
 
 
-def test_launch_virtual_points_by_section_regression_failure():
+def test_compute_virtual_points_regression_failure():
     points, lines, mask_hydro = create_test_data_with_regression_failure()
     crs = CRS.from_epsg(2154)
     spacing = 1.0
     river_length = 150
     output_filename = os.path.join(TMP_PATH, "mask_hydro_no_virtual_points_with_regression.geojson")
 
-    launch_virtual_points_by_section(points, lines, mask_hydro, crs, spacing, river_length, TMP_PATH)
+    compute_virtual_points_by_section(points, lines, mask_hydro, crs, spacing, river_length, TMP_PATH)
 
     assert (Path(TMP_PATH) / "mask_hydro_no_virtual_points_with_regression.geojson").is_file()
     masks_without_points = gpd.read_file(output_filename)
     assert len(masks_without_points) == len(mask_hydro)
 
 
-def test_launch_virtual_points_by_section_flattening_failure():
+def test_compute_virtual_points_flattening_failure():
     points, lines, mask_hydro = create_test_data_with_flattening_failure()
     crs = CRS.from_epsg(2154)
     spacing = 1.0
     river_length = 150
     output_filename = os.path.join(TMP_PATH, "mask_hydro_no_virtual_points_for_little_river.geojson")
 
-    launch_virtual_points_by_section(points, lines, mask_hydro, crs, spacing, river_length, TMP_PATH)
+    compute_virtual_points_by_section(points, lines, mask_hydro, crs, spacing, river_length, TMP_PATH)
 
     assert (Path(TMP_PATH) / "mask_hydro_no_virtual_points_for_little_river.geojson").is_file()
     masks_without_points = gpd.read_file(output_filename)
