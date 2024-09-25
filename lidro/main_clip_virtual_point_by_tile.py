@@ -44,13 +44,14 @@ def main(config: DictConfig):
 
     # Parameters for clip virtual point by tiles
     crs = CRS.from_user_input(config.io.srid)
+    input_dir_point_virtual = config.io.input_dir_point_virtual
 
     # Clip virtual points file by LIDAR tiles
     # Create the tiling of lidar tiles
     json_tiles = os.path.join(output_dir, "tiles_from_las.GeoJSON")
     create_geojson_from_laz_files([os.path.join(input_dir, file) for file in os.listdir(input_dir)], json_tiles, crs)
     # Clip virtual points (3D point grid in LAZ format) by LIDAR tiles (tiling file)
-    virtul_points_file = os.path.join(output_dir, "virtual_points.laz")
+    virtul_points_file = os.path.join(input_dir_point_virtual, "virtual_points.laz")
     compute_virtual_points_by_tiles(virtul_points_file, json_tiles, input_dir, output_dir)
 
 

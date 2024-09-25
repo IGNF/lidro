@@ -11,6 +11,7 @@ io:
   input_mask_hydro: null
   input_skeleton: null
   input_dir: null
+  input_dir_point_virtual: null
   output_dir: null
   dir_points_skeleton: null # folder to contains files (.GeoJSON) by LIDAR tiles : neighboring points for each point of the skeleton
   srid: 2154

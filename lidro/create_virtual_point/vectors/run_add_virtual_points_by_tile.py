@@ -27,8 +27,8 @@ def compute_virtual_points_by_tiles(input_virtual_points: str, tile_geojson: str
         geojson_data = json.load(f)
 
     # Clip the virtual points by each tile
-    for feature in geojson_data:
-        if feature["geometry"]["type"] == "Polygon":
+    for feature in geojson_data["features"]:
+        if feature.get("geometry", {}).get("type") == "Polygon":
             name = feature["properties"]["tilename_las"]
             input_las = os.path.join(input_dir, name)
             output_file = os.path.join(output_dir, name)
