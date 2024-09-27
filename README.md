@@ -179,10 +179,10 @@ Autres paramètres disponibles :
 * mask_generation.raster.dilatation_size : La taille pour la dilatation du raster binaire "eau"
 
 ##### Données d'entrées
-* Les dalles LIDAR classées 
+* Les dalles LIDAR classées. 
 
 ##### Données de sorties
-* Les masques HYDRO
+* Les masques HYDRO.
 
 
 ### 2) Fusion des masques HYDRO des grands cours d'eaux
@@ -203,10 +203,10 @@ Autres paramètres disponibles :
 * mask_generation.vector.tolerance : La distance de tolérance en mètres pour appliquer l'algorithme de Douglas-Peucker sur les masques HYDRO.
 
 ##### Données d'entrées
-* Les masques HYDRO à l'échelle des dalles LIDAR
+* Les masques HYDRO à l'échelle des dalles LIDAR.
 
 ##### Données de sorties
-* Le masque HYDRO fusionné à l'échelle du projet
+* Le masque HYDRO fusionné à l'échelle du projet.
 
 
 ### 3) Création des squelettes hydrographiques des grands cours d'eaux
@@ -241,10 +241,10 @@ Autres paramètres disponibles :
 * skeleton.branch.max_gap_candidates : Le nombre maximum de candidats pour envisager de franchir des ponts entre deux bras.
 
 ##### Données d'entrées
-* Le masque HYDRO fusionné à l'échelle du projet
+* Le masque HYDRO fusionné à l'échelle du projet.
 
 ##### Données de sorties
-* Le squelette HYDRO à l'échelle du projet
+* Le squelette HYDRO à l'échelle du projet.
 
 
 ### 4) étapes 1 & 2. Création des points virtuels (grille régulière tous les N mètres) à l'intérieur des grands cours d'eaux
@@ -271,12 +271,16 @@ Autres paramètres disponibles :
 * pointcloud.virtual_points_classes : Le choix du numéro de classification pour les points virtuels dans les nuages de points LIDAR.
 
 ##### Données d'entrées
-* Le masque HYDRO fusionné à l'échelle du projet
-* Le squelette HYDRO à l'échelle du projet
-* Les dalles LIDAR classées
+* Le masque HYDRO fusionné à l'échelle du projet.
+* Le squelette HYDRO à l'échelle du projet.
+* Les dalles LIDAR classées.
 
 ##### Données de sorties
-* Les points virtuels (grille règluière tous les N mètre) à l'échelle du projet
+* Les points virtuels (grille règluière tous les N mètre) à l'échelle du projet.
+* Un fichier GeoJSON "mask_skeletons_exclusions" indiquant spatialement quels entités HYDRO (masques) présentent un problèmes de géoémtries au niveau de squelettes HYDRO. Conséquence, dans ces entités HYDRO, aucuns points virtuels n'ont pu être calculés. (Options)
+* Un fichier GeoJSON "mask_hydro_no_virtual_points" indiquant spatialement quels entités HYDRO (masques) ne détiennent aucuns points "SOL" le long de ces berges. Conséquence, dans ces entités HYDRO, aucuns points virtuels n'ont pu être calculés. (Options)
+* Un fichier GeoJSON "mask_hydro_no_virtual_points_with_regression" indiquant spatialement quels entités HYDRO (masques) le modèle de régression linéaire n'a pas pu être calculés. Conséquence, dans ces entités HYDRO, aucuns points virtuels n'ont pu être calculés. (Options)
+* Un fichier GeoJSON "mask_hydro_no_virtual_points_for_little_rivern" indiquant spatialement quels entités HYDRO (masques) ingériur à 150 m de long, le modèle d'aplanissement n'a pas pu être calculés. Conséquence, dans ces entités HYDRO, aucuns points virtuels n'ont pu être calculés. (Options)
 
 
 ### 4) étape 3. Intégration des points virtuels à l'échelle de la dalle LIDAR (1 Km * Km)
@@ -297,3 +301,8 @@ Options généralement passées en paramètres :
 
 ##### Données de sorties
 * Les dalles LIDAR classées avec leurs points virtuels (grille règluière tous les N mètre)
+* Un fichier GeoJSON "tiles_from_las" représentant l'emprise des dalles LIDAR du chantier. Pour chaque dalle, on retrouve : 
+** tile_id : identifiant unique "coordonnée mimimum X" + "_" + "coordonnée maximale Y" de l'emprise de la dalle LIDAR.
+** tilename_las : nom de la dalle LIDAR en entrée.
+** geometry : l'emprise de la dalle LIDAR (POLYGONE).
+
