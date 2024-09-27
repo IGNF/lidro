@@ -32,6 +32,12 @@ def setup_module():
     os.makedirs(TMP_PATH)
 
 
+def count_points(input_file):
+    pipeline_input = pdal.Pipeline() | pdal.Reader.las(input_file, nosrs=True)
+    pipeline_input.execute()
+    return pipeline_input.metadata["metadata"]["readers.las"]["count"]
+
+
 def test_add_virtual_points_by_tiles():
     """Test that the output file is in the correct LAZ format."""
     add_virtual_points_by_tiles(input_file, input_las, output_laz_file, geom)
@@ -39,20 +45,10 @@ def test_add_virtual_points_by_tiles():
     # Check that the output file exists
     assert os.path.exists(output_laz_file), "Output LAZ file should be created."
 
-    # Verify the format using PDAL
-    pipeline_input = pdal.Pipeline() | pdal.Reader.las(input_file, nosrs=True)
-    pipeline_input.execute()
-
-    pipeline_virtual_point = pdal.Pipeline() | pdal.Reader.las(input_las, nosrs=True)
-    pipeline_virtual_point.execute()
-
-    pipeline_output = pdal.Pipeline() | pdal.Reader.las(output_laz_file, nosrs=True)
-    pipeline_output.execute()
-
     # Check if the point count for input, virtual points and output
-    point_count_input = pipeline_input.metadata["metadata"]["readers.las"]["count"]
-    point_count_virtual_point = pipeline_virtual_point.metadata["metadata"]["readers.las"]["count"]
-    point_count_output = pipeline_output.metadata["metadata"]["readers.las"]["count"]
+    point_count_input = count_points(input_file)
+    point_count_virtual_point = count_points(input_las)
+    point_count_output = count_points(output_laz_file)
 
     assert point_count_output == int(
         point_count_input + point_count_virtual_point
