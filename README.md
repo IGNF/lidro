@@ -161,44 +161,60 @@ Pour lancer les tests :
 python -m pytest -s
 ```
 
-### Paramètres pour créer les masques hydro des grands cours d'eaux
-Pour fonctionner, la création des masques hydro a besoin d'une série de paramètres, certains ayant une valeur par défaut, d'autres non. Les paramètres se trouvent dans le fichier configs/configs_lidro.yaml. 
+### 1) Création des masques HYDRO des grands cours d'eaux à l'échelle de la dalle LIDAR
+Pour fonctionner, la création des masques HYDRO a besoin d'une série de paramètres, certains ayant une valeur par défaut, d'autres non. Les paramètres se trouvent dans le fichier configs/configs_lidro.yaml. 
 On peut soit les y modifier, soit les modifier en ligne de commande lors de l'exécution du script avec :
 ```
 python -m lidro.main_create_mask [nom_paramètre_1]=[valeur_du_paramètre_1] [nom_paramètre_2]=[valeur_du_paramètre_2]
 ```
+#### Paramètres
 Options généralement passées en paramètres :
 * io.input_dir : Le chemin du dossier contenant les tuiles LIDAR
-* io.output_dir : Le chemin du dossier de sortie (Les masques hydro à l'échelle de la dalle LIDAR)
+* io.output_dir : Le chemin du dossier de sortie (Les masques HYDRO à l'échelle de la dalle LIDAR)
 * io.pixel_size : La distance entre chaque nœud de la grille raster en mètres (taille du pixel)
 * io.tile_size : La taille de la grille raster (en mètres)
 
 Autres paramètres disponibles :
-* mask_generation.filter.keep_classes : Les classes LIDAR considérées comme "non eau" utilisées pour générer les masques hydro
+* mask_generation.filter.keep_classes : Les classes LIDAR considérées comme "non eau" utilisées pour générer les masques HYDRO
 * mask_generation.raster.dilatation_size : La taille pour la dilatation du raster binaire "eau"
 
+##### Données d'entrées
+* Les dalles LIDAR classées 
 
-Lors de la fusion des masques hydro, plusieurs paramètres peuvent également être utilisés.
+##### Données de sorties
+* Les masques HYDRO
+
+
+### 2) Fusion des masques HYDRO des grands cours d'eaux
+Lors de la fusion des masques HYDRO, plusieurs paramètres peuvent également être utilisés.
 On peut soit les y modifier, soit les modifer en ligne de commande lors de l'exécution du script avec :
 ```
 python -m lidro.main_merge_mask  [nom_paramètre_1]=[valeur_du_paramètre_1] [nom_paramètre_2]=[valeur_du_paramètre_2]
 ```
+##### Paramètres
 Options généralement passées en paramètres :
 * io.input_dir : Le chemin du dossier contenant les différents masques hydrographiques (.GeoJSON).
-* io.output_dir : Le chemin du dossier de sortie (Masque Hydro fusionné).
+* io.output_dir : Le chemin du dossier de sortie (Masque HYDRO fusionné).
 
 Autres paramètres disponibles :
-* mask_generation.vector.min_water_area : La superficie minimale en m² des masques hydro à conserver.
-* mask_generation.vector.buffer_positive : La taille en mètres de la zone tampon "positive" appliquée aux masques hydro.
-* mask_generation.vector.buffer_negative : La taille en mètres de la zone tampon "négative" appliquée aux masques hydro.
-* mask_generation.vector.tolerance : La distance de tolérance en mètres pour appliquer l'algorithme de Douglas-Peucker sur les masques hydro.
+* mask_generation.vector.min_water_area : La superficie minimale en m² des masques HYDRO à conserver.
+* mask_generation.vector.buffer_positive : La taille en mètres de la zone tampon "positive" appliquée aux masques HYDRO.
+* mask_generation.vector.buffer_negative : La taille en mètres de la zone tampon "négative" appliquée aux masques HYDRO.
+* mask_generation.vector.tolerance : La distance de tolérance en mètres pour appliquer l'algorithme de Douglas-Peucker sur les masques HYDRO.
+
+##### Données d'entrées
+* Les masques HYDRO à l'échelle des dalles LIDAR
+
+##### Données de sorties
+* Le masque HYDRO fusionné à l'échelle du projet
 
 
-### Paramètres pour créer les squelettes hydrographiques des grands cours d'eaux
+### 3) Création des squelettes hydrographiques des grands cours d'eaux
 Pour fonctionner, la création de squelettes a besoin d'une série de paramètres, certains ayant une valeur par défaut, d'autres non. Les paramètres se trouvent dans le fichier configs/configs_lidro.yaml. On peut soit les y modifier, soit les modifer en ligne de commande lors de l'exécution du script avec :
 ```
 python lidro/main_create_skeleton_lines.py [nom_paramètre_1]=[valeur_du_paramètre_1] [nom_paramètre_2]=[valeur_du_paramètre_2]
 ```
+##### Paramètres
 Généralement, sont mis dans le fichier de configuration ceux qui changent rarement (srid par défaut, port de connexion à la base de données...), et sont passés en paramètres les éléments qui changent souvent (chemins de fichiers d'entrée et de sortie) ou ce qu'il ne faut théoriquement pas stocker (credentials).
 
 Options généralement passées en paramètres :
@@ -224,15 +240,23 @@ Autres paramètres disponibles :
 * skeleton.branch.water_min_size : La longueur minimale à partir de laquelle une ligne de squelette sera automatiquement gardée (trop petite, et il y aura des sortes "d'aiguilles" qui apparaitront. Trop grande, et certains afluents ne seront pas détectés).
 * skeleton.branch.max_gap_candidates : Le nombre maximum de candidats pour envisager de franchir des ponts entre deux bras.
 
-### Paramètres pour créer les points virtuels (grille régulière tous les N mètres) à l'intérieur des grands cours d'eaux
+##### Données d'entrées
+* Le masque HYDRO fusionné à l'échelle du projet
+
+##### Données de sorties
+* Le squelette HYDRO à l'échelle du projet
+
+
+### 4) étapes 1 & 2. Création des points virtuels (grille régulière tous les N mètres) à l'intérieur des grands cours d'eaux
 Pour fonctionner, la création des points virtuels a besoin d'une série de paramètres, certains ayant une valeur par défaut, d'autres non. Les paramètres se trouvent dans le fichier configs/configs_lidro.yaml. 
 On peut soit les y modifier, soit les modifier en ligne de commande lors de l'exécution du script avec :
 ```
 python -m lidro.main_create_virtual_points [nom_paramètre_1]=[valeur_du_paramètre_1] [nom_paramètre_2]=[valeur_du_paramètre_2]
 ```
+##### Paramètres
 Options généralement passées en paramètres :
 * io.input_dir : Le chemin du dossier contenant l'ensemble des données d'entrée (ex. "./data/").
-* io.input_mask_hydro : Le chemin contenant le masque hydro fusionné (ex."./data/merge_mask_hydro/MaskHydro_merge.geosjon").
+* io.input_mask_hydro : Le chemin contenant le masque HYDRO fusionné (ex."./data/merge_mask_hydro/MaskHydro_merge.geosjon").
 * io.input_skeleton= Le chemin contenant le squelette hydrographique (ex. "./data/skeleton_hydro/Skeleton_Hydro.geojson")
 * io.dir_points_skeleton : Le chemin contenant l'ensemble des N points du squelette créés à l'échelle des dalles LIDAR ( ex. "./tmp/point_skeleton/").
 * io.output_dir :  Le chemin du dossier de sortie (les points virtuels à l'échelle du projet).
@@ -246,13 +270,30 @@ Autres paramètres disponibles :
 * pointcloud.points_grid_spacing : L'espacement entre les points de la grille en mètres.
 * pointcloud.virtual_points_classes : Le choix du numéro de classification pour les points virtuels dans les nuages de points LIDAR.
 
-### Paramètres pour intégrer les points virtuels à l'échelle de la dalle LIDAR (1 Km * Km)
+##### Données d'entrées
+* Le masque HYDRO fusionné à l'échelle du projet
+* Le squelette HYDRO à l'échelle du projet
+* Les dalles LIDAR classées
+
+##### Données de sorties
+* Les points virtuels (grille règluière tous les N mètre) à l'échelle du projet
+
+
+### 4) étape 3. Intégration des points virtuels à l'échelle de la dalle LIDAR (1 Km * Km)
 Pour fonctionner, le découpage des points virtuels par dalle LIDAR a besoin d'une série de paramètres, certains ayant une valeur par défaut, d'autres non. Les paramètres se trouvent dans le fichier configs/configs_lidro.yaml. 
 On peut soit les y modifier, soit les modifier en ligne de commande lors de l'exécution du script avec :
 ```
 python -m lidro.main_clip_virtual_point_by_tile [nom_paramètre_1]=[valeur_du_paramètre_1] [nom_paramètre_2]=[valeur_du_paramètre_2]
 ```
+##### Paramètres
 Options généralement passées en paramètres :
 * io.input_dir : Le chemin du dossier contenant l'ensemble des dalles LIDAR classées (ex. "./data/pointcloud").
 * io.input_dir_virtual_point : Le chemin du dosiser contenant les points virtueks générés à l'échelle du projet.
 * io.output_dir :  Le chemin du dossier de sortie (les points virtuels intégrés dans chaque dalle LIDAR).
+
+##### Données d'entrées
+* Les dalles LIDAR classées
+* Les points virtuels (grille règluière tous les N mètre) à l'échelle du projet
+
+##### Données de sorties
+* Les dalles LIDAR classées avec leurs points virtuels (grille règluière tous les N mètre)
