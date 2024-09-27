@@ -2,7 +2,6 @@
 """ This function automatically creates the tiling of lidar tiles (.GeoJSON)
 """
 import logging
-import math
 import os
 from typing import List
 
@@ -56,8 +55,7 @@ def extract_bounds_from_laz(input_points):
 
 def create_geojson_from_laz_files(laz_files: List, output_geojson_path: str, crs: str):
     """
-    Create a GeoJSON from a list of .laz files by calculating the footprint (bounding box) of each tile
-    and save it to a GeoJSON file.
+    Create a GeoJSON from a  count_points(input_file)file.
 
     Args:
         laz_files (List): list of file paths to .laz files.
@@ -79,7 +77,7 @@ def create_geojson_from_laz_files(laz_files: List, output_geojson_path: str, crs
     # Create a list of dictionaries representing the tiles
     tiles = [
         {
-            "tile_id": str(int(min_x)) + "_" + str(math.ceil(max_y / 1000) * 1000),
+            "tile_id": str(int(min_x)) + "_" + str(int(max_y)),
             "tilename_las": os.path.basename(laz_file),
             "geometry": Polygon([(min_x, min_y), (max_x, min_y), (max_x, max_y), (min_x, max_y)]),
         }
