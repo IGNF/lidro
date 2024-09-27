@@ -11,8 +11,7 @@ from shapely.geometry import Polygon
 
 
 def extract_bounds_from_laz(input_points):
-    """
-    This function uses PDAL to read metadata from a .laz file.
+    """This function uses PDAL to read metadata from a .laz file.
 
     Args:
         input_points (str): Path to the input LAS/LAZ file
@@ -54,8 +53,8 @@ def extract_bounds_from_laz(input_points):
 
 
 def create_geojson_from_laz_files(laz_files: List, output_geojson_path: str, crs: str):
-    """
-    Create a GeoJSON from a  count_points(input_file)file.
+    """Create a GeoJSON from a list of .laz files by calculating the footprint (bounding box) of each tile
+    and save it to a GeoJSON file.
 
     Args:
         laz_files (List): list of file paths to .laz files.
