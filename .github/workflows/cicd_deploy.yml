@@ -62,10 +62,10 @@ jobs:
     - name: Build and push Docker image
       id: build-and-push
       uses: docker/build-push-action@v5
+      submodules:
+        include: []
+        recursive: false
       with:
-        submodules:
-          include: []
-          recursive: false
         context: .
         push: true
         tags: ${{ steps.meta.outputs.tags }}
