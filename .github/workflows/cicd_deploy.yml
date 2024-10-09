@@ -2,10 +2,10 @@
 name: cicd_deploy
 
 on:
-  # Also run when the pull request merges  (which generates a push)
-  # So that we can tag the docker image appropriately.
-  push:
-    tags: [ 'v*.*.*' ]
+  pull_request:
+    branches:
+      - main
+      - dev
 
 env:
   IMAGE_NAME:  ${{ github.repository }}
