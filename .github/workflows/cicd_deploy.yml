@@ -63,7 +63,9 @@ jobs:
       id: build-and-push
       uses: docker/build-push-action@v5
       with:
-        submodules: false
+        submodules:
+          include: []
+          recursive: false
         context: .
         push: true
         tags: ${{ steps.meta.outputs.tags }}
