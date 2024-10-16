@@ -62,9 +62,6 @@ jobs:
     - name: Build and push Docker image
       id: build-and-push
       uses: docker/build-push-action@v5
-      submodules:
-        include: []
-        recursive: false
       with:
         context: .
         push: true
