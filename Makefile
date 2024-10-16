@@ -21,12 +21,24 @@ mamba-env-update:
 # Docker
 ##############################
 
-PROJECT_NAME=lidar_hd/lidro
+REGISTRY=ghcr.io
+IMAGE_NAME=lidro
+NAMESPACE=ignf
 VERSION=`python -m lidro._version`
+FULL_IMAGE_NAME=${REGISTRY}/${NAMESPACE}/${IMAGE_NAME}:${VERSION}
+
 
 docker-build:
-	docker build -t ${PROJECT_NAME}:${VERSION} -f Dockerfile .
+	docker build --no-cache -t ${IMAGE_NAME}:${VERSION} -f Dockerfile .
+
+docker-test:
+	docker run --rm -it ${IMAGE_NAME}:${VERSION} python -m pytest -s
 
 docker-remove:
-	docker rmi -f `docker images | grep ${PROJECT_NAME} | tr -s ' ' | cut -d ' ' -f 3`
+	docker rmi -f `docker images | grep ${IMAGE_NAME} | tr -s ' ' | cut -d ' ' -f 3`
 	docker rmi -f `docker images -f "dangling=true" -q`
+
+docker-deploy:
+	docker tag ${IMAGE_NAME}:${VERSION} ${FULL_IMAGE_NAME}
+	docker push ${FULL_IMAGE_NAME}
+
