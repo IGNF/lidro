@@ -19,6 +19,10 @@ def calculate_grid_z_with_model(points: gpd.GeoDataFrame, line: gpd.GeoDataFrame
     """
     # Calculate curvilinear abscises for all points of the grid
     curvilinear_abs = line_locate_point(line.loc[0, "geometry"], points["geometry"].array, normalized=False)
+    # line_points = line.copy()
+    if len(line.index) > 1:
+        print(line["geometry"])
+        raise ValueError("Line is not with a single line", line)
 
     # Prediction of Z values using the regression model
     # Its possible to use non-linear models for prediction
