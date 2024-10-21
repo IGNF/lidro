@@ -9,6 +9,7 @@ work_dir: ${hydra:runtime.cwd}
 io:
   input_filename: null
   input_mask_hydro: null
+  input_bridge: null
   input_skeleton: null
   input_dir: null
   input_dir_point_virtual: null
