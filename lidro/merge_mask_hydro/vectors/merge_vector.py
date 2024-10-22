@@ -67,4 +67,6 @@ def merge_geom(
     gdf = gdf[gdf.geometry.area > min_water_area]
 
     # save the result
-    gdf.to_file(os.path.join(output_folder, "MaskHydro_merge.geojson"), driver="GeoJSON", crs=crs)
+    gdf.to_file(
+        os.path.join(output_folder, "MaskHydro_merge_with_multibranch_skeleton.geojson"), driver="GeoJSON", crs=crs
+    )

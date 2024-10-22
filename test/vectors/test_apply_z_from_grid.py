@@ -1,6 +1,7 @@
 import geopandas as gpd
 import numpy as np
 import pytest
+from shapely import line_merge
 from shapely.geometry import LineString, MultiLineString, Point
 
 from lidro.create_virtual_point.vectors.apply_Z_from_grid import (
@@ -19,24 +20,29 @@ from lidro.create_virtual_point.vectors.apply_Z_from_grid import (
             [0, np.sqrt(2), np.sqrt(8)],
         ),
         # Single line, points are not on the line
+        (
+            gpd.GeoDataFrame({"geometry": [LineString([(0, 0), (0, 2)])]}, crs="EPSG:4326"),
+            gpd.GeoDataFrame({"geometry": [Point(0, 0), Point(1, 1), Point(2, 2)]}, crs="EPSG:4326"),
+            [0, 1, 2],
+        ),
         # Multi line, lines are consecutive, points are on the line
         (
-            gpd.GeoDataFrame({"geometry": [MultiLineString([[(0, 0), (0, 1)], [(0, 4), (0, 5)]])]}, crs="EPSG:4326"),
+            gpd.GeoDataFrame({"geometry": [MultiLineString([[(0, 0), (0, 2)], [(0, 2), (0, 5)]])]}, crs="EPSG:4326"),
             gpd.GeoDataFrame(
                 {"geometry": [Point(0, 0), Point(0, 1), Point(0, 2), Point(0, 3), Point(0, 4), Point(0, 5)]},
                 crs="EPSG:4326",
             ),
-            [0, 1, 1, 2, 2, 3],
+            [0, 1, 2, 3, 4, 5],
         ),
-        # # Multi line, lines are not ordered, points are on the line
-        # (
-        #     gpd.GeoDataFrame({"geometry": [MultiLineString([[(0, 0), (0, 1)], [(0, 5), (0, 4)]])]}, crs="EPSG:4326"),
-        #     gpd.GeoDataFrame(
-        #         {"geometry": [Point(0, 0), Point(0, 1), Point(0, 2), Point(0, 3), Point(0, 4), Point(0, 5)]},
-        #         crs="EPSG:4326",
-        #     ),
-        #     [0, 1, 1, 5, 5, 4],
-        # ),
+        # Multi line, lines are not ordered, points are on the line
+        (
+            gpd.GeoDataFrame({"geometry": [MultiLineString([[(0, 0), (0, 2)], [(0, 5), (0, 2)]])]}, crs="EPSG:4326"),
+            gpd.GeoDataFrame(
+                {"geometry": [Point(0, 0), Point(0, 1), Point(0, 2), Point(0, 3), Point(0, 4), Point(0, 5)]},
+                crs="EPSG:4326",
+            ),
+            [0, 1, 2, 3, 4, 5],
+        ),
     ],
 )
 def test_calculate_grid_z_with_model(line, points, expected_curvilinear_abs):
@@ -44,6 +50,9 @@ def test_calculate_grid_z_with_model(line, points, expected_curvilinear_abs):
     # Sample model function
     def model(x):
         return np.array(x) * 2  # Simple linear model for testing
+
+    line = line_merge(line)  # this step is usually done in combine_skeletons, this step is meant to check
+    # the order of the points after applying a line_merge
 
     # Call the function to test
     result = calculate_grid_z_with_model(points, line, model)

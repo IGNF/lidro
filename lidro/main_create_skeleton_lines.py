@@ -3,6 +3,7 @@
 
 import os
 import sys
+from pathlib import Path
 
 import geopandas as gpd
 import hydra
@@ -62,7 +63,7 @@ def run(config: DictConfig):
     branch_lines_list = [branch.gdf_skeleton_lines for branch in branches_list]
     gdf_branch_lines = gpd.GeoDataFrame(pd.concat(branch_lines_list, ignore_index=True))
     if config.io.skeleton.skeleton_lines_output_path:
-        os.makedirs(os.path.parent, exist_ok=True)
+        os.makedirs(Path(config.io.skeleton.skeleton_lines_output_path).parent, exist_ok=True)
         gdf_branch_lines.to_file(config.io.skeleton.skeleton_lines_output_path, driver="GeoJSON")
 
     # saving all lines if there is a path
