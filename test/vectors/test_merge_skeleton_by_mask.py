@@ -53,36 +53,50 @@ def test_combine_skeletons(skeletons, hydro_masks, expected_out):
     assert out.equals(expected_out)
 
 
-# @pytest.mark.parametrize(
-#         "skeletons, hydro_masks",
-#         [
-#             (
-#                 [LineString([(0, 0), (0.1, 0.1)]), LineString([(0.9, 0.9), (1, 1)])],
-#                 [Polygon(shell=[(0, 0), (0, 1), (1, 1), (1, 0)])]
-#             ),  # disjoint skeleton
-#             (
-#                 [LineString([(0, 0), (1, 1)])],
-#                 [Polygon(shell=[(0, 0), (0, 1), (1, 1), (1, 0)],
-#                          holes=[[(0.4, 0.4), (0.6, 0.4), (0.6, 0.6), (0.4, 0.6)]])],
-#             ),  # one skeleton partly inside one hydro mask with a hole, will be cut into 2 parts which cannot join
-#         ])
-# def test_combine_skeletons_raise(skeletons, hydro_masks):
-#     crs = CRS.from_epsg(2154)
-#     gdf_skeletons = gpd.GeoDataFrame(geometry=skeletons, crs=crs)
-#     print(gdf_skeletons)
-#     gdf_hydro_masks = gpd.GeoDataFrame(geometry=hydro_masks, crs=crs)
-#     print(gdf_hydro_masks)
+@pytest.mark.parametrize(
+    "skeletons, hydro_masks",
+    [
+        (
+            [LineString([(0, 0), (0.1, 0.1)]), LineString([(0.9, 0.9), (1, 1)])],
+            [Polygon(shell=[(0, 0), (0, 1), (1, 1), (1, 0)])],
+        ),  # disjoint skeleton
+        (
+            [LineString([(0, 0), (1, 1)])],
+            [
+                Polygon(
+                    shell=[(0, 0), (0, 1), (1, 1), (1, 0)], holes=[[(0.4, 0.4), (0.6, 0.4), (0.6, 0.6), (0.4, 0.6)]]
+                )
+            ],
+        ),  # one skeleton partly inside one hydro mask with a hole, will be cut into 2 parts which cannot join
+    ],
+)
+def test_combine_skeletons_raise(skeletons, hydro_masks):
+    crs = CRS.from_epsg(2154)
+    gdf_skeletons = gpd.GeoDataFrame(geometry=skeletons, crs=crs)
+    print(gdf_skeletons)
+    gdf_hydro_masks = gpd.GeoDataFrame(geometry=hydro_masks, crs=crs)
+    print(gdf_hydro_masks)
+
+    with pytest.raises(ValueError):
+        combine_skeletons(gdf_skeletons, gdf_hydro_masks, crs)
 
 
-#     with pytest.raises(ValueError):
-#         combine_skeletons(gdf_skeletons, gdf_hydro_masks, crs)
-
-
-def test_merge_skeleton_by_mask_default():
+@pytest.mark.parametrize(
+    "skeleton, mask",
+    [
+        (  # simple mono_branch skeleton (real case)
+            Path("./data/skeleton_hydro/dataset_2/skeleton_hydro.geojson"),
+            Path("./data/merge_mask_hydro/dataset_2/MaskHydro_merge.geojson"),
+        ),
+        (  # simple mono_branch skeleton going over an island
+            Path("./data/skeleton_hydro/dataset_2/skeleton_hydro_over_island.geojson"),
+            Path("./data/merge_mask_hydro/dataset_2/MaskHydro_merge.geojson"),
+        ),
+    ],
+)
+def test_merge_skeleton_by_mask_default(skeleton, mask):
     # Parameters
     crs = CRS.from_epsg(2154)
-    mask = Path("./data/merge_mask_hydro/MaskHydro_merge.geojson")
-    skeleton = Path("./data/skeleton_hydro/Skeleton_Hydro.geojson")
 
     result = merge_skeleton_by_mask(skeleton, mask, TMP_PATH, crs)
 
@@ -93,4 +107,23 @@ def test_merge_skeleton_by_mask_default():
     assert "geometry_skeleton" in result.columns, "Missing 'geometry_skeleton' column"
     assert "geometry_mask" in result.columns, "Missing 'geometry_mask' column"
 
-    print(result)
+
+@pytest.mark.parametrize(
+    "skeleton, mask",
+    [
+        (  # simple mono_branch skeleton, which in fact has 2 parts that are disjoint of around 1 mm
+            Path("./data/skeleton_hydro/dataset_1/Skeleton_Hydro_single_branch.geojson"),
+            Path("./data/merge_mask_hydro/dataset_1/MaskHydro_merge_with_multibranch_skeleton.geojson"),
+        ),
+        (  # multi_branch skeleton (should not happen)
+            Path("./data/skeleton_hydro/dataset_1/Skeleton_Hydro_multibranch.geojson"),
+            Path("./data/merge_mask_hydro/dataset_1/MaskHydro_merge_with_multibranch_skeleton.geojson"),
+        ),
+    ],
+)
+def test_merge_skeleton_by_mask_fail(skeleton, mask):
+    # Parameters
+    crs = CRS.from_epsg(2154)
+
+    with pytest.raises(ValueError):
+        merge_skeleton_by_mask(skeleton, mask, TMP_PATH, crs)

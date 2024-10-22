@@ -6,7 +6,7 @@ import os
 
 import geopandas as gpd
 import pandas as pd
-from shapely import line_merge
+from shapely import line_merge, set_precision
 
 from lidro.vectors.close_holes import close_holes
 
@@ -27,8 +27,7 @@ def explode_multipart(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
 
 def combine_skeletons(gdf_skeleton: gpd.GeoDataFrame, gdf_mask_hydro: gpd.GeoDataFrame, crs: str) -> gpd.GeoDataFrame:
-    """Combine skeletons that belong to the same entity
-    (single polygon) of the hydro mask
+    """Combine skeletons that belong to the same entity (single polygon) of the hydro mask.
 
     Args:
         gdf_skeleton (gpd.GeoDataFrame): hydro skeletons (one skeleton by row)
@@ -52,10 +51,13 @@ def combine_skeletons(gdf_skeleton: gpd.GeoDataFrame, gdf_mask_hydro: gpd.GeoDat
     # Apply line_merge where it is possible (skeleton lines are joint), raise an error in other cases
     combined_skeletons["geometry"] = combined_skeletons["geometry"].apply(line_merge)
 
-    # if not (combined_skeletons["geometry"].geom_type == "LineString").all() :
-    #     raise ValueError("Combined skeleton geometry should all be of type LineString,"
-    #                     f"got {combined_skeletons['geometry'].geom_type} instead. This means that"
-    #                     "there is a hole in the skeleton inside one hydro entity")
+    if not (combined_skeletons["geometry"].geom_type == "LineString").all():
+        raise ValueError(
+            "Combined skeleton geometry should all be of type LineString,"
+            f"got {combined_skeletons['geometry'].geom_type} instead. This means that "
+            "there is a hole in the skeleton inside one hydro entity, or the skeleton has "
+            "multiple branches."
+        )
 
     gdf_combined_skeletons = gpd.GeoDataFrame(combined_skeletons, columns=["geometry"], crs=crs).reset_index()
 
@@ -85,11 +87,14 @@ def merge_skeleton_by_mask(input_skeleton: str, input_mask_hydro: str, output_di
     # Inputs
     gdf_skeleton = gpd.read_file(input_skeleton)
     gdf_skeleton = explode_multipart(gdf_skeleton)
+    # set centimetric precision (equivalent to point cloud precision)
+    gdf_skeleton["geometry"] = set_precision(gdf_skeleton["geometry"], 0.01)
 
     gdf_mask_hydro = gpd.read_file(input_mask_hydro)
     gdf_mask_hydro = explode_multipart(gdf_mask_hydro)
     # Close holes in gdf_mask-hydro to prevent island from dividing a skeleton into multiple parts
     gdf_mask_hydro["geometry"] = gdf_mask_hydro["geometry"].apply(close_holes)
+    print("gdf_mask_hydro::", gdf_mask_hydro)
 
     gdf_combined = combine_skeletons(gdf_skeleton, gdf_mask_hydro, crs)
 
