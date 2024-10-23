@@ -10,7 +10,7 @@ from lidro.create_mask_hydro.vectors.convert_to_vector import create_hydro_vecto
 
 TMP_PATH = Path("./tmp/create_mask_hydro/vectors/convert_to_vector")
 
-las_file = "./data/pointcloud/Semis_2021_0830_6291_LA93_IGN69.laz"
+las_file = "./data/tile_0830_6291/pointcloud/Semis_2021_0830_6291_LA93_IGN69.laz"
 output = "./tmp/create_mask_hydro/vectors/convert_to_vector/MaskHydro_Semis_2021_0830_6291_LA93_IGN69.GeoJSON"
 
 

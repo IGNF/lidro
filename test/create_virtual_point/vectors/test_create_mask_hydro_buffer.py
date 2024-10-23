@@ -12,7 +12,7 @@ from lidro.create_virtual_point.vectors.mask_hydro_with_buffer import (
 
 TMP_PATH = Path("./tmp/create_virtual_point/vectors/create_mask_hydro_buffer/")
 
-file_mask = "./data/merge_mask_hydro/dataset_1/MaskHydro_merge_with_multibranch_skeleton.geojson"
+file_mask = "./data/tile_0830_6291/mask_hydro_merge/MaskHydro_merge.geojson"
 output = Path("./tmp/create_virtual_point/vectors/create_mask_hydro_buffer/MaskHydro_merge_buffer.geojson")
 
 

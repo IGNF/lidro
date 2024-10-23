@@ -7,19 +7,18 @@ from hydra import compose, initialize
 
 from lidro.main_merge_mask import main
 
-INPUT_DIR = Path("data") / "mask_hydro"
-OUTPUT_DIR = Path("tmp") / "merge_mask_hydro/main"
+INPUT_DIR = Path("data/tile_0830_6291")
+OUTPUT_DIR = Path("tmp") / "main_merge_mask_hydro"
 
 
 def setup_module(module):
-    os.makedirs("tmp/merge_mask_hydro/main", exist_ok=True)
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 
 def test_main_run_okay():
-    repo_dir = Path.cwd().parent
     cmd = f"""python -m lidro.main_merge_mask \
-        io.input_dir="{repo_dir}/lidro/data/mask_hydro/"\
-        io.output_dir="{repo_dir}/lidro/tmp/merge_mask_hydro/main/"
+        io.input_dir="{INPUT_DIR}/mask_hydro_merge/"\
+        io.output_dir="{OUTPUT_DIR}/main_run_ok"
         """
     sp.run(cmd, shell=True, check=True)
 
@@ -78,7 +77,7 @@ def test_main_lidro_fail_wrong_input_dir():
 
 
 def test_main_lidro_fail_no_output_dir():
-    input_dir = INPUT_DIR
+    input_dir = INPUT_DIR / "mask_hydro_merge"
     pixel_size = 1
     min_water_area = 150
     buffer_positive = 0.5

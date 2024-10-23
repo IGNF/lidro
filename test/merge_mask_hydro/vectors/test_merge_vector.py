@@ -10,7 +10,8 @@ from lidro.merge_mask_hydro.vectors.merge_vector import merge_geom
 
 TMP_PATH = Path("./tmp/merge_mask_hydro/vectors/merge_mask_hydro")
 
-input_folder = "./data/mask_hydro/"
+
+input_folder = "./data/tile_0830_6291/mask_hydro"
 output = Path("./tmp/merge_mask_hydro/vectors/merge_mask_hydro/MaskHydro_merge.geojson")
 
 

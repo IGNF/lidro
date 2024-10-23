@@ -17,7 +17,7 @@ from lidro.skeleton.branch import (
 
 sys.path.append("lidro/skeleton")
 
-BRANCH_TEST_1_PATH = "data/skeleton_hydro/test_files/90.geojson"
+BRANCH_TEST_1_PATH = "data/other/skeleton/90.geojson"
 CRS_FOR_TEST = 2154
 WATER_MIN_SIZE_TEST = 20
 CLIPPING_LENGTH = 50

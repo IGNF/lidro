@@ -85,18 +85,18 @@ def test_combine_skeletons_raise(skeletons, hydro_masks):
     "skeleton, mask",
     [
         (  # simple mono_branch skeleton (real case)
-            Path("./data/skeleton_hydro/dataset_2/skeleton_hydro.geojson"),
-            Path("./data/merge_mask_hydro/dataset_2/MaskHydro_merge.geojson"),
+            Path("./data/OM_subset/skeleton/skeleton_hydro.geojson"),
+            Path("./data/OM_subset/mask_hydro_merge/MaskHydro_merge.geojson"),
         ),
         (  # simple mono_branch skeleton going over an island
-            Path("./data/skeleton_hydro/dataset_2/skeleton_hydro_over_island.geojson"),
-            Path("./data/merge_mask_hydro/dataset_2/MaskHydro_merge.geojson"),
+            Path("./data/OM_subset/skeleton//skeleton_hydro_over_island.geojson"),
+            Path("./data/OM_subset/mask_hydro_merge/MaskHydro_merge.geojson"),
         ),
-        (  # simple mono_branch skeleton
+        (  # mono_branch skeleton with mutliple LineString
             # original skeleton code generated skeleton_hydro_fail_with_small_gap.geojson which failed
             # newer output should pass
-            Path("./data/skeleton_hydro/dataset_1/skeleton_hydro_single_branch.geojson"),
-            Path("./data/merge_mask_hydro/dataset_1/MaskHydro_merge_with_multibranch_skeleton.geojson"),
+            Path("./data/tile_0830_6291/skeleton/skeleton_hydro.geojson"),
+            Path("./data/tile_0830_6291/mask_hydro_merge/MaskHydro_merge.geojson"),
         ),
     ],
 )
@@ -118,12 +118,12 @@ def test_merge_skeleton_by_mask_default(skeleton, mask):
     "skeleton, mask",
     [
         (  # simple mono_branch skeleton, which in fact has 2 parts that are disjoint of around 1 mm
-            Path("./data/skeleton_hydro/dataset_1/skeleton_hydro_failt_with_small_gap.geojson"),
-            Path("./data/merge_mask_hydro/dataset_1/MaskHydro_merge_with_multibranch_skeleton.geojson"),
+            Path("./data/tile_0830_6291/skeleton/skeleton_hydro_fail_with_small_gap.geojson"),
+            Path("./data/tile_0830_6291/mask_hydro_merge/MaskHydro_merge.geojson"),
         ),
         (  # multi_branch skeleton (should not happen)
-            Path("./data/skeleton_hydro/dataset_1/Skeleton_Hydro_multibranch.geojson"),
-            Path("./data/merge_mask_hydro/dataset_1/MaskHydro_merge_with_multibranch_skeleton.geojson"),
+            Path("./data/tile_0830_6291/skeleton/skeleton_hydro_fail_with_multibranch.geojson"),
+            Path("./data/tile_0830_6291/mask_hydro_merge/MaskHydro_merge.geojson"),
         ),
     ],
 )

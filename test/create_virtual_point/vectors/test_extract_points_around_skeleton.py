@@ -11,9 +11,9 @@ from lidro.create_virtual_point.vectors.extract_points_around_skeleton import (
 )
 
 TMP_PATH = Path("./tmp/create_virtual_point/vectors/extract_points_around_skeleton")
-INPUT_DIR = Path("./data/")
-MASK_HYDRO = "./data/merge_mask_hydro/dataset_1/MaskHydro_merge_with_multibranch_skeleton.geojson"
-POINTS_SKELETON = "./data/skeleton_hydro/dataset_1/points_along_skeleton.geojson"
+INPUT_DIR = Path("./data/tile_0830_6291")
+MASK_HYDRO = "./data/tile_0830_6291/mask_hydro_merge/MaskHydro_merge.geojson"
+POINTS_SKELETON = "./data/tile_0830_6291/skeleton/points_along_skeleton.geojson"
 OUTPUT_GEOJSON = TMP_PATH / "Semis_2021_0830_6291_LA93_IGN69_points_skeleton.geojson"
 
 
@@ -30,6 +30,7 @@ def test_extract_points_around_skeleton_default():
     k = 3  # Example k value
 
     # Mask Hydro with buffer
+
     mask_hydro_buffered = "MULTIPOLYGON (((829969.0856167737 6292032.553442742,\
         830452.9506643447 6292032.553442742, \
         830498.1716968281 6291675.307286125, \
