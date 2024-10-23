@@ -21,7 +21,7 @@ def test_main_run_okay():
         io.input_dir="{repo_dir}/lidro/data/"\
         io.input_filename=Semis_2021_0830_6291_LA93_IGN69.laz \
         io.input_mask_hydro="{repo_dir}/lidro/data/merge_mask_hydro/dataset_1/MaskHydro_merge_with_multibranch_skeleton.geojson"\
-        io.input_skeleton="{repo_dir}/lidro/data/skeleton_hydro/dataset_1/Skeleton_Hydro_single_branch.geojson"\
+        io.input_skeleton="{repo_dir}/lidro/data/skeleton_hydro/dataset_1/skeleton_hydro_single_branch.geojson"\
         io.output_dir="{repo_dir}/lidro/tmp/extract_points_around_skeleton/main/"
         """
     sp.run(cmd, shell=True, check=True)
@@ -32,7 +32,7 @@ def test_main_extract_points_skeleton_input_file():
     output_dir = OUTPUT_DIR / "main_extract_points_skeleton_input_file"
     input_filename = "Semis_2021_0830_6291_LA93_IGN69.laz"
     input_mask_hydro = INPUT_DIR / "merge_mask_hydro/dataset_1/MaskHydro_merge_with_multibranch_skeleton.geojson"
-    input_skeleton = INPUT_DIR / "skeleton_hydro/dataset_1/Skeleton_Hydro_single_branch.geojson"
+    input_skeleton = INPUT_DIR / "skeleton_hydro/dataset_1/skeleton_hydro_single_branch.geojson"
     distances_meters = 5
     buffer = 2
     srid = 2154
@@ -60,7 +60,7 @@ def test_main_extract_points_skeleton_input_file():
 def test_main_extract_points_skeleton_fail_no_input_dir():
     output_dir = OUTPUT_DIR / "main_no_input_dir"
     input_mask_hydro = INPUT_DIR / "merge_mask_hydro/MaskHydro_merge_with_multibranch_skeleton.geojson"
-    input_skeleton = INPUT_DIR / "skeleton_hydro/dataset_1/Skeleton_Hydro_single_branch.geojson"
+    input_skeleton = INPUT_DIR / "skeleton_hydro/dataset_1/skeleton_hydro_single_branch.geojson"
     distances_meters = 5
     buffer = 2
     srid = 2154
@@ -86,7 +86,7 @@ def test_main_extract_points_skeleton_fail_no_input_dir():
 def test_main_extract_points_skeleton_fail_wrong_input_dir():
     output_dir = OUTPUT_DIR / "main_wrong_input_dir"
     input_mask_hydro = INPUT_DIR / "merge_mask_hydro/MaskHydro_merge_with_multibranch_skeleton.geojson"
-    input_skeleton = INPUT_DIR / "skeleton_hydro/dataset_1/Skeleton_Hydro_single_branch.geojson"
+    input_skeleton = INPUT_DIR / "skeleton_hydro/dataset_1/skeleton_hydro_single_branch.geojson"
     distances_meters = 5
     buffer = 2
     srid = 2154
@@ -113,7 +113,7 @@ def test_main_extract_points_skeleton_fail_wrong_input_dir():
 def test_main_extract_points_skeleton_fail_no_output_dir():
     input_dir = INPUT_DIR
     input_mask_hydro = INPUT_DIR / "merge_mask_hydro/MaskHydro_merge_with_multibranch_skeleton.geojson"
-    input_skeleton = INPUT_DIR / "skeleton_hydro/dataset_1/Skeleton_Hydro_single_branch.geojson"
+    input_skeleton = INPUT_DIR / "skeleton_hydro/dataset_1/skeleton_hydro_single_branch.geojson"
     distances_meters = 5
     buffer = 2
     srid = 2154
@@ -139,7 +139,7 @@ def test_main_extract_points_skeleton_fail_no_output_dir():
 def test_main_extract_points_skeleton_fail_no_input_mask_hydro():
     input_dir = INPUT_DIR
     output_dir = OUTPUT_DIR / "main_no_input_dir"
-    input_skeleton = INPUT_DIR / "skeleton_hydro/dataset_1/Skeleton_Hydro_single_branch.geojson"
+    input_skeleton = INPUT_DIR / "skeleton_hydro/dataset_1/skeleton_hydro_single_branch.geojson"
     distances_meters = 5
     buffer = 2
     srid = 2154

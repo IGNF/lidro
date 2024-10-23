@@ -92,6 +92,12 @@ def test_combine_skeletons_raise(skeletons, hydro_masks):
             Path("./data/skeleton_hydro/dataset_2/skeleton_hydro_over_island.geojson"),
             Path("./data/merge_mask_hydro/dataset_2/MaskHydro_merge.geojson"),
         ),
+        (  # simple mono_branch skeleton
+            # original skeleton code generated skeleton_hydro_fail_with_small_gap.geojson which failed
+            # newer output should pass
+            Path("./data/skeleton_hydro/dataset_1/skeleton_hydro_single_branch.geojson"),
+            Path("./data/merge_mask_hydro/dataset_1/MaskHydro_merge_with_multibranch_skeleton.geojson"),
+        ),
     ],
 )
 def test_merge_skeleton_by_mask_default(skeleton, mask):
@@ -112,7 +118,7 @@ def test_merge_skeleton_by_mask_default(skeleton, mask):
     "skeleton, mask",
     [
         (  # simple mono_branch skeleton, which in fact has 2 parts that are disjoint of around 1 mm
-            Path("./data/skeleton_hydro/dataset_1/Skeleton_Hydro_single_branch.geojson"),
+            Path("./data/skeleton_hydro/dataset_1/skeleton_hydro_failt_with_small_gap.geojson"),
             Path("./data/merge_mask_hydro/dataset_1/MaskHydro_merge_with_multibranch_skeleton.geojson"),
         ),
         (  # multi_branch skeleton (should not happen)

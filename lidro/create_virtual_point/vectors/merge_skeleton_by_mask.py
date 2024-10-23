@@ -8,6 +8,7 @@ import geopandas as gpd
 import pandas as pd
 from shapely import line_merge, set_precision
 
+from lidro.skeleton.branch import PRECISION
 from lidro.vectors.close_holes import close_holes
 
 
@@ -88,7 +89,7 @@ def merge_skeleton_by_mask(input_skeleton: str, input_mask_hydro: str, output_di
     gdf_skeleton = gpd.read_file(input_skeleton)
     gdf_skeleton = explode_multipart(gdf_skeleton)
     # set centimetric precision (equivalent to point cloud precision)
-    gdf_skeleton["geometry"] = set_precision(gdf_skeleton["geometry"], 0.01)
+    gdf_skeleton["geometry"] = set_precision(gdf_skeleton["geometry"], PRECISION)
 
     gdf_mask_hydro = gpd.read_file(input_mask_hydro)
     gdf_mask_hydro = explode_multipart(gdf_mask_hydro)
