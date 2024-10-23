@@ -5,7 +5,7 @@ from shapely.geometry import Polygon
 
 from lidro.vectors.close_holes import close_holes
 
-input = "./data/merge_mask_hydro/dataset_1/MaskHydro_merge_with_multibranch_skeleton.geojson"
+input = "./data/tile_0830_6291/mask_hydro_merge/MaskHydro_merge.geojson"
 
 
 @pytest.mark.parametrize(

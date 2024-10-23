@@ -13,7 +13,7 @@ from lidro.create_virtual_point.vectors.points_along_skeleton import (
 
 TMP_PATH = Path("./tmp/create_virtual_point/vectors/points_along_skeleton")
 
-file = "./data/skeleton_hydro/dataset_2/skeleton_hydro.geojson"
+file = "./data/tile_0830_6291/skeleton/skeleton_hydro.geojson"
 output = Path("./tmp/create_virtual_point/vectors/points_along_skeleton/points.geojson")
 
 

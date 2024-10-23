@@ -1,4 +1,5 @@
 import os
+import shutil
 import subprocess as sp
 from pathlib import Path
 
@@ -7,19 +8,21 @@ from hydra import compose, initialize
 
 from lidro.main_create_mask import main
 
-INPUT_DIR = Path("data") / "pointcloud"
-OUTPUT_DIR = Path("tmp") / "create_mask_hydro/main"
+DATA_DIR = Path("data/tile_0830_6291")
+INPUT_DIR = DATA_DIR / "pointcloud"
+OUTPUT_DIR = Path("tmp") / "main_create_mask"
 
 
 def setup_module(module):
-    os.makedirs("tmp/create_mask_hydro/main", exist_ok=True)
+    if OUTPUT_DIR.is_dir():
+        shutil.rmtree(OUTPUT_DIR)
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 
 def test_main_run_okay():
-    repo_dir = Path.cwd().parent
     cmd = f"""python -m lidro.main_create_mask \
-        io.input_dir="{repo_dir}/lidro/data/pointcloud/"\
-        io.output_dir="{repo_dir}/lidro/tmp/create_mask_hydro/main/"
+        io.input_dir={INPUT_DIR}\
+        io.output_dir={OUTPUT_DIR}
         """
     sp.run(cmd, shell=True, check=True)
 
@@ -43,11 +46,11 @@ def test_main_lidro_default():
             ],
         )
     main(cfg)
-    assert (Path(output_dir) / "MaskHydro_LHD_FXX_0706_6627_PTS_C_LAMB93_IGN69_TEST.GeoJSON").is_file()
+    assert (Path(output_dir) / "MaskHydro_Semis_2021_0830_6291_LA93_IGN69.GeoJSON").is_file()
 
 
 def test_main_lidro_input_file():
-    input_dir = INPUT_DIR
+    input_dir = Path("data/other/pointcloud")
     output_dir = OUTPUT_DIR / "main_lidro_input_file"
     input_filename = "LHD_FXX_0706_6627_PTS_C_LAMB93_IGN69_TEST.las"
     pixel_size = 1
