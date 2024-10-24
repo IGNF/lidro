@@ -1,13 +1,21 @@
 import sys
 
-from hydra import compose, initialize
 import geopandas as gpd
+from hydra import compose, initialize
 from omegaconf import DictConfig
 from shapely import LineString, Point
 
-from lidro.skeleton.branch import Branch, get_vertices_dict, get_df_points_from_gdf, line_merge, cut, cut_both_ends
+from lidro.skeleton.branch import (
+    PRECISION,
+    Branch,
+    cut,
+    cut_both_ends,
+    get_df_points_from_gdf,
+    get_vertices_dict,
+    line_merge,
+)
 
-sys.path.append('lidro/skeleton')
+sys.path.append("lidro/skeleton")
 
 BRANCH_TEST_1_PATH = "data/skeleton_hydro/test_files/90.geojson"
 CRS_FOR_TEST = 2154
@@ -48,18 +56,12 @@ def test_line_merge():
     line_5 = LineString([point_0_4, point_1_4])
     line_6 = LineString([point_1_4, point_2_4])
 
-    line_list = [line_1,
-                 line_2,
-                 line_3,
-                 line_4,
-                 line_5,
-                 line_6
-                 ]
+    line_list = [line_1, line_2, line_3, line_4, line_5, line_6]
 
     gdf_gap_lines = gpd.GeoDataFrame(geometry=line_list).set_crs(CRS_FOR_TEST, allow_override=True)
     gdf_merged = line_merge(gdf_gap_lines, CRS_FOR_TEST)
     assert len(gdf_merged) == 3
-    for line in gdf_merged['geometry']:
+    for line in gdf_merged["geometry"]:
         if point_0_0 in line.coords:
             assert len(line.coords) == 5
             assert point_0_1 in line.coords
@@ -94,13 +96,7 @@ def test_get_vertices_dict():
     line_5 = LineString([point_0_4, point_1_4])
     line_6 = LineString([point_1_4, point_2_4])
 
-    line_list = [line_1,
-                 line_2,
-                 line_3,
-                 line_4,
-                 line_5,
-                 line_6
-                 ]
+    line_list = [line_1, line_2, line_3, line_4, line_5, line_6]
 
     gdf_gap_lines = gpd.GeoDataFrame(geometry=line_list).set_crs(CRS_FOR_TEST, allow_override=True)
 
@@ -120,7 +116,7 @@ def test_create_voronoi_lines():
             config_name="configs_lidro.yaml",
             overrides=[
                 f"skeleton.branch.water_min_size={WATER_MIN_SIZE_TEST}",
-            ]
+            ],
         )
         branch_1 = read_branch(config, BRANCH_TEST_1_PATH, "test_branch_1")
         voronoi_lines = branch_1.create_voronoi_lines()
@@ -144,7 +140,7 @@ def test_creation_skeleton_lines():
             config_name="configs_lidro.yaml",
             overrides=[
                 f"skeleton.branch.water_min_size={WATER_MIN_SIZE_TEST}",
-            ]
+            ],
         )
         branch_1 = read_branch(config, BRANCH_TEST_1_PATH, "test_branch_1")
 
@@ -220,7 +216,7 @@ def test_shorten_lines():
             config_name="configs_lidro.yaml",
             overrides=[
                 f"skeleton.clipping_length={CLIPPING_LENGTH}",
-            ]
+            ],
         )
         branch_1 = read_branch(config, BRANCH_TEST_1_PATH, "test_branch_1")
 
@@ -229,10 +225,10 @@ def test_shorten_lines():
         branch_1.simplify()
 
         # check length before shortening
-        total_length_before = sum(line.length for line in branch_1.gdf_skeleton_lines['geometry'])
-        assert total_length_before == 775.0587088169204
+        total_length_before = sum(line.length for line in branch_1.gdf_skeleton_lines["geometry"])
+        assert abs(total_length_before - 775.059) < PRECISION
 
         # check length after shortening
         branch_1.shorten_lines()
-        total_length_after = sum(line.length for line in branch_1.gdf_skeleton_lines['geometry'])
-        assert total_length_after == 675.0587088169583
+        total_length_after = sum(line.length for line in branch_1.gdf_skeleton_lines["geometry"])
+        assert abs(total_length_after - 675.059) < PRECISION

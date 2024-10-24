@@ -19,8 +19,8 @@ def test_main_run_okay():
     cmd = f"""python -m lidro.main_create_virtual_point \
         io.input_dir="{repo_dir}/lidro/data/"\
         io.input_filename=Semis_2021_0830_6291_LA93_IGN69.laz \
-        io.input_mask_hydro="{repo_dir}/lidro/data/merge_mask_hydro/MaskHydro_merge.geojson"\
-        io.input_skeleton="{repo_dir}/lidro/data/skeleton_hydro/Skeleton_Hydro_small.geojson"\
+        io.input_mask_hydro="{repo_dir}/lidro/data/merge_mask_hydro/dataset_2/MaskHydro_merge.geojson"\
+        io.input_skeleton="{repo_dir}/lidro/data/skeleton_hydro/dataset_2/skeleton_hydro.geojson"\
         io.dir_points_skeleton="{repo_dir}/lidro/data/point_virtual/"\
         io.output_dir="{repo_dir}/lidro/tmp/create_virtual_point/main/"
         """
@@ -31,8 +31,8 @@ def test_main_lidro_input_file():
     input_dir = INPUT_DIR
     output_dir = OUTPUT_DIR / "main_lidro_input_file"
     input_filename = "Semis_2021_0830_6291_LA93_IGN69.laz"
-    input_mask_hydro = INPUT_DIR / "merge_mask_hydro/MaskHydro_merge.geojson"
-    input_skeleton = INPUT_DIR / "skeleton_hydro/Skeleton_Hydro_small.geojson"
+    input_mask_hydro = INPUT_DIR / "merge_mask_hydro/dataset_2/MaskHydro_merge.geojson"
+    input_skeleton = INPUT_DIR / "skeleton_hydro/dataset_2/skeleton_hydro.geojson"
     dir_points_skeleton = INPUT_DIR / "point_virtual/"
     srid = 2154
     points_grid_spacing = 1

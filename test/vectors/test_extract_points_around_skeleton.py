@@ -12,8 +12,8 @@ from lidro.create_virtual_point.vectors.extract_points_around_skeleton import (
 
 TMP_PATH = Path("./tmp/create_virtual_point/vectors/extract_points_around_skeleton")
 INPUT_DIR = Path("./data/")
-MASK_HYDRO = "./data/merge_mask_hydro/MaskHydro_merge.geojson"
-POINTS_SKELETON = "./data/skeleton_hydro/points_along_skeleton_small.geojson"
+MASK_HYDRO = "./data/merge_mask_hydro/dataset_1/MaskHydro_merge_with_multibranch_skeleton.geojson"
+POINTS_SKELETON = "./data/skeleton_hydro/dataset_1/points_along_skeleton.geojson"
 OUTPUT_GEOJSON = TMP_PATH / "Semis_2021_0830_6291_LA93_IGN69_points_skeleton.geojson"
 
 
