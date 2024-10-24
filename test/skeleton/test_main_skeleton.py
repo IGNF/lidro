@@ -1,26 +1,30 @@
 import os
-
-from hydra import compose, initialize
-import pandas as pd
-import geopandas as gpd
-from dotenv import load_dotenv
-import pytest
-
-from lidro.skeleton.create_skeleton_lines import create_branches_list, create_branches_pair
-from lidro.skeleton.create_skeleton_lines import select_candidates, query_db_for_bridge_across_gap
-from lidro.skeleton.branch import Candidate
 from test.skeleton.test_branch import read_branch
+
+import geopandas as gpd
+import pandas as pd
+import pytest
+from dotenv import load_dotenv
+from hydra import compose, initialize
+
+from lidro.skeleton.branch import Candidate
+from lidro.skeleton.create_skeleton_lines import (
+    create_branches_list,
+    create_branches_pair,
+    query_db_for_bridge_across_gap,
+    select_candidates,
+)
 
 load_dotenv()
 
-IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"   # check if tests runs under github_action
+IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"  # check if tests runs under github_action
 
-DB_UNI_USER = os.getenv('DB_UNI_USER')
-DB_UNI_PASSWORD = os.getenv('DB_UNI_PASSWORD')
+DB_UNI_USER = os.getenv("DB_UNI_USER")
+DB_UNI_PASSWORD = os.getenv("DB_UNI_PASSWORD")
 CRS = 2154
-MAIN_SKELETON_TEST_1_1_PATH = "data/skeleton_hydro/test_files/40.geojson"
-MAIN_SKELETON_TEST_1_2_PATH = "data/skeleton_hydro/test_files/43.geojson"
-MAIN_SKELETON_TEST_1_3_PATH = "data/skeleton_hydro/test_files/44.geojson"
+MAIN_SKELETON_TEST_1_1_PATH = "data/other/skeleton/40.geojson"
+MAIN_SKELETON_TEST_1_2_PATH = "data/other/skeleton/43.geojson"
+MAIN_SKELETON_TEST_1_3_PATH = "data/other/skeleton/44.geojson"
 
 
 def test_main_skeleton_1():
@@ -44,14 +48,14 @@ def test_main_skeleton_1():
         candidate_1 = validated_candidates[0]
         candidate_2 = validated_candidates[1]
 
-        assert (candidate_1.squared_distance < 30)
-        assert (candidate_2.squared_distance < 75)
+        assert candidate_1.squared_distance < 30
+        assert candidate_2.squared_distance < 75
 
 
 # do that test only if we are not on github action, since github can't connect to BD UNI
 @pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="BD UNI not reachable from github action")
 def test_query_db_for_bridge_across_gap():
-    """Test : query_db_for_bridge_across_gap """
+    """Test : query_db_for_bridge_across_gap"""
     with initialize(version_base="1.2", config_path="../../configs"):
         config = compose(
             config_name="configs_lidro.yaml",

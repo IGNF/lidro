@@ -1,18 +1,24 @@
 """ Main script for creating skeleton lines inside masks
 """
-import sys
 
-import hydra
-from omegaconf import DictConfig
+import os
+import sys
+from pathlib import Path
 
 import geopandas as gpd
+import hydra
 import pandas as pd
+from omegaconf import DictConfig
 from shapely.geometry import Point
 
-sys.path.append('../lidro')
+sys.path.append("../lidro")
 
-from lidro.skeleton.create_skeleton_lines import create_branches_list, create_branches_pair, select_candidates
-from lidro.skeleton.branch import Branch, line_merge
+from lidro.skeleton.branch import Branch, line_merge  # noqa: E402
+from lidro.skeleton.create_skeleton_lines import (  # noqa: E402
+    create_branches_list,
+    create_branches_pair,
+    select_candidates,
+)
 
 
 @hydra.main(version_base="1.2", config_path="../configs/", config_name="configs_lidro.yaml")
@@ -38,7 +44,7 @@ def run(config: DictConfig):
     gap_lines_list = [validated_candidate.line for validated_candidate in validated_candidates]
     gdf_gap_lines = gpd.GeoDataFrame(geometry=gap_lines_list).set_crs(crs, allow_override=True)
     if config.io.skeleton.gap_lines_output_path and validated_candidates:
-        gdf_gap_lines.to_file(config.io.skeleton.gap_lines_output_path, driver='GeoJSON')
+        gdf_gap_lines.to_file(config.io.skeleton.gap_lines_output_path, driver="GeoJSON")
 
     # add the extremities used on each branch to close a gap to the list of gap_point of that branch,
     # to create a new line toward that extremity and know not to remove it during the "simplify"
@@ -57,13 +63,14 @@ def run(config: DictConfig):
     branch_lines_list = [branch.gdf_skeleton_lines for branch in branches_list]
     gdf_branch_lines = gpd.GeoDataFrame(pd.concat(branch_lines_list, ignore_index=True))
     if config.io.skeleton.skeleton_lines_output_path:
-        gdf_branch_lines.to_file(config.io.skeleton.skeleton_lines_output_path, driver='GeoJSON')
+        os.makedirs(Path(config.io.skeleton.skeleton_lines_output_path).parent, exist_ok=True)
+        gdf_branch_lines.to_file(config.io.skeleton.skeleton_lines_output_path, driver="GeoJSON")
 
     # saving all lines if there is a path
     if config.io.skeleton.global_lines_output_path:
         gdf_global_lines = gpd.GeoDataFrame(pd.concat([gdf_branch_lines, gdf_gap_lines], ignore_index=True))
         gdf_global_lines = line_merge(gdf_global_lines, crs)  # merge lines into polylines
-        gdf_global_lines.to_file(config.io.skeleton.global_lines_output_path, driver='GeoJSON')
+        gdf_global_lines.to_file(config.io.skeleton.global_lines_output_path, driver="GeoJSON")
 
 
 if __name__ == "__main__":

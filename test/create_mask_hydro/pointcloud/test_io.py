@@ -9,7 +9,7 @@ from lidro.create_mask_hydro.pointcloud.io import get_pointcloud_origin
 
 TMP_PATH = Path("./tmp/create_mask_hydro/pointcloud/io")
 
-LAS_FILE = "./data/pointcloud/LHD_FXX_0706_6627_PTS_C_LAMB93_IGN69_TEST.las"
+LAS_FILE = "./data/other/pointcloud/LHD_FXX_0706_6627_PTS_C_LAMB93_IGN69_TEST.las"
 
 
 def setup_module(module):

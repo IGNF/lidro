@@ -77,7 +77,7 @@ virtual_point:
     # The number of nearest neighbors to find with KNeighbors
     k: 3
     # The minimum length of a river to use the linear regression model
-    river_length: 150 
+    river_length: 150
   pointcloud:
     # Spacing between the grid points in meters by default "0.5"
     points_grid_spacing: 0.5

@@ -24,14 +24,14 @@ def setup_module():
 def mock_laz_files():
     # LAZ files
     return [
-        "./data/pointcloud/LHD_FXX_0706_6627_PTS_C_LAMB93_IGN69_TEST.las",
-        "./data/pointcloud/Semis_2021_0830_6291_LA93_IGN69.laz",
+        "./data/other/pointcloud/LHD_FXX_0706_6627_PTS_C_LAMB93_IGN69_TEST.las",
+        "./data/tile_0830_6291/pointcloud/Semis_2021_0830_6291_LA93_IGN69.laz",
     ]
 
 
 def test_extract_bounds_from_laz_file_not_found():
     """Test that the function raises a FileNotFoundError when the file does not exist."""
-    non_existing_file = "./data/pointcloud/non_existing_file.laz"
+    non_existing_file = "./data/other/pointcloud/non_existing_file.laz"
 
     with pytest.raises(FileNotFoundError, match=f"The file '{non_existing_file}' does not exist."):
         extract_bounds_from_laz(non_existing_file)
@@ -39,7 +39,7 @@ def test_extract_bounds_from_laz_file_not_found():
 
 def test_extract_bounds_from_real_laz_file():
     """Test if extract_bounds_from_laz returns a bounding box of 1km x 1km for the real file."""
-    laz_file = "./data/pointcloud/Semis_2021_0830_6291_LA93_IGN69.laz"
+    laz_file = "./data/tile_0830_6291/pointcloud/Semis_2021_0830_6291_LA93_IGN69.laz"
     bounds = extract_bounds_from_laz(laz_file)
 
     assert len(bounds) == 4, "Bounding box should return 4 values."

@@ -53,6 +53,7 @@ def create_test_data_no_points():
 
 
 def create_test_data_with_points():
+    # to be confirmed (@Malvina ?): compute_virtual_points_by_section runs on a single mask
     # Create GeoDataFrame with points and points_knn columns
     points = gpd.GeoDataFrame(
         {
@@ -75,7 +76,7 @@ def create_test_data_with_points():
         {
             "geometry": [
                 LineString([(700000, 6600000), (700300, 6600300)]),
-                LineString([(700400, 6600400), (700500, 6600500)]),
+                # LineString([(700400, 6600400), (700500, 6600500)]),
             ]
         },
         crs="EPSG:2154",
@@ -87,9 +88,9 @@ def create_test_data_with_points():
                 Polygon(
                     [(699900, 6599900), (700400, 6599900), (700400, 6600400), (699900, 6600400), (699900, 6599900)]
                 ),
-                Polygon(
-                    [(700400, 6600400), (700500, 6600400), (700500, 6600500), (700400, 6600500), (700400, 6600400)]
-                ),
+                # Polygon(
+                #     [(700400, 6600400), (700500, 6600400), (700500, 6600500), (700400, 6600500), (700400, 6600400)]
+                # ),
             ]
         },
         crs="EPSG:2154",
@@ -245,12 +246,11 @@ def test_compute_virtual_points_no_points():
 
 
 def test_compute_virtual_points_with_points():
-    points, lines, mask_hydro = create_test_data_with_points()
+    points, line, mask_hydro = create_test_data_with_points()
     crs = CRS.from_epsg(2154)
     spacing = 1.0
     river_length = 150
-
-    grid_with_z = compute_virtual_points_by_section(points, lines, mask_hydro, crs, spacing, river_length, TMP_PATH)
+    grid_with_z = compute_virtual_points_by_section(points, line, mask_hydro, crs, spacing, river_length, TMP_PATH)
 
     assert all(isinstance(geom, Point) for geom in grid_with_z.geometry)
     assert all(geom.has_z for geom in grid_with_z.geometry)  # Check that all points have a Z coordinate

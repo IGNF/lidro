@@ -14,7 +14,7 @@ from lidro.create_mask_hydro.rasters.create_mask_raster import (
 
 TMP_PATH = Path("./tmp/create_mask_hydro/rasters/create_mask_raster")
 
-LAS_FILE = "./data/pointcloud/Semis_2021_0830_6291_LA93_IGN69.laz"
+LAS_FILE = "./data/tile_0830_6291/pointcloud/Semis_2021_0830_6291_LA93_IGN69.laz"
 
 
 tile_size = 1000

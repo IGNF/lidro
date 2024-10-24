@@ -1,16 +1,18 @@
+from dataclasses import dataclass, field
 from itertools import product
 from typing import Dict, List
-from dataclasses import dataclass, field
 
-from omegaconf import DictConfig
 import geopandas as gpd
-from geopandas.geodataframe import GeoDataFrame
-import pandas as pd
 import numpy as np
-from shapely import LineString, Point, Geometry
-from shapely.geometry import Polygon, MultiLineString
-from shapely.ops import voronoi_diagram, linemerge
+import pandas as pd
+from geopandas.geodataframe import GeoDataFrame
+from omegaconf import DictConfig
 from pyproj.crs.crs import CRS
+from shapely import Geometry, LineString, Point, set_precision
+from shapely.geometry import MultiLineString, Polygon
+from shapely.ops import linemerge, voronoi_diagram
+
+PRECISION = 0.001
 
 
 @dataclass
@@ -18,6 +20,7 @@ class Candidate:
     """
     a candidate contains the data to close a gap between 2 branches with a line
     """
+
     branch_1: "Branch"
     branch_2: "Branch"
     extremity_1: tuple
@@ -26,15 +29,14 @@ class Candidate:
     line: LineString = field(init=False)
 
     def __post_init__(self):
-        self.line = LineString([
-            (self.extremity_1[0], self.extremity_1[1]),
-            (self.extremity_2[0], self.extremity_2[1])
-            ])
+        self.line = LineString(
+            [(self.extremity_1[0], self.extremity_1[1]), (self.extremity_2[0], self.extremity_2[1])]
+        )
 
 
 class Branch:
     """a branch contains all the data relative to a single 'entity' of water, defined by a single polygon
-    that is the mask (the contour) of the branch """
+    that is the mask (the contour) of the branch"""
 
     def __init__(self, config: DictConfig, branch_id: str, branch_mask: GeoDataFrame, crs: CRS):
         """
@@ -69,7 +71,9 @@ class Branch:
         creates a skeleton for the branch
         """
         voronoi_lines = self.create_voronoi_lines()
-
+        voronoi_lines["geometry"] = set_precision(
+            voronoi_lines["geometry"], PRECISION
+        )  # force voronoi lines not to be more precise than mm to prevent precision issues
         if len(voronoi_lines) == 0:
             self.gdf_skeleton_lines = gpd.GeoDataFrame(geometry=[], crs=self.crs)
             return
@@ -77,7 +81,7 @@ class Branch:
         # draw a new line for each point added to close gaps to the nearest points on voronoi_lines
         np_points = get_df_points_from_gdf(voronoi_lines).to_numpy().transpose()
         for gap_point in self.gap_points:
-            distance_squared = (np_points[0] - gap_point.x)**2 + (np_points[1] - gap_point.y)**2
+            distance_squared = (np_points[0] - gap_point.x) ** 2 + (np_points[1] - gap_point.y) ** 2
             min_index = np.unravel_index(np.argmin(distance_squared, axis=None), distance_squared.shape)[0]
             line_to_close_the_gap = LineString([gap_point, Point(np_points[0][min_index], np_points[1][min_index])])
             voronoi_lines.loc[len(voronoi_lines)] = line_to_close_the_gap
@@ -99,7 +103,7 @@ class Branch:
             else:
                 break
 
-    def distance_to_a_branch(self, other_branch: 'Branch') -> float:
+    def distance_to_a_branch(self, other_branch: "Branch") -> float:
         """
         returns the distance to another branch
         Args:
@@ -107,16 +111,16 @@ class Branch:
         """
         return self.gdf_branch_mask.distance(other_branch.gdf_branch_mask)[0]
 
-    def get_candidates(self, other_branch: 'Branch') -> List[Candidate]:
+    def get_candidates(self, other_branch: "Branch") -> List[Candidate]:
         """
         Returns all the possible candidates (up to max_gap_candidates) to close the gap with the other branch
         Args:
             - other_branch (Branch): the other branch we want the distance to
         """
-        np_all_x = self.df_all_coords['x'].to_numpy()
-        np_all_y = self.df_all_coords['y'].to_numpy()
-        other_all_x = other_branch.df_all_coords['x'].to_numpy()
-        other_all_y = other_branch.df_all_coords['y'].to_numpy()
+        np_all_x = self.df_all_coords["x"].to_numpy()
+        np_all_y = self.df_all_coords["y"].to_numpy()
+        other_all_x = other_branch.df_all_coords["x"].to_numpy()
+        other_all_y = other_branch.df_all_coords["y"].to_numpy()
 
         # create 2 numpy matrix with all x, y from self, minus all x, y from the other
         x_diff = np_all_x - other_all_x[:, np.newaxis]
@@ -134,17 +138,20 @@ class Branch:
             if index >= self.config.skeleton.branch.max_gap_candidates:
                 break
             # stop if the following candidates
-            if distance_squared[other_index][self_index] \
-                    > self.config.skeleton.max_gap_width * self.config.skeleton.max_gap_width:
+            if (
+                distance_squared[other_index][self_index]
+                > self.config.skeleton.max_gap_width * self.config.skeleton.max_gap_width
+            ):
                 break
 
             candidates.append(
-                Candidate(self,
-                          other_branch,
-                          (self.df_all_coords['x'][self_index], self.df_all_coords['y'][self_index]),
-                          (other_branch.df_all_coords['x'][other_index], other_branch.df_all_coords['y'][other_index]),
-                          distance_squared[other_index][self_index]
-                          )
+                Candidate(
+                    self,
+                    other_branch,
+                    (self.df_all_coords["x"][self_index], self.df_all_coords["y"][self_index]),
+                    (other_branch.df_all_coords["x"][other_index], other_branch.df_all_coords["y"][other_index]),
+                    distance_squared[other_index][self_index],
+                )
             )
         return candidates
 
@@ -195,18 +202,18 @@ class Branch:
             line_that_should_not_be_removed = None
             for line_to_keep, line_that_can_be_removed in product(lines_to_keep, lines_that_can_be_removed):
                 if vertex == line_to_keep.boundary.geoms[0]:
-                    vector_to_keep = np.array(line_to_keep.boundary.geoms[1].coords[0]) \
-                        - np.array(vertex.coords[0])
+                    vector_to_keep = np.array(line_to_keep.boundary.geoms[1].coords[0]) - np.array(vertex.coords[0])
                 else:
-                    vector_to_keep = np.array(line_to_keep.boundary.geoms[0].coords[0]) \
-                        - np.array(vertex.coords[0])
+                    vector_to_keep = np.array(line_to_keep.boundary.geoms[0].coords[0]) - np.array(vertex.coords[0])
 
                 if vertex == line_that_can_be_removed.boundary.geoms[0]:
-                    vector_to_remove = np.array(line_that_can_be_removed.boundary.geoms[1].coords[0]) \
-                        - np.array(vertex.coords[0])
+                    vector_to_remove = np.array(line_that_can_be_removed.boundary.geoms[1].coords[0]) - np.array(
+                        vertex.coords[0]
+                    )
                 else:
-                    vector_to_remove = np.array(line_that_can_be_removed.boundary.geoms[0].coords[0]) \
-                        - np.array(vertex.coords[0])
+                    vector_to_remove = np.array(line_that_can_be_removed.boundary.geoms[0].coords[0]) - np.array(
+                        vertex.coords[0]
+                    )
 
                 length_to_keep = np.linalg.norm(vector_to_keep)
                 length_to_remove = np.linalg.norm(vector_to_remove)
@@ -225,7 +232,7 @@ class Branch:
             lines_to_remove += lines_that_can_be_removed
 
         # set the lines without the lines to remove
-        self.gdf_skeleton_lines = self.gdf_skeleton_lines[~self.gdf_skeleton_lines['geometry'].isin(lines_to_remove)]
+        self.gdf_skeleton_lines = self.gdf_skeleton_lines[~self.gdf_skeleton_lines["geometry"].isin(lines_to_remove)]
 
     def can_line_be_removed(self, line: Geometry, vertices_dict: Dict[Point, List[LineString]]):
         """
@@ -252,22 +259,23 @@ class Branch:
         return str(self.branch_id)
 
     def create_voronoi_lines(self) -> GeoDataFrame:
-        """ Returns the Voronoi lines from the mask.
+        """Returns the Voronoi lines from the mask.
         (Only the lines that are completely inside the mask are returned)
         """
         # divide geometry into segments no longer than max_segment_length
-        united_geom = self.gdf_branch_mask['geometry'].unary_union
+        united_geom = self.gdf_branch_mask["geometry"].unary_union
         segmentize_geom = united_geom.segmentize(max_segment_length=self.config.skeleton.branch.voronoi_max_length)
         # Create the voronoi diagram and only keep polygon
         regions = voronoi_diagram(segmentize_geom, envelope=segmentize_geom, tolerance=0.0, edges=True)
 
         # remove Voronoi lines exterior to the mask
         geometry = gpd.GeoSeries(regions.geoms, crs=self.crs).explode(index_parts=False)
+
         df = gpd.GeoDataFrame(geometry=geometry, crs=self.crs)
-        lines_filter = df.sjoin(self.gdf_branch_mask, predicate='within')  # only keeps lines "Within" gdf_branch_mask
+        lines_filter = df.sjoin(self.gdf_branch_mask, predicate="within")  # only keeps lines "Within" gdf_branch_mask
         # save Voronoi lines
         lines_filter = lines_filter.reset_index(drop=True)  # Réinitialiser l'index
-        lines_filter = lines_filter.drop(columns=['index_right'])  # Supprimer la colonne 'index_right'
+        lines_filter = lines_filter.drop(columns=["index_right"])  # Supprimer la colonne 'index_right'
 
         return gpd.GeoDataFrame(lines_filter, crs=self.crs)
 
@@ -299,12 +307,14 @@ class Branch:
                 new_line = cut(line, self.config.skeleton.clipping_length)
             elif end_point == vertex:
                 new_line = cut(LineString(reversed(line.coords)), self.config.skeleton.clipping_length)
-            self.gdf_skeleton_lines.loc[self.gdf_skeleton_lines['geometry'] == line, 'geometry'] = new_line
+            self.gdf_skeleton_lines.loc[self.gdf_skeleton_lines["geometry"] == line, "geometry"] = new_line
 
         # double cut
         for line in double_cut_list:
             new_line = cut_both_ends(line, self.config.skeleton.clipping_length)
-            self.gdf_skeleton_lines.loc[self.gdf_skeleton_lines['geometry'] == line, 'geometry'] = new_line
+            self.gdf_skeleton_lines.loc[self.gdf_skeleton_lines["geometry"] == line, "geometry"] = new_line
+
+        self.gdf_skeleton_lines["geometry"] = set_precision(self.gdf_skeleton_lines["geometry"], PRECISION)
 
 
 def cut(line: LineString, distance: float) -> LineString:
@@ -325,10 +335,10 @@ def cut(line: LineString, distance: float) -> LineString:
             previous_point = point
             continue
         elif distance == segment.length:
-            return LineString(reversed(coords[:2 + index]))  # reversed to put the line back in the correct order
+            return LineString(reversed(coords[: 2 + index]))  # reversed to put the line back in the correct order
         else:  # distance < segment.length
             cutting_point = segment.interpolate(distance)
-            return LineString(reversed(coords[:index + 1] + [(cutting_point.x, cutting_point.y)]))
+            return LineString(reversed(coords[: index + 1] + [(cutting_point.x, cutting_point.y)]))
 
 
 def cut_both_ends(line: LineString, distance: float) -> LineString:
@@ -347,7 +357,7 @@ def get_df_points_from_gdf(gdf: GeoDataFrame) -> pd.DataFrame:
 
     all_points = set()  # we use a set instead of a list to remove doubles
     for _, row in gdf.iterrows():
-        unknown_geometry = row['geometry']
+        unknown_geometry = row["geometry"]
         if isinstance(unknown_geometry, Polygon):
             line: MultiLineString = unknown_geometry.exterior
         elif isinstance(unknown_geometry, MultiLineString):
@@ -360,8 +370,12 @@ def get_df_points_from_gdf(gdf: GeoDataFrame) -> pd.DataFrame:
             all_points.add(coord)
 
     all_points = list(all_points)
-    return pd.DataFrame(data={'x': [point[0] for point in all_points],
-                              'y': [point[1] for point in all_points], })
+    return pd.DataFrame(
+        data={
+            "x": [point[0] for point in all_points],
+            "y": [point[1] for point in all_points],
+        }
+    )
 
 
 def get_vertices_dict(gdf_lines: GeoDataFrame) -> Dict[Point, List[LineString]]:
@@ -375,8 +389,8 @@ def get_vertices_dict(gdf_lines: GeoDataFrame) -> Dict[Point, List[LineString]]:
     #  prepare a vertice dict, containing all the lines connected on a same vertex
     vertices_dict = {}
     for index in gdf_lines.index:
-        line = gdf_lines.iloc[index]['geometry']
-        if line.is_ring:   # it's a loop : no extremity
+        line = gdf_lines.iloc[index]["geometry"]
+        if line.is_ring:  # it's a loop : no extremity
             continue
 
         point_a, point_b = line.boundary.geoms[0], line.boundary.geoms[1]
