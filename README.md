@@ -59,7 +59,13 @@ Pour les cours d'eau supérieurs à 150 m de long :
 * 3- Transformer les coordonnées de ces points (étape précédente) en abscisses curvilignes
 * 4- Générer un modèle de régression linéaire afin de générer tous les N mètres une valeur d'altitude le long du squelette de cette rivière. Les différents Z le long des squelettes HYDRO doivent assurer l'écoulement. Il est important de noter que tous les 50 mètres semble une valeur correcte pour appréhender la donnée. Cette valeur s'explique en raison de la précision altimétrique des données LIDAR (20 cm) ET que les rivières françaises correspondent à des cours d’eau naturels dont la pente est inférieure à 1%. 
 / ! \ Pour les cours d'eau inférieurs à 150 m de long, le modèle de régression linéaire ne fonctionne pas. La valeur du premier quartile sera calculée sur l'ensemble des points d'altitudes du LIDAR "SOL" (étape 2) et affectée pour ces entités hydrographiques (< 150m de long) : aplanissement. 
-* 5- Création de points virtuels nécessitant plusieurs étapes intermédiaires :
+* 5- Vérifier que les modèles de régréssion linéaire calculés le long du squelette s'écoulement progressivement le long du cours d'eau, c'est-à-dire éviter les zones de cuvettes sous les ponts. D'un point de vue mathématique, cela signifie que le "Dernier point squelette AMONT < Premier point squelette AVAL = ALERTE".
+![Alerte](images/alerte_squelette.jpg)
+
+Pour éviter ces "alertes", il faut corriger les valeurs Z des N points du squelette jusqu'à le Z du squelette aval est égal au dernier point Z du squelette amont.
+![Corrections des alertes](images/alerte_squelette.jpg)
+
+* 6- Création de points virtuels nécessitant plusieurs étapes intermédiaires :
   * Création des points virtuels 2D espacés selon une grille régulière tous les N mètres (paramétrable) à l'intérieur du masque hydrographique "écoulement"
   * Affecter une valeur d'altitude à ces points virtuels en fonction des "Z" calculés à l'étape précédente (interpolation linéaire ou aplanissement)
 
@@ -259,6 +265,7 @@ Options généralement passées en paramètres :
 * io.input_mask_hydro : Le chemin contenant le masque HYDRO fusionné (ex."./data/merge_mask_hydro/MaskHydro_merge.geosjon").
 * io.input_skeleton= Le chemin contenant le squelette hydrographique (ex. "./data/skeleton_hydro/Skeleton_Hydro.geojson")
 * io.dir_points_skeleton : Le chemin contenant l'ensemble des N points du squelette créés à l'échelle des dalles LIDAR ( ex. "./tmp/point_skeleton/").
+* io.input_bridge : Le chemin contenant le tablier de pont produit par la production (ex. "./data/bridge/tablier_pont.geojson")
 * io.output_dir :  Le chemin du dossier de sortie (les points virtuels à l'échelle du projet).
 
 Autres paramètres disponibles :
