@@ -54,7 +54,7 @@ def extract_bridge_skeleton_info(bridge: Polygon, list_skeleton_with_z: List):
                       and Z value of the first downstream point.
     """
     intersecting_skeletons = [
-        skeleton for skeleton in list_skeleton_with_z if bridge.intersects(skeleton["geometry"]).all()
+        skeleton for skeleton in list_skeleton_with_z if bridge.intersects(skeleton["geometry"]).any()
     ]
     list_skeleton = [i for i in intersecting_skeletons if len(intersecting_skeletons) == 2]
     # Check if exactly two skeletons intersect the bridge
