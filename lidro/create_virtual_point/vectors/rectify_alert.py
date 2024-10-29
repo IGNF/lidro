@@ -47,7 +47,7 @@ def rectify_z_from_downstream_skeleton(
         upstream_geometries.extend(upstream_geometry)
 
         # Check if alert is active and process downstream geometry accordingly
-        if skeleton_info["alert"].iloc[0] is True:
+        if skeleton_info["alert"].iloc[0]:
             logging.info("Alert detected for bridge intersection. Updating Z values...")
             z_upstream = float(skeleton_info["z_upstream"].iloc[0])
             z_downstream = float(skeleton_info["z_downstream"].iloc[0])
@@ -66,7 +66,8 @@ def rectify_z_from_downstream_skeleton(
                 # Rebuild the geometry with the updated Z values
                 updated_coords = np.column_stack([x_vals, y_vals, z_vals])
                 downstream_geometries.append(LineString(updated_coords))
-        else:
+
+        if not skeleton_info["alert"].iloc[0]:
             # If no alert, add the original downstream geometry
             logging.info("No alert detected. Adding original downstream geometry.")
             downstream_geometries.extend(downstream_geometry)
@@ -84,8 +85,8 @@ def create_list_rectify_skeleton_with_mask(
 ) -> List[gpd.GeoDataFrame]:
     """
     Processes skeletons per hydro mask, prioritizes downstream geometries, and returns
-    a list of GeoDataFrames containing unique skeleton geometries intersected
-    with each hydro mask along with the geometry of each mask.
+    a list of GeoDataFrames containing unique skeleton geometries intersected with each hydro mask,
+    along with the geometry of each mask.
 
     Args:
         input_bridge (str): Path to the bridge input file
@@ -107,7 +108,7 @@ def create_list_rectify_skeleton_with_mask(
     # Keep Only the Matching Geometries from downstream_gdf
     result_gdf = downstream_gdf.drop_duplicates(subset="geometry")
     # Add Non-Matching Geometries from upstream_gdf
-    unmatched_upstream = upstream_gdf[upstream_gdf["geometry"].isin(downstream_gdf["geometry"]) is False]
+    unmatched_upstream = upstream_gdf[~upstream_gdf["geometry"].isin(downstream_gdf["geometry"])]
     result_gdf = pd.concat([result_gdf, unmatched_upstream], ignore_index=True)
 
     # # For each mask, get the intersecting skeleton geometries and prioritize downstream geometries
