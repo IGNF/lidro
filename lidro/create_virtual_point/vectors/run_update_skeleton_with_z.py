@@ -3,6 +3,7 @@
 """
 import logging
 import os
+from typing import List
 
 import geopandas as gpd
 import numpy as np
@@ -23,25 +24,21 @@ def compute_skeleton_with_z(
     line: gpd.GeoDataFrame,
     mask_hydro: gpd.GeoDataFrame,
     crs: str,
-    spacing: float,
     length: int,
     output_dir: str,
-) -> gpd.GeoDataFrame:
+) -> List:
     """This function update skeleton with Z
 
     Args:
         points (gpd.GeoDataFrame): A GeoDataFrame containing points along Hydro's Skeleton
         line (gpd.GeoDataFrame): A GeoDataFrame containing each line from Hydro's Skeleton
         mask_hydro (gpd.GeoDataFrame): A GeoDataFrame containing each mask hydro from Hydro's Skeleton
-        crs (str): A pyproj CRS object used to create the output GeoJSON file
-        spacing (float, optional): Spacing between the grid points in meters.
-                                   The default value is 0.5 meter
         length (int, optional): Minimum length of a river to use the linear regression model.
                                       The default value is 150 meters.
         output_dir (str): Folder to output Mask Hydro without virtual points
 
     Returns:
-        gpd.GeoDataFrame: All skeleton with Z
+        List : the 3D skeleton's geometrie (Polyligne Z) Z with Z mean
     """
     # Check if the points DataFrame is empty and all the values in the "points_knn" column are null
     if points.empty or points["points_knn"].isnull().all():
@@ -94,6 +91,6 @@ def compute_skeleton_with_z(
                 )
                 masks_without_points.to_file(output_mask_hydro_error, driver="GeoJSON")
             # Apply model from skeleton
-            skeleton_hydro_3D = skeleton_3d_with_flatten(line, model, crs)
+            skeleton_hydro_3D = skeleton_3d_with_flatten(line, predicted_z, crs)
 
         return skeleton_hydro_3D
