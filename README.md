@@ -60,10 +60,10 @@ Pour les cours d'eau supérieurs à 150 m de long :
 * 4- Générer un modèle de régression linéaire afin de générer tous les N mètres une valeur d'altitude le long du squelette de cette rivière. Les différents Z le long des squelettes HYDRO doivent assurer l'écoulement. Il est important de noter que tous les 50 mètres semble une valeur correcte pour appréhender la donnée. Cette valeur s'explique en raison de la précision altimétrique des données LIDAR (20 cm) ET que les rivières françaises correspondent à des cours d’eau naturels dont la pente est inférieure à 1%. 
 / ! \ Pour les cours d'eau inférieurs à 150 m de long, le modèle de régression linéaire ne fonctionne pas. La valeur du premier quartile sera calculée sur l'ensemble des points d'altitudes du LIDAR "SOL" (étape 2) et affectée pour ces entités hydrographiques (< 150m de long) : aplanissement. 
 * 5- Vérifier que les modèles de régréssion linéaire calculés le long du squelette s'écoulement progressivement le long du cours d'eau, c'est-à-dire éviter les zones de cuvettes sous les ponts. D'un point de vue mathématique, cela signifie que le "Dernier point squelette AMONT < Premier point squelette AVAL = ALERTE".
-![Alerte](images/alerte_squelette.jpg)
+![Alerte](images/alerte_squelette.png)
 
 Pour éviter ces "alertes", il faut corriger les valeurs Z des N points du squelette jusqu'à le Z du squelette aval est égal au dernier point Z du squelette amont.
-![Corrections des alertes](images/alerte_squelette.jpg)
+![Corrections des alertes](images/correction_alerte_squelette.png)
 
 * 6- Création de points virtuels nécessitant plusieurs étapes intermédiaires :
   * Création des points virtuels 2D espacés selon une grille régulière tous les N mètres (paramétrable) à l'intérieur du masque hydrographique "écoulement"
