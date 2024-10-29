@@ -10,21 +10,19 @@ import hydra
 import pandas as pd
 from omegaconf import DictConfig
 from pyproj import CRS
-from shapely.geometry import CAP_STYLE
 
-# from lidro.create_virtual_point.pointcloud.convert_list_points_to_las import (
-#     list_points_to_las,
-# )
-from lidro.create_virtual_point.vectors.intersect_skeleton_by_bridge import (
-    extract_bridge_skeleton_info,
+from lidro.create_virtual_point.pointcloud.convert_list_points_to_las import (
+    list_points_to_las,
 )
 from lidro.create_virtual_point.vectors.merge_skeleton_by_mask import (
     merge_skeleton_by_mask,
 )
-
-# from lidro.create_virtual_point.vectors.run_create_virtual_points import (
-#     compute_virtual_points_by_section,
-# )
+from lidro.create_virtual_point.vectors.rectify_alert import (
+    create_list_rectify_skeleton_with_mask,
+)
+from lidro.create_virtual_point.vectors.run_create_virtual_points import (
+    compute_virtual_points_by_section,
+)
 from lidro.create_virtual_point.vectors.run_update_skeleton_with_z import (
     compute_skeleton_with_z,
 )
@@ -64,7 +62,7 @@ def main(config: DictConfig):
     crs = CRS.from_user_input(config.io.srid)
     river_length = config.virtual_point.vector.river_length
     points_grid_spacing = config.virtual_point.pointcloud.points_grid_spacing
-    # classes = config.virtual_point.pointcloud.virtual_points_classes
+    classes = config.virtual_point.pointcloud.virtual_points_classes
 
     # Step 1 : Merged all "points around skeleton" by lidar tile
     def process_points_knn(points_knn):
@@ -96,7 +94,6 @@ def main(config: DictConfig):
                 gpd.GeoDataFrame([{"geometry": row["geometry_skeleton"]}], crs=crs),
                 gpd.GeoDataFrame([{"geometry": row["geometry_mask"]}], crs=crs),
                 crs,
-                points_grid_spacing,
                 river_length,
                 output_dir,
             )
@@ -105,38 +102,30 @@ def main(config: DictConfig):
         logging.info("Apply Z to skeleton")
         # print(list_skeleton_with_z)
 
-        for idx, skeleton_data in enumerate(list_skeleton_with_z):
-            skeleton_gdf = gpd.GeoDataFrame(skeleton_data, crs=crs)
-            skeleton_gdf.to_file(f"output_skeleton_{idx}.geojson", driver="GeoJSON")
-        logging.info("All skeletons have been saved as GeoJSON")
-
         # Step 4 : intersect skeletons by bridge and return info
-        gdf_bridge = gpd.read_file(input_bridge, crs=crs)
-        gdf_bridge["geometry"] = gdf_bridge.buffer(5, cap_style=CAP_STYLE.square)
+        gdf_skeleton_rectify_with_mask = create_list_rectify_skeleton_with_mask(
+            input_bridge, input_mask_hydro, list_skeleton_with_z, crs
+        )
+        logging.info("intersect skeletons by bridge and return info")
+        print(gdf_skeleton_rectify_with_mask)
 
-        for bridge in gdf_bridge["geometry"]:
-            p = extract_bridge_skeleton_info(bridge, list_skeleton_with_z)
-            print(p)
+        # Step 5 : Generate a regular grid of 3D points spaced every N meters inside each hydro entity
+        list_virtual_points = [
+            compute_virtual_points_by_section(
+                gpd.GeoDataFrame(geometry=row["geometry"], crs=crs),
+                gpd.GeoDataFrame(geometry=row["geometry_mask"], crs=crs),
+                crs,
+                points_grid_spacing,
+            )
+            for idx, row in enumerate(gdf_skeleton_rectify_with_mask)
+        ]
+        logging.info("Calculate virtuals points by mask hydro and skeleton")
+        # print(list_virtual_points)
 
-        # # Step 3 : Generate a regular grid of 3D points spaced every N meters inside each hydro entity
-        # list_virtual_points = [
-        #     compute_virtual_points_by_section(
-        #         points_gdf,
-        #         gpd.GeoDataFrame([{"geometry": row["geometry_skeleton"]}], crs=crs),
-        #         gpd.GeoDataFrame([{"geometry": row["geometry_mask"]}], crs=crs),
-        #         crs,
-        #         points_grid_spacing,
-        #         river_length,
-        #         output_dir,
-        #     )
-        #     for idx, row in gdf_merged.iterrows()
-        # ]
-        # logging.info("Calculate virtuals points by mask hydro and skeleton")
-
-    #     # Step 4 : Save the virtual points in a file (.LAZ)
-    #     list_points_to_las(list_virtual_points, output_dir, crs, classes)
-    # else:
-    #     logging.error("Error when merged all points around skeleton by lidar tile")
+        # Step 6 : Save the virtual points in a file (.LAZ)
+        list_points_to_las(list_virtual_points, output_dir, crs, classes)
+    else:
+        logging.error("Error when merged all points around skeleton by lidar tile")
 
 
 if __name__ == "__main__":
