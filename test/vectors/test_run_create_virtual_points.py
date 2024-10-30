@@ -53,7 +53,7 @@ def create_test_data_no_points():
 
 
 def create_test_data_with_points():
-    # to be confirmed (@Malvina ?): compute_virtual_points_by_section runs on a single mask
+    # compute_virtual_points_by_section runs on a single mask
     # Create GeoDataFrame with points and points_knn columns
     points = gpd.GeoDataFrame(
         {
