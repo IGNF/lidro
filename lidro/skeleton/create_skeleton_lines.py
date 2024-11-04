@@ -1,18 +1,17 @@
-from typing import List, Tuple
 import sys
-
-from omegaconf import DictConfig
-from pyproj.crs.crs import CRS
+from typing import List, Tuple
 
 import geopandas as gpd
-from geopandas.geodataframe import GeoDataFrame
 import psycopg
+from geopandas.geodataframe import GeoDataFrame
+from omegaconf import DictConfig
+from pyproj.crs.crs import CRS
 from shapely import make_valid
 
 from lidro.skeleton.branch import Branch, Candidate
 from lidro.skeleton.group_maker import GroupMaker
 
-sys.path.append('../lidro')
+sys.path.append("../lidro")
 
 
 def db_connector(config: DictConfig):
@@ -27,7 +26,7 @@ def db_connector(config: DictConfig):
         user={config.skeleton.db_uni.db_user} \
         password={config.skeleton.db_uni.db_password} \
         port={config.skeleton.db_uni.db_port}"
-        )
+    )
 
 
 def query_db_for_bridge_across_gap(config: DictConfig, candidate: Candidate) -> bool:
@@ -54,13 +53,13 @@ def query_db_for_bridge_across_gap(config: DictConfig, candidate: Candidate) -> 
         "WHERE gcms_detruit = false "
         "AND nature = 'Pont' "
         f"AND ST_Intersects(ST_Force2D(geometrie), ST_GeomFromText('{line}'));"
-        )
+    )
     query_area = (
         "SELECT cleabs FROM public.Construction_surfacique "
         "WHERE gcms_detruit = false "
         "AND nature = 'Pont' "
         f"AND ST_Intersects(ST_Force2D(geometrie), ST_GeomFromText('{line}'));"
-        )
+    )
 
     # execution of queries
     with db_connector(config) as db_conn:
@@ -77,9 +76,8 @@ def query_db_for_bridge_across_gap(config: DictConfig, candidate: Candidate) -> 
 
 
 def select_candidates(
-        config: DictConfig,
-        branches_pair_list: List[Tuple[Candidate, Candidate, float]]
-        ) -> List[Candidate]:
+    config: DictConfig, branches_pair_list: List[Tuple[Candidate, Candidate, float]]
+) -> List[Candidate]:
     """
     create candidates between pairs of branches
     args:
@@ -124,9 +122,11 @@ def select_candidates(
             # if the gap is wide enough, we check with DB_Uni to see if there is a bridge
             # On the other hand, if it's small enough the candidate is automatically validated
             # All that, ONLy if we want to interrogate the DB
-            if config.skeleton.db_uni.db_using_db and \
-                    candidate.squared_distance \
-                    > config.skeleton.gap_width_check_db * config.skeleton.gap_width_check_db:
+            if (
+                config.skeleton.db_uni.db_using_db
+                and candidate.squared_distance
+                > config.skeleton.gap_width_check_db * config.skeleton.gap_width_check_db
+            ):
                 is_bridge = query_db_for_bridge_across_gap(config, candidate)
                 # if the line does not cross any bridge, we don't validate that candidate
                 if not is_bridge:
@@ -139,7 +139,7 @@ def select_candidates(
             # a candidate has been validated between A and B, so we put together A and B
             branch_group.put_together(branch_a, branch_b)
             nb_bridges_crossed += 1
-            if nb_bridges_crossed >= config.skeleton.max_bridges:   # max bridges reached between those 2 branches
+            if nb_bridges_crossed >= config.skeleton.max_bridges:  # max bridges reached between those 2 branches
                 break
     return validated_candidates
 
@@ -194,7 +194,7 @@ def create_branches_pair(config: DictConfig, branches_list: List[Branch]) -> Lis
     # create branches_pair_list, that stores all pairs of branches close enough to have a bridge
     branches_pair_list = []
     for index, branch_a in enumerate(branches_list[:-1]):
-        for branch_b in branches_list[index + 1:]:
+        for branch_b in branches_list[index + 1 :]:  # noqa E203
             distance = branch_a.distance_to_a_branch(branch_b)
             if distance < config.skeleton.max_gap_width:
                 branches_pair_list.append((branch_a, branch_b, distance))

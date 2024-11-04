@@ -10,7 +10,7 @@ from lidro.merge_mask_hydro.vectors.check_rectify_geometry import (
     apply_buffers_to_geometry,
     fix_topology,
 )
-from lidro.merge_mask_hydro.vectors.close_holes import close_holes
+from lidro.vectors.close_holes import close_holes
 
 
 def merge_geom(
@@ -62,7 +62,7 @@ def merge_geom(
     gs = gdf.geometry.apply(lambda p: close_holes(p, min_hole_area=100))
     gdf = gpd.GeoDataFrame(geometry=gs, crs=crs)
 
-    # filter out water area < min_water_area (150 m² by default) again to make sure 
+    # filter out water area < min_water_area (150 m² by default) again to make sure
     # that previous geometry updates did not generate new small water areas
     gdf = gdf[gdf.geometry.area > min_water_area]
 

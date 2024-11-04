@@ -27,9 +27,9 @@ WITH emprise_PM AS (SELECT st_GeomFromText('POLYGON((875379.222972973 6431750.0,
 
 SELECT geometrie, nature, fictif, persistance, classe_de_largeur, position_par_rapport_au_sol
 FROM troncon_hydrographique
-JOIN emprise_PM ON st_intersects(troncon_hydrographique.geometrie,emprise_PM.geom) 
-WHERE NOT gcms_detruit 
-AND classe_de_largeur NOT IN ('Entre 0 et 5 m', 'Sans objet') 
+JOIN emprise_PM ON st_intersects(troncon_hydrographique.geometrie,emprise_PM.geom)
+WHERE NOT gcms_detruit
+AND classe_de_largeur NOT IN ('Entre 0 et 5 m', 'Sans objet')
 AND position_par_rapport_au_sol='0'
 ```
 
@@ -53,12 +53,12 @@ Il existe plusieurs étapes intermédiaires :
 * 1- création automatique du tronçon hydrographique ("Squelette hydrographique", soit les tronçons hydrographiques dans la BD Unis) à partir de l'emprise du masque hydrographique "écoulement".
 / ! \ EN AMONT : Appariement, contrôle et correction manuels des masques hydrographiques "écoulement" (rivières) et du squelette hydrographique
 
-A l'échelle de l'entité hydrographique : 
+A l'échelle de l'entité hydrographique :
 * 2- Récupérer tous les points LIDAR considérés comme du "SOL" situés à la limite de berges (masque hydrographique) moins N mètres
 Pour les cours d'eau supérieurs à 150 m de long :
 * 3- Transformer les coordonnées de ces points (étape précédente) en abscisses curvilignes
-* 4- Générer un modèle de régression linéaire afin de générer tous les N mètres une valeur d'altitude le long du squelette de cette rivière. Les différents Z le long des squelettes HYDRO doivent assurer l'écoulement. Il est important de noter que tous les 50 mètres semble une valeur correcte pour appréhender la donnée. Cette valeur s'explique en raison de la précision altimétrique des données LIDAR (20 cm) ET que les rivières françaises correspondent à des cours d’eau naturels dont la pente est inférieure à 1%. 
-/ ! \ Pour les cours d'eau inférieurs à 150 m de long, le modèle de régression linéaire ne fonctionne pas. La valeur du premier quartile sera calculée sur l'ensemble des points d'altitudes du LIDAR "SOL" (étape 2) et affectée pour ces entités hydrographiques (< 150m de long) : aplanissement. 
+* 4- Générer un modèle de régression linéaire afin de générer tous les N mètres une valeur d'altitude le long du squelette de cette rivière. Les différents Z le long des squelettes HYDRO doivent assurer l'écoulement. Il est important de noter que tous les 50 mètres semble une valeur correcte pour appréhender la donnée. Cette valeur s'explique en raison de la précision altimétrique des données LIDAR (20 cm) ET que les rivières françaises correspondent à des cours d’eau naturels dont la pente est inférieure à 1%.
+/ ! \ Pour les cours d'eau inférieurs à 150 m de long, le modèle de régression linéaire ne fonctionne pas. La valeur du premier quartile sera calculée sur l'ensemble des points d'altitudes du LIDAR "SOL" (étape 2) et affectée pour ces entités hydrographiques (< 150m de long) : aplanissement.
 * 5- Création de points virtuels nécessitant plusieurs étapes intermédiaires :
   * Création des points virtuels 2D espacés selon une grille régulière tous les N mètres (paramétrable) à l'intérieur du masque hydrographique "écoulement"
   * Affecter une valeur d'altitude à ces points virtuels en fonction des "Z" calculés à l'étape précédente (interpolation linéaire ou aplanissement)
@@ -124,13 +124,13 @@ Tester sur un seul fichier LAS/LAZ pour créer un/des masques hydrographiques su
 ```
 example_create_mask_by_tile.sh
 ```
-Tester sur un dossier contenant plusieurs dalles LIDAR pour créer un/des masques hydrographiques 
+Tester sur un dossier contenant plusieurs dalles LIDAR pour créer un/des masques hydrographiques
 ```
 example_create_mask_default.sh
 ```
 
 * 2- Créer un masque hydrographiques fusionné et nettoyé à l'échelle de l'ensemble de l'ensemble des dalles LIDAR
-Tester sur un dossier contenant plusieurs dalles LIDAR pour créer et fusionner l'ensemble des masques hydrographiques 
+Tester sur un dossier contenant plusieurs dalles LIDAR pour créer et fusionner l'ensemble des masques hydrographiques
 ```
 example_merge_mask_default.sh
 ```
@@ -161,8 +161,8 @@ Pour lancer les tests :
 python -m pytest -s
 ```
 
-### 1) Création des masques HYDRO des grands cours d'eaux à l'échelle de la dalle LIDAR
-Pour fonctionner, la création des masques HYDRO a besoin d'une série de paramètres, certains ayant une valeur par défaut, d'autres non. Les paramètres se trouvent dans le fichier configs/configs_lidro.yaml. 
+### 1) Création des masques HYDRO des grands cours d'eau à l'échelle de la dalle LIDAR
+Pour fonctionner, la création des masques HYDRO a besoin d'une série de paramètres, certains ayant une valeur par défaut, d'autres non. Les paramètres se trouvent dans le fichier configs/configs_lidro.yaml.
 On peut soit les y modifier, soit les modifier en ligne de commande lors de l'exécution du script avec :
 ```
 python -m lidro.main_create_mask [nom_paramètre_1]=[valeur_du_paramètre_1] [nom_paramètre_2]=[valeur_du_paramètre_2]
@@ -179,7 +179,7 @@ Autres paramètres disponibles :
 * mask_generation.raster.dilatation_size : La taille pour la dilatation du raster binaire "eau"
 
 ##### Données d'entrées
-* Les dalles LIDAR classées. 
+* Les dalles LIDAR classées.
 
 ##### Données de sorties
 * Les masques HYDRO.
@@ -218,7 +218,7 @@ python lidro/main_create_skeleton_lines.py [nom_paramètre_1]=[valeur_du_paramè
 Généralement, sont mis dans le fichier de configuration ceux qui changent rarement (srid par défaut, port de connexion à la base de données...), et sont passés en paramètres les éléments qui changent souvent (chemins de fichiers d'entrée et de sortie) ou ce qu'il ne faut théoriquement pas stocker (credentials).
 
 Options généralement passées en paramètres :
-* io.skeleton.mask_input_path : Le chemin du fichier d'entrée contenant les masques de cours d'eau 
+* io.skeleton.mask_input_path : Le chemin du fichier d'entrée contenant les masques de cours d'eau
 * io.skeleton.gap_lines_output_path : Le chemin du fichier de sortie contenant uniquement les lignes reliant les emprises de cours d'eau (optionnel).
 * io.skeleton.skeleton_lines_output_path : Le chemin du fichier de sortie contenant uniquement les lignes internes (optionnel).
 * io.skeleton.global_lines_output_path : Le chemin du fichier de sortie contenant toutes les lignes (optionnel).
@@ -234,7 +234,7 @@ Autres paramètres disponibles :
 * skeleton.db_uni.db_name : Le nom de la base de données.
 * skeleton.db_uni.db_host : L'adresse de la base de données.
 * skeleton.db_uni.db_user : L'utilisateur de la base de données.
-* skeleton.db_uni.db_password : Le mot de passe de l'utilisateur. ATTENTION ! S'il y a des caractères spéciaux, il peut être nécessaire de les écrire ainsi : "skeleton.db_uni.db_password='$tr@ng€_ch@r@ct€r$'" (notez les " et les '). Si cela ne fonctionne toujours pas, peut-être essayer de jongler un peu avec ces ponctuations pour trouver celle qui fonctionne.  
+* skeleton.db_uni.db_password : Le mot de passe de l'utilisateur. ATTENTION ! S'il y a des caractères spéciaux, il peut être nécessaire de les écrire ainsi : "skeleton.db_uni.db_password='$tr@ng€_ch@r@ct€r$'" (notez les " et les '). Si cela ne fonctionne toujours pas, peut-être essayer de jongler un peu avec ces ponctuations pour trouver celle qui fonctionne.
 * skeleton.db_uni.db_port : La port de connexion avec la base de données.
 * skeleton.branch.voronoi_max_length : La longueur maximum des lignes individuelles des squelettes.
 * skeleton.branch.water_min_size : La longueur minimale à partir de laquelle une ligne de squelette sera automatiquement gardée (trop petite, et il y aura des sortes "d'aiguilles" qui apparaitront. Trop grande, et certains afluents ne seront pas détectés).
@@ -248,7 +248,7 @@ Autres paramètres disponibles :
 
 
 ### 4) étapes 1 & 2. Création des points virtuels (grille régulière tous les N mètres) à l'intérieur des grands cours d'eaux
-Pour fonctionner, la création des points virtuels a besoin d'une série de paramètres, certains ayant une valeur par défaut, d'autres non. Les paramètres se trouvent dans le fichier configs/configs_lidro.yaml. 
+Pour fonctionner, la création des points virtuels a besoin d'une série de paramètres, certains ayant une valeur par défaut, d'autres non. Les paramètres se trouvent dans le fichier configs/configs_lidro.yaml.
 On peut soit les y modifier, soit les modifier en ligne de commande lors de l'exécution du script avec :
 ```
 python -m lidro.main_create_virtual_points [nom_paramètre_1]=[valeur_du_paramètre_1] [nom_paramètre_2]=[valeur_du_paramètre_2]
@@ -256,8 +256,8 @@ python -m lidro.main_create_virtual_points [nom_paramètre_1]=[valeur_du_paramè
 ##### Paramètres
 Options généralement passées en paramètres :
 * io.input_dir : Le chemin du dossier contenant l'ensemble des données d'entrée (ex. "./data/").
-* io.input_mask_hydro : Le chemin contenant le masque HYDRO fusionné (ex."./data/merge_mask_hydro/MaskHydro_merge.geosjon").
-* io.input_skeleton= Le chemin contenant le squelette hydrographique (ex. "./data/skeleton_hydro/Skeleton_Hydro.geojson")
+* io.input_mask_hydro : Le chemin contenant le masque HYDRO fusionné (ex."./data/merge_mask_hydro/dataset_2/MaskHydro_merge.geosjon").
+* io.input_skeleton= Le chemin contenant le squelette hydrographique (ex. "./data/skeleton_hydro/dataset_2/skeleton_hydro.geojson")
 * io.dir_points_skeleton : Le chemin contenant l'ensemble des N points du squelette créés à l'échelle des dalles LIDAR ( ex. "./tmp/point_skeleton/").
 * io.output_dir :  Le chemin du dossier de sortie (les points virtuels à l'échelle du projet).
 
@@ -284,7 +284,7 @@ Autres paramètres disponibles :
 
 
 ### 4) étape 3. Intégration des points virtuels à l'échelle de la dalle LIDAR (1 Km * Km)
-Pour fonctionner, le découpage des points virtuels par dalle LIDAR a besoin d'une série de paramètres, certains ayant une valeur par défaut, d'autres non. Les paramètres se trouvent dans le fichier configs/configs_lidro.yaml. 
+Pour fonctionner, le découpage des points virtuels par dalle LIDAR a besoin d'une série de paramètres, certains ayant une valeur par défaut, d'autres non. Les paramètres se trouvent dans le fichier configs/configs_lidro.yaml.
 On peut soit les y modifier, soit les modifier en ligne de commande lors de l'exécution du script avec :
 ```
 python -m lidro.main_clip_virtual_point_by_tile [nom_paramètre_1]=[valeur_du_paramètre_1] [nom_paramètre_2]=[valeur_du_paramètre_2]
@@ -301,7 +301,7 @@ Options généralement passées en paramètres :
 
 ##### Données de sorties
 * Les dalles LIDAR classées avec leurs points virtuels (grille règluière tous les N mètre)
-* Un fichier GeoJSON "tiles_from_las" représentant l'emprise des dalles LIDAR du chantier. Pour chaque dalle, on retrouve : 
+* Un fichier GeoJSON "tiles_from_las" représentant l'emprise des dalles LIDAR du chantier. Pour chaque dalle, on retrouve :
 ** tile_id : identifiant unique "coordonnée mimimum X" + "_" + "coordonnée maximale Y" de l'emprise de la dalle LIDAR.
 ** tilename_las : nom de la dalle LIDAR en entrée.
 ** geometry : l'emprise de la dalle LIDAR (POLYGONE).
