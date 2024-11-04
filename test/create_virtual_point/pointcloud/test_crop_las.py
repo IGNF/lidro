@@ -9,7 +9,7 @@ from lidro.create_virtual_point.pointcloud.crop_las import (
 )
 
 TMP_PATH = Path("./tmp/create_virtual_point/pointcloud/crop_las")
-LAS_FILE = "./data/pointcloud/Semis_2021_0830_6291_LA93_IGN69.laz"
+LAS_FILE = "./data/tile_0830_6291/pointcloud/Semis_2021_0830_6291_LA93_IGN69.laz"
 
 
 def setup_module(module):

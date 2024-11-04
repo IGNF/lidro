@@ -11,8 +11,8 @@ from lidro.create_virtual_point.pointcloud.add_virtual_points_to_pointcloud impo
 
 # Path to temporary directory for output files
 TMP_PATH = Path("./tmp/virtual_points/pointcloud/add_virtual_points_by_tiles")
-input_file = str("./data/point_virtual/virtual_points.laz")
-input_las = str("./data/pointcloud/Semis_2021_0830_6291_LA93_IGN69.laz")
+input_file = str("./data/tile_0830_6291/virtual_points/virtual_points.laz")
+input_las = str("./data/tile_0830_6291/pointcloud/Semis_2021_0830_6291_LA93_IGN69.laz")
 output_laz_file = str(TMP_PATH / "output_0830_6291_with_virtual_points.laz")
 geom = Polygon(
     [
