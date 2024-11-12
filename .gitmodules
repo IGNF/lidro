@@ -1,3 +1,3 @@
-[submodule "lidro-data"]
-	path = lidro/data
+[submodule "data"]
+	path = data
 	url = https://github.com/IGNF/lidro-data.git
