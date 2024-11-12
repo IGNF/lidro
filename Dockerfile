@@ -17,3 +17,4 @@ ARG MAMBA_DOCKERFILE_ACTIVATE=1
 
 COPY lidro lidro
 COPY configs configs
+COPY data data
