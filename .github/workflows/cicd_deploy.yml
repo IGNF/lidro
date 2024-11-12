@@ -22,7 +22,7 @@ jobs:
       with:
         submodules: recursive
         token: ${{ secrets.GHCR_TOKEN }}
-    ## build the image
+    # build the image
     - name: Build Docker image for tests
       id: build
       uses: docker/build-push-action@v5
