@@ -18,7 +18,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
-          token: ${{ secrets.GHRC_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
 
       - name: Configure .netrc for Docker submodule access
         run: |
