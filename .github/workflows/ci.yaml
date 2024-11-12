@@ -17,17 +17,31 @@ jobs:
       - name: Checkout branch
         uses: actions/checkout@v4
         with:
-          submodules: True
-          token: ${{ secrets.GHCR_TOKEN }}
-      # See https://github.com/marketplace/actions/setup-micromamba
+          submodules: recursive
+          token: ${{ secrets.GHRC_TOKEN }}
+
+      - name: Configure .netrc for Docker submodule access
+        run: |
+          echo "machine github.com login ${{ secrets.GHRC_TOKEN }}" > ~/.netrc
+          chmod 600 ~/.netrc
+
+      - name: Build Docker image for tests
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          load: true
+          tags: ${{ env.TEST_TAG }}
+          secrets: id=netrc,src=$HOME/.netrc
+
       - name: Install conda env
         uses: mamba-org/setup-micromamba@v1.8.1
         with:
           environment-file: environment.yml
-          environment-name: lidro  # activate the environment
+          environment-name: lidro
           cache-environment: true
           cache-downloads: true
           generate-run-shell: true
+
       - name: Unit test
         shell: micromamba-shell {0}
         run: |
