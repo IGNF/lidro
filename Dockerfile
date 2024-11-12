@@ -14,7 +14,7 @@ RUN micromamba install -y -n base -f /tmp/env.yaml && \
 ENV ENV=base
 ARG MAMBA_DOCKERFILE_ACTIVATE=1
 
-
+RUN mkdir data
+RUN mkdir tmp
 COPY lidro lidro
 COPY configs configs
-COPY data data
