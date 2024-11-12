@@ -2,6 +2,13 @@ FROM mambaorg/micromamba:latest
 
 USER root
 
+
+# Switch to root to install additional packages
+USER root
+
+# Install Git to enable submodule sync/update commands
+RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /lidro
 
 # # Set up the Conda environment: cf https://github.com/mamba-org/micromamba-docker
@@ -11,14 +18,21 @@ RUN chown $MAMBA_USER:$MAMBA_USER /tmp/env.yaml
 RUN micromamba install -y -n base -f /tmp/env.yaml && \
     micromamba clean --all --yes
 
+
+# Set environment variables
 ENV ENV=base
 ARG MAMBA_DOCKERFILE_ACTIVATE=1
 
-RUN mkdir data
-## RUN cd /data && git clone git@github.com:IGNF/lidro-data.git
-RUN mkdir tmp
+# Sync and update submodules (ensure they are configured in the repository)
+RUN git submodule sync && \
+    git submodule update --init --recursive
+
+# Create directories
+RUN mkdir data tmp
+
+# Copy the application files
 COPY lidro lidro
 COPY configs configs
-## RUN git submodule update --remote --merge
+
 
 
