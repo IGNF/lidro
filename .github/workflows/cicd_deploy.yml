@@ -12,63 +12,88 @@ env:
   REGISTRY: ghcr.io
   TEST_TAG:  ${{ github.repository }}:test
 
+
 jobs:
-  deploy_docker:
+  build-docker:
     runs-on: ubuntu-latest
-
-    permissions:
-      packages: write
-
     steps:
-    - name: Checkout with submodules
-      uses: actions/checkout@v3
-      with:
-        ssh-key: ${{ secrets.DEPLOYER_SSHKEY }}
-        submodules: true
-    - name: Checkout branch
-      uses: actions/checkout@v4
+      - name: Checkout with submodules
+        uses: actions/checkout@v3
+        with:
+          ssh-key: ${{ secrets.DEPLOYER_SSHKEY }}
+          submodules: true
+      - name: Log in to the Container registry
+        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_TOKEN }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: true
+          tags: 'user/app:tag'
 
-    - name: Build the Docker image
-      id: build
-      uses: docker/build-push-action@v5
-      with:
-        load: true
-        tags: ${{ env.TEST_TAG }}
+# jobs:
+#   deploy_docker:
+#     runs-on: ubuntu-latest
 
-    # run the test on the docker image
-    - name: Run tests in docker image
-      run: >
-        docker run
-        --ipc=host
-        ${{ env.TEST_TAG }}
-        python -m pytest ./test -s --log-cli-level DEBUG
+#     permissions:
+#       packages: write
 
-    # Login against a Docker registry except on PR
-    # https://github.com/docker/login-action
-    - name: Log into registry ${{ env.REGISTRY }}
-      if: github.event_name != 'pull_request'
-      uses: docker/login-action@v2
-      with:
-        registry: ${{ env.REGISTRY }}
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+#     steps:
+#     - name: Checkout with submodules
+#       uses: actions/checkout@v3
+#       with:
+#         ssh-key: ${{ secrets.DEPLOYER_SSHKEY }}
+#         submodules: true
+#     - name: Checkout branch
+#       uses: actions/checkout@v4
 
-    # Extract metadata (tags, labels) for Docker
-    # https://github.com/docker/metadata-action
-    - name: Extract Docker metadata
-      if: github.event_name != 'pull_request'
-      id: meta
-      uses: docker/metadata-action@v5
-      with:
-        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+#     - name: Build the Docker image
+#       id: build
+#       uses: docker/build-push-action@v5
+#       with:
+#         load: true
+#         tags: ${{ env.TEST_TAG }}
 
-    # Build an Docker image with Buildx (don't on PR)
-    # https://github.com/docker/build-push-action
-    - name: Build and push Docker image
-      id: build-and-push
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        push: true
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
+#     # run the test on the docker image
+#     - name: Run tests in docker image
+#       run: >
+#         docker run
+#         --ipc=host
+#         ${{ env.TEST_TAG }}
+#         python -m pytest ./test -s --log-cli-level DEBUG
+
+#     # Login against a Docker registry except on PR
+#     # https://github.com/docker/login-action
+#     - name: Log into registry ${{ env.REGISTRY }}
+#       if: github.event_name != 'pull_request'
+#       uses: docker/login-action@v2
+#       with:
+#         registry: ${{ env.REGISTRY }}
+#         username: ${{ github.actor }}
+#         password: ${{ secrets.GITHUB_TOKEN }}
+
+#     # Extract metadata (tags, labels) for Docker
+#     # https://github.com/docker/metadata-action
+#     - name: Extract Docker metadata
+#       if: github.event_name != 'pull_request'
+#       id: meta
+#       uses: docker/metadata-action@v5
+#       with:
+#         images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+#     # Build an Docker image with Buildx (don't on PR)
+#     # https://github.com/docker/build-push-action
+#     - name: Build and push Docker image
+#       id: build-and-push
+#       uses: docker/build-push-action@v5
+#       with:
+#         context: .
+#         push: true
+#         tags: ${{ steps.meta.outputs.tags }}
+#         labels: ${{ steps.meta.outputs.labels }}
