@@ -20,7 +20,7 @@ jobs:
     - name: Checkout branch
       uses: actions/checkout@v4
       with:
-        submodules: recursive
+        submodules: true
         token: ${{ secrets.GHCR_TOKEN }}
     # build the image
     - name: Build Docker image for tests
