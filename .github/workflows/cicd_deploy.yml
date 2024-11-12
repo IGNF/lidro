@@ -20,7 +20,7 @@ jobs:
     - name: Checkout branch
       uses: actions/checkout@v4
 
-    # build the image
+    ## build the image
     - name: Build Docker image for tests
       id: build
       uses: docker/build-push-action@v5
