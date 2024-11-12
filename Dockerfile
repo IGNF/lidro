@@ -15,6 +15,11 @@ ENV ENV=base
 ARG MAMBA_DOCKERFILE_ACTIVATE=1
 
 RUN mkdir data
+RUN cd /data && git clone git@github.com:IGNF/lidro-data.git
+RUN cd ..
 RUN mkdir tmp
 COPY lidro lidro
 COPY configs configs
+RUN git submodule update --remote --merge
+
+
