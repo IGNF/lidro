@@ -20,6 +20,11 @@ jobs:
       packages: write
 
     steps:
+    - name: Checkout with submodules
+      uses: actions/checkout@v3
+      with:
+        ssh-key: ${{ secrets.DEPLOYER_SSHKEY }}
+        submodules: true
     - name: Checkout branch
       uses: actions/checkout@v4
 
