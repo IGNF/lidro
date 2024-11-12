@@ -1,11 +1,11 @@
 name: cicd_deploy
 
 on:
-  push:
-    # Run deployment on every new version tag and every push to main
-    branches: [ "main" ]
-    tags: [ '*.*.*' ]
-
+  pull_request:
+    branches:
+      - main
+      - dev
+      
 env:
   IMAGE_NAME: ${{ github.repository }}
   REGISTRY: ghcr.io
