@@ -12,15 +12,11 @@ USER root
 WORKDIR /lidro
 
 
-# Create directories
-RUN mkdir tmp data
+# # Create directories
+RUN mkdir tmp 
 
 COPY . .
 
-# Sync and update submodules (ensure they are configured in the repository)
-RUN git submodule sync && \
-    git submodule update --init --recursive
-    
 RUN chown $MAMBA_USER:$MAMBA_USER environment.yml
 RUN micromamba install -y -n base -f environment.yml && \
     micromamba clean --all --yes
@@ -42,6 +38,12 @@ RUN micromamba install -y -n base -f environment.yml && \
 ENV ENV=base
 ARG MAMBA_DOCKERFILE_ACTIVATE=1
 
+
+# Sync and update submodules (ensure they are configured in the repository)
+RUN git submodule sync && \
+    git submodule update --init --recursive
+
+RUN mkdir tmp
 
 
 

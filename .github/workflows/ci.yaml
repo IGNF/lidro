@@ -18,7 +18,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
-          #token: ${{ secrets.GHCR_TOKEN }}
+          token: ${{ secrets.GHCR_TOKEN }}
+          fetch-depth: 1
       # See https://github.com/marketplace/actions/setup-micromamba
       - name: Install conda env
         uses: mamba-org/setup-micromamba@v1.8.1
