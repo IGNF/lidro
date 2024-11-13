@@ -11,9 +11,11 @@ RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /lidro
 
+COPY . .
+
 # # Set up the Conda environment: cf https://github.com/mamba-org/micromamba-docker
-COPY environment.yml /tmp/env.yaml
-COPY requirements.txt /tmp/requirements.txt
+# COPY environment.yml /tmp/env.yaml
+# COPY requirements.txt /tmp/requirements.txt
 RUN chown $MAMBA_USER:$MAMBA_USER /tmp/env.yaml
 RUN micromamba install -y -n base -f /tmp/env.yaml && \
     micromamba clean --all --yes
@@ -28,11 +30,11 @@ RUN git submodule sync && \
     git submodule update --init --recursive
 
 # Create directories
-RUN mkdir data tmp
+RUN mkdir tmp
 
-# Copy the application files
-COPY lidro lidro
-COPY configs configs
+# # Copy the application files
+# COPY lidro lidro
+# COPY configs configs
 
 
 
