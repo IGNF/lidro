@@ -38,7 +38,7 @@ jobs:
       - name: Run tests in docker
         run: >
           docker run -v $(pwd)/data:/lidro/data --ipc=host ${{ env.TEST_TAG }}
-          python -m pytest test --log-cli-level DEBUG
+          python -m pytest test -m "not returnfile and not bduni" -s --log-cli-level INFO
 
       - name: Set version number
         run: |

@@ -5,9 +5,7 @@ dynamic = ["version"]
 description = "lidro"
 readme = "README.md"
 
-authors = [
-    { name = "Malvina Dupays", email = "malvina.dupays@ign.fr" },
-]
+authors = [{ name = "Malvina Dupays", email = "malvina.dupays@ign.fr" }]
 
 [tool.black]
 line-length = 119
@@ -29,5 +27,6 @@ profile = "black"
 
 [tool.pytest.ini_options]
 markers = [
-    "returnfile: marks tests that return a file to visualize results (select with '--return-file')"
+  "returnfile: mark a test that returns a file to visualize results (deselect with '-m \"not returnfile\"')",
+  "bduni: mark a test that uses the bduni database (deselect with '-m \"not bduni\"')",
 ]
