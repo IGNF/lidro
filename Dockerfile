@@ -3,9 +3,6 @@ FROM mambaorg/micromamba:latest
 USER root
 
 
-# Switch to root to install additional packages
-USER root
-
 # # Install Git to enable submodule sync/update commands
 # RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 
@@ -38,6 +35,9 @@ RUN micromamba install -y -n base -f environment.yml && \
 ENV ENV=base
 ARG MAMBA_DOCKERFILE_ACTIVATE=1
 
+
+RUN mkdir tmp data
+
 # Use ARG to pass the authentication token
 ARG GIT_AUTH_TOKEN
 
@@ -47,7 +47,6 @@ RUN git config --global url."https://${GIT_AUTH_TOKEN}@github.com/".insteadOf "h
 # Initialize and update submodules
 RUN git submodule update --init --recursive
 
-RUN mkdir tmp
 
 
 
