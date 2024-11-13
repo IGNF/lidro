@@ -19,7 +19,7 @@ jobs:
         with:
           submodules: recursive
           token: ${{ secrets.GHCR_TOKEN }}
-          fetch-depth: 1
+          #fetch-depth: 1
       # See https://github.com/marketplace/actions/setup-micromamba
       - name: Install conda env
         uses: mamba-org/setup-micromamba@v1.8.1
