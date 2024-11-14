@@ -1,0 +1,31 @@
+name: lidro
+channels:
+  - conda-forge
+dependencies:
+  - python==3.12.*
+  - pip
+  - pytest
+  - gdal
+  - laspy
+  - numpy
+  - scipy
+  - geojson
+  - rasterio
+  - geopandas==0.*
+  - pyproj
+  - pdal>=2.6
+  - python-pdal>=3.2.1
+  - shapely>=2.0.3
+  - psycopg[binary]
+  - python-dotenv
+    # --------- hydra configs --------- #
+  - hydra-core
+  - hydra-colorlog
+  # ----------- linting --------------- #
+  - black
+  - flake8
+  - isort
+  - pre-commit
+  - pip:
+    - -r requirements.txt
+
