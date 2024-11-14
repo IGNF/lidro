@@ -17,8 +17,6 @@ from lidro.skeleton.create_skeleton_lines import (
 
 load_dotenv()
 
-IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"  # check if tests runs under github_action
-
 DB_UNI_USER = os.getenv("DB_UNI_USER")
 DB_UNI_PASSWORD = os.getenv("DB_UNI_PASSWORD")
 CRS = 2154
@@ -52,8 +50,8 @@ def test_main_skeleton_1():
         assert candidate_2.squared_distance < 75
 
 
-# do that test only if we are not on github action, since github can't connect to BD UNI
-@pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="BD UNI not reachable from github action")
+# do that test only if we can connect to BD UNI
+@pytest.mark.bduni
 def test_query_db_for_bridge_across_gap():
     """Test : query_db_for_bridge_across_gap"""
     with initialize(version_base="1.2", config_path="../../configs"):

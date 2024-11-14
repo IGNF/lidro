@@ -14,11 +14,13 @@ jobs:
         packages: write
 
     steps:
+      # cf https://samuelsson.dev/access-private-submodules-in-github-actions/ for submodule fetching
       - name: Checkout branch
         uses: actions/checkout@v4
         with:
-          submodules: recursive
-          token: ${{ secrets.PAT_TOKEN }}
+          ssh-key: ${{ secrets.SUBMODULE_PULL_KEY }}
+          submodules: 'recursive'
+
       # See https://github.com/marketplace/actions/setup-micromamba
       - name: Install conda env
         uses: mamba-org/setup-micromamba@v1.8.1
@@ -32,6 +34,4 @@ jobs:
         shell: micromamba-shell {0}
         run: |
           cp .env_example .env
-          sed -i "s/DB_UNI_USER='TO_BE_DEFINED'/DB_UNI_USER=${{ secrets.DB_UNI_USER }}/g" .env
-          sed -i "s/DB_UNI_PASSWORD='TO_BE_DEFINED'/DB_UNI_PASSWORD=${{ secrets.DB_UNI_PASSWORD }}/g" .env
-          python -m pytest -s --log-cli-level DEBUG
+          python -m pytest -m "not returnfile and not bduni" -s --log-cli-level INFO
