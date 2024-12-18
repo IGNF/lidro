@@ -9,15 +9,19 @@ Pour créer des modèles numériques cohérents avec les modèles hydrologiques,
 Cette modélisation des surfaces hydrographiques se décline en 3 grands enjeux :​
 * Mise à plat des surfaces d’eau marine​
 * Mise à plat des plans d’eau intérieurs (lac, marais, etc.)​
-* Mise en plan des grands cours d’eau (>5m large) pour assurer l’écoulement​. A noter que pour l'instant seulement cette étape est développée.
+* Mise en plan des grands cours d’eau (>5m large) pour assurer l’écoulement​. / ! \ Pour l'instant, seulement cette étape est développée dans LIDRO.
 
 ## Traitement
+### Objectif 
+L’écoulement des eaux n’est pas toujours cohérent sur les MNT produits à partir des données LIDAR classées. On observe par exemple quelques fois des cuvettes artefacts le long de certains cours d’eau surfaciques. Le traitement mis en œuvre a pour objectif de rendre l’écoulement cohérent (selon des altitudes décroissantes) sur les cours d’eaux surfaciques.
 
-![Chaine de traitement global de LIDRO](images/chaine_traitement_lidro.jpg)
+### Les données en ENTREES
 
-Les données en entrées :
-- dalles LIDAR classées
-- données vectorielles représentant le réseau hydrographique issu des différentes bases de données IGN (BDUnis, BDTopo, etc.) / ! \ requête SQL fait manuellement pour le moment. Exemple de requête SQL sur le bloc PM du LIDAR HD
+Dans LIDRO, vous aurez besoin de deux données en entrées :
+- de dalles LIDAR classées
+- de données vectorielles représentant le réseau hydrographique issu des différentes bases de données IGN (BDUnis et/ou BDTopo : tronçons hydrographiques, etc.)
+
+Ci-dessous, un exemple de requête SQL pour réccupérer l'emprise des grands tronçons hydrographiques (> 5m de larges) sur le bloc PM du LIDAR HD.
 ```
 WITH emprise_PM AS (SELECT st_GeomFromText('POLYGON((875379.222972973 6431750.0,
 875379.222972973 6484250.0,
@@ -32,48 +36,48 @@ WHERE NOT gcms_detruit
 AND classe_de_largeur NOT IN ('Entre 0 et 5 m', 'Sans objet')
 AND position_par_rapport_au_sol='0'
 ```
+### Process pour les grands cours d'eaux (> 5m de large)
+![Chaine de traitement global de LIDRO](images/chaine_traitement_lidro.jpg)
 
-Trois grands axes du processus à mettre en place en distanguant l'échelle de traitement associée :
-* 1- Création de masques hydrographiques à l'échelle de la dalle LIDAR
-* 2- Création de masques hydrographiques pré-filtrés à l'échelle du chantier, soit :
-  * la suppression de ces masques dans les zones ZICAD/ZIPVA
+Le process mis en place se décompose en quatre parties :
+* 1- Création de masques hydrographiques à l'échelle de la dalle LIDAR.
+
+* 2- Création de masques hydrographiques pré-filtrés à l'échelle du chantier. 
+
+Cette étape comprend :
+  * la suppression de ces masques dans les zones ZICAD/ZIPVA : étape manuelle, à réaliser sous QGIS par exemple
+  * la suppression des ces masques en dehors des grands cours d'eau, et leurs nettoyage : étape manuelle, à réaliser sous QGIS par exemple
   * la suppression des aires < 150 m² (paramétrable)
-  * la suppression des aires < 1000 m² hors BD IGN (grands cours d'eau < 5m de large)
-A noter que pour l'instant, la suppression des masques hydrographiques en dehors des grands cours d'eau et le nettoyage de ces masques s'effectuent manuellement. Ce processus sera développé prochainement en automatique.
-* 3*- Pour les grands cours d'eaux, il existe une étape intermédaire : Création des squelettes internes des masques hydrographiques, c'est-à-dire les lignes internes indiquant le sens de l'écoulement de l'eau pour les grands cours d'eaux.
-* 4- Création de points virtuels le long de deux entités hydrographiques :
-  * Grands cours d'eau (> 5 m de large dans la BD Unis).
-  * Surfaces planes (mer, lac, étang, etc.) (pas encore développé)
+
+<img src="images/correction_manuelle_masque_hydro.jpg" alt="Contrôle et nettoyage des masques hydrographiques à l'échelle du chantier" width="800">
+
+* 3- Création automatiques des tronçons hydrographiques - les "squelettes hydrographiques" des masques hydrographiques - c'est-à-dire les lignes internes indiquant le sens de l'écoulement de l'eau.
+
+* 4- Création de points virtuels correspondant à une grille régulière (paramétrable) à l'intérieur des masques hydrographiques.
 
 
-### Traitement des grands cours d'eau (> 5 m de large dans la BD Unis).
+### Détails du process de créations des points virtuels pour les grands cours d'eaux (>5m de large)
 ![Chaine de traitement des points virtuels](images/process_points_virtuels.jpg)
 
-Il existe plusieurs étapes intermédiaires :
-* 1- création automatique du tronçon hydrographique ("Squelette hydrographique", soit les tronçons hydrographiques dans la BD Unis) à partir de l'emprise du masque hydrographique "écoulement".
-/ ! \ EN AMONT : Appariement, contrôle et correction manuels des masques hydrographiques "écoulement" (rivières) et du squelette hydrographique
+A l'échelle de l'entité hydrographique, soit du masque hydrographique, la création des points virtuels consiste à :
+* 1- Récupérer tous les points LIDAR considérés comme du "SOL" situés à la limite de berges (masques hydrographiques) moins N mètres (distance paramétrable).
 
-A l'échelle de l'entité hydrographique :
-* 2- Récupérer tous les points LIDAR considérés comme du "SOL" situés à la limite de berges (masque hydrographique) moins N mètres
-Pour les cours d'eau supérieurs à 150 m de long :
-* 3- Transformer les coordonnées de ces points (étape précédente) en abscisses curvilignes
-* 4- Générer un modèle de régression linéaire afin de générer tous les N mètres une valeur d'altitude le long du squelette de cette rivière. Les différents Z le long des squelettes HYDRO doivent assurer l'écoulement. Il est important de noter que tous les 50 mètres semble une valeur correcte pour appréhender la donnée. Cette valeur s'explique en raison de la précision altimétrique des données LIDAR (20 cm) ET que les rivières françaises correspondent à des cours d’eau naturels dont la pente est inférieure à 1%.
-/ ! \ Pour les cours d'eau inférieurs à 150 m de long, le modèle de régression linéaire ne fonctionne pas. La valeur du premier quartile sera calculée sur l'ensemble des points d'altitudes du LIDAR "SOL" (étape 2) et affectée pour ces entités hydrographiques (< 150m de long) : aplanissement.
-* 5- Création de points virtuels nécessitant plusieurs étapes intermédiaires :
-  * Création des points virtuels 2D espacés selon une grille régulière tous les N mètres (paramétrable) à l'intérieur du masque hydrographique "écoulement"
-  * Affecter une valeur d'altitude à ces points virtuels en fonction des "Z" calculés à l'étape précédente (interpolation linéaire ou aplanissement)
+Pour les cours d'eau SUPERIEURS A 150 M de long, il existe des étapes intermédiaires (étapes A. et B.):
+* A- Transformer les coordonnées de ces points (étape 1.) en abscisses curvilignes
+* B- Générer un modèle de régression linéaire afin de générer tous les N mètres une valeur d'altitude le long du squelette de cette rivière. Les différents Z le long des squelettes HYDRO doivent assurer l'écoulement. Il est important de noter que tous les 50 mètres semble une valeur correcte pour appréhender la donnée. Cette valeur s'explique en raison de la précision altimétrique des données LIDAR (20 cm) ET que les rivières françaises correspondent à des cours d’eau naturels dont la pente est inférieure à 1%.
 
-### Traitement des surfaces planes (mer, lac, étang, etc.) (EN ATTENTE)
-Pour rappel, l'eau est considérée comme horizontale sur ce type de surface.
-/ ! \ EN ATTENTE / ! \
-Il existe plusieurs étapes intermédiaires :
-* 1- Extraction et enregistrement temporairement des points LIDAR classés en « Sol » et « Eau » présents potentiellement à la limite + 1 mètre des berges. Pour cela, on s'appuie sur l'emprise du masque hydrographique "surface plane" apparaier, contrôler et corriger par la "production" (SV3D) en amont (étape manuelle). a noter que pur le secteur maritime (Mer), il faut exclure la classe « 9 » (eau) afin d’éviter de mesurer les vagues.
-* 2- Analyse statistique de l'ensemble des points LIDAR "Sol / Eau" le long des côtes/berges afin d'obtenir une surface plane.
-  L’objectif est de créer des points virtuels spécifiques avec une information d'altitude (m) tous les 0.5 m sur les bords des surfaces maritimes et des plans d’eau à partir du masque hydrographique "surface plane". Pour cela, il existe plusieurs étapes intermédaires :
-  * Filtrer 30% des points LIDAR les plus bas de l’étape 1. afin de supprimer les altitudes trop élevées
-  * Analyser la répartition en Z de ces points afin d’extraire une seule valeur d’altitude selon l’objet hydrographique :
-    * Pour les Plans d’eau : l’altitude correspond à la ligne basse de la boxplot, soit la valeur minimale en excluant les valeurs aberrantes,
-    * Pour la Mer : l’altitude correspond à la ligne basse de la boxplot, soit la valeur minimale en excluant les valeurs aberrantes
+Pour les cours d'eau INFERIEURS A 150 m de long, le modèle de régression linéaire ne fonctionne pas. La valeur du premier quartile sera calculée sur l'ensemble des points d'altitudes du LIDAR "SOL" (étape 2) et affectée pour ces entités hydrographiques (< 150m de long) : aplanissement.
+
+* 2- Création de points virtuels nécessitant plusieurs étapes intermédiaires :
+  *2.1 Création des points virtuels 2D espacés selon une grille régulière tous les N mètres (paramétrable) à l'intérieur du masque hydrographique "écoulement"
+  *2.2 Affecter une valeur d'altitude à ces points virtuels en fonction des "Z" calculés à l'étape précédente (interpolation linéaire ou aplanissement)
+
+### Effet de LIDRO sur les MNTs
+Ci-dessous un AVANT/APRES de la production d'un MNT SANS les points virtuels (MNT classé) / AVEC les points vrituels (MNT optimisé). 
+
+Du point de vue de l’usage métier, l’écoulement étant rendu cohérent le long des cours d’eau, les cuvettes artefacts sont par conséquent supprimées.
+
+![MNT classé / MNT optimisé](images/mnt_avant_apres.jpg)
 
 
 ## Installation des dépendances (conda)
@@ -112,9 +116,19 @@ git submodule update --init --recursive
 ```
 
 ## Utilisation
-Lidro se lance sur un seul fichier LAS/LAZ ou sur un Dossier
+LIDRO se lance sur un seul fichier LAS/LAZ ou sur un Dossier
 
 Voir les tests fonctionnels en bas du README.
+
+## L'arborescence du projet
+* ``` configs/```: un dossier contenant un fichier de paramètres ```configs_lidro.yaml```.
+* ``` data/ ```: un dossier lié à un dépot git ```lidar-data``` contenant plusieurs juex de données différents pour tester LIDRO
+* ``` images/ ```: un dossier contenant des images JPG contenues dans le README.md
+* ``` lidro/ ```: un dossier contenant l'ensembles des fonctions développées pour lancer LIDRO
+* ``` scripts/ ```: un dossier contenant plusieurs fichiers ```.sh``` de tests fonctionnels
+* ``` test/ ```: un dossier contenant tous les tests unitaires des différentes fonctions développées dans le dossier ```lidro/```
+* ``` README ```: ce fichier
+* ``` environment.yml ```: un fichier d'environnement
 
 
 ## Tests
@@ -161,6 +175,8 @@ Pour lancer les tests :
 python -m pytest -s
 ```
 
+
+## Les différentes étapes pour lancer LIDRO en ligne de commande dans un environnement conda dédié
 ### 1) Création des masques HYDRO des grands cours d'eau à l'échelle de la dalle LIDAR
 Pour fonctionner, la création des masques HYDRO a besoin d'une série de paramètres, certains ayant une valeur par défaut, d'autres non. Les paramètres se trouvent dans le fichier configs/configs_lidro.yaml.
 On peut soit les y modifier, soit les modifier en ligne de commande lors de l'exécution du script avec :
@@ -184,6 +200,8 @@ Autres paramètres disponibles :
 ##### Données de sorties
 * Les masques HYDRO.
 
+<img src="images/masque_hydro_dalles.jpg" alt="Masques hydrographiques à l'échelle de la dalle LIDAR" width="700"> <figcaption>Figure 1 : Masques hydrographiques à l'échelle de la dalle LIDAR</figcaption> </figure>
+
 
 ### 2) Fusion des masques HYDRO des grands cours d'eaux
 Lors de la fusion des masques HYDRO, plusieurs paramètres peuvent également être utilisés.
@@ -206,8 +224,12 @@ Autres paramètres disponibles :
 * Les masques HYDRO à l'échelle des dalles LIDAR.
 
 ##### Données de sorties
-* Le masque HYDRO fusionné à l'échelle du projet.
+* Le masque HYDRO fusionné à l'échelle du projet, soit un masque HYDRO corrigé et nettoyé :
+    * hors des zones de ZICAD/ZIPVA,
+    * en dehors des zones de petits/moyens cours d'eau,
+    * ayant des aires > 150 m² (paramétrable).
 
+<img src="images/masque_hydro_merge.jpg" alt="Masques hydrographiques fusionnés" width="700"> <figcaption>Figure 2 : Masques hydrographiques fusionnés </figcaption> </figure>
 
 ### 3) Création des squelettes hydrographiques des grands cours d'eaux
 Pour fonctionner, la création de squelettes a besoin d'une série de paramètres, certains ayant une valeur par défaut, d'autres non. Les paramètres se trouvent dans le fichier configs/configs_lidro.yaml. On peut soit les y modifier, soit les modifer en ligne de commande lors de l'exécution du script avec :
@@ -243,8 +265,10 @@ Autres paramètres disponibles :
 ##### Données d'entrées
 * Le masque HYDRO fusionné à l'échelle du projet.
 
-##### Données de sorties
+##### Données de sorties <figcaption>Figure 1 : Masques hydrographiques à l'échelle de la dalle LIDAR</figcaption> </figure>
 * Le squelette HYDRO à l'échelle du projet.
+
+<img src="images/squelette_hydro.jpg" alt="Squelette hydrographique" width="700"> <figcaption>Figure 3 : Squelettes hydrographiques à l'échelle du chantier</figcaption> </figure>
 
 
 ### 4) étapes 1 & 2. Création des points virtuels (grille régulière tous les N mètres) à l'intérieur des grands cours d'eaux
@@ -300,9 +324,24 @@ Options généralement passées en paramètres :
 * Les points virtuels (grille règluière tous les N mètre) à l'échelle du projet
 
 ##### Données de sorties
-* Les dalles LIDAR classées avec leurs points virtuels (grille règluière tous les N mètre)
 * Un fichier GeoJSON "tiles_from_las" représentant l'emprise des dalles LIDAR du chantier. Pour chaque dalle, on retrouve :
 ** tile_id : identifiant unique "coordonnée mimimum X" + "_" + "coordonnée maximale Y" de l'emprise de la dalle LIDAR.
 ** tilename_las : nom de la dalle LIDAR en entrée.
 ** geometry : l'emprise de la dalle LIDAR (POLYGONE).
+* Les dalles LIDAR classées avec leurs points virtuels (grille règluière tous les N mètre)
+
+<img src="images/points_virtuels.jpg" alt="Points virtuels" width="700"> <figcaption>Figure 4 : Points virtuels à l'échelle de la dalle LIDAR</figcaption> </figure>
+
+## Correction du bug "zones de cuvettes sous les ponts"
+Dans la branche ```rectify_model_under_bridge``` (https://github.com/IGNF/lidro/tree/rectify_model_under_bridge), un correctif non industriel a été développé. 
+Ce correctif consiste à vérifier que les modèles de régréssion linéaire calculés le long du squelette s'écoulement progressivement le long du cours d'eau, c'est-à-dire éviter les zones de cuvettes sous les ponts. 
+
+D'un point de vue mathématique, cela signifie que le "Dernier point squelette AMONT < Premier point squelette AVAL = ALERTE". 
+
+![Alerte](images/alerte_squelette.png)
+
+
+Ainsi, après l'étape de génération du modèle de régréssion linéaire et donc avant la génération des points virtuels, une étape intermédiaire a été mis en place pour éviter ces "alertes". Elle consiste à corriger les valeurs Z des N points du squelette jusqu'à le Z du squelette aval est égal au dernier point Z du squelette amont.
+
+![Corrections des alertes](images/correction_alerte_squelette.png)
 
