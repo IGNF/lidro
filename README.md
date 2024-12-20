@@ -1,6 +1,8 @@
-# LIDRO
+# LIDRO (Aplanissement des surfaces d'eau pour la génération de modèles numériques de terrain à partir de données Lidar)
 
-Lidro (Aplanissement des surfaces d'eaux) est un outil permettant de créer automatiquement des points virtuels le long des surfaces d'eaux afin de créer des modèles numériques cohérents avec les modèles hydrologiques. Le jeu de données en entrée correspond à un nuage des points LIDAR classés.
+Lidro est un outil permettant de créer automatiquement des points virtuels le long des surfaces d'eaux afin de créer des modèles numériques cohérents avec les modèles hydrologiques. 
+Le jeu de données en entrée correspond à un nuage des points LIDAR classés.
+
 Ce processus a été mis en place après plusieurs mois d'échanges (ateliers) avec le CEREMA et l'Université Gustave Eiffel afin d'améliorer la génération des Modèles Numériques de Terrains issus du projet LIDAR HD. L'IGN s'est inspiré du code développé par Frédéric PONS : https://github.com/CEREMA/filino
 
 ## Contexte
@@ -9,17 +11,31 @@ Pour créer des modèles numériques cohérents avec les modèles hydrologiques,
 Cette modélisation des surfaces hydrographiques se décline en 3 grands enjeux :​
 * Mise à plat des surfaces d’eau marine​
 * Mise à plat des plans d’eau intérieurs (lac, marais, etc.)​
-* Mise en plan des grands cours d’eau (>5m large) pour assurer l’écoulement​. / ! \ Pour l'instant, seulement cette étape est développée dans LIDRO.
+* Mise en plan des grands cours d’eau (>5m large) pour assurer l’écoulement​. **A noter : Pour l'instant, seule cette partie est développée dans LIDRO.**
 
 ## Traitement
 ### Objectif 
-L’écoulement des eaux n’est pas toujours cohérent sur les MNT produits à partir des données LIDAR classées. On observe par exemple quelques fois des cuvettes artefacts le long de certains cours d’eau surfaciques. Le traitement mis en œuvre a pour objectif de rendre l’écoulement cohérent (selon des altitudes décroissantes) sur les cours d’eaux surfaciques.
+L’écoulement de l'eau n’est pas toujours cohérent sur les MNT produits à partir des données LIDAR classées. 
+
+Par exemple dans l'image ci-dessous, le niveau d'eau en aval du barrage est supérieur à celui présent en amont. 
+
+<img src="images/erreur_modelisation.jpg" alt="Erreur de modélisation de l'eau à l'aval d'un barrage" width="700"> 
+
+Autre phénomène observable, la présence de cuvettes artefacts le long de certains cours d’eau. 
+
+<img src="images/cuvettes_artefects.jpg" alt="Cuvettes artéfacts le long d'un cours d'eau" width="700"> 
+
+Ces deux phénomènes (erreur de modélisation et cuvettes artéfacts) peuvent-être du par :
+* l'absence de points "sols" au niveaux des berges
+* la quasi-absence de points sur l'eau
+
+LIDRO a donc pour objectif de rendre l’écoulement cohérent (selon des altitudes décroissantes) sur les grands cours d’eaux.
 
 ### Les données en ENTREES
 
 Dans LIDRO, vous aurez besoin de deux données en entrées :
 - de dalles LIDAR classées
-- de données vectorielles représentant le réseau hydrographique issu des différentes bases de données IGN (BDUnis et/ou BDTopo : tronçons hydrographiques, etc.)
+- de données vectorielles représentant le réseau hydrographique issu des différentes bases de données IGN (BDUni et/ou BDTopo : tronçons hydrographiques, etc.)
 
 Ci-dessous, un exemple de requête SQL pour réccupérer l'emprise des grands tronçons hydrographiques (> 5m de larges) sur le bloc PM du LIDAR HD.
 ```
@@ -36,13 +52,17 @@ WHERE NOT gcms_detruit
 AND classe_de_largeur NOT IN ('Entre 0 et 5 m', 'Sans objet')
 AND position_par_rapport_au_sol='0'
 ```
-### Process pour les grands cours d'eaux (> 5m de large)
+### Processus pour les grands cours d'eau (> 5m de large)
 ![Chaine de traitement global de LIDRO](images/chaine_traitement_lidro.jpg)
 
-Le process mis en place se décompose en quatre parties :
+Le processus mis en place se décompose en quatre parties :
 * 1- Création de masques hydrographiques à l'échelle de la dalle LIDAR.
 
 * 2- Création de masques hydrographiques pré-filtrés à l'échelle du chantier. 
+
+* 3- Création automatiques des tronçons hydrographiques - les "squelettes hydrographiques" des masques hydrographiques - c'est-à-dire les lignes internes indiquant le sens de l'écoulement de l'eau.
+
+* 4- Création de points virtuels correspondant à une grille régulière (paramétrable) à l'intérieur des masques hydrographiques.
 
 Cette étape comprend :
   * la suppression de ces masques dans les zones ZICAD/ZIPVA : étape manuelle, à réaliser sous QGIS par exemple
@@ -51,12 +71,8 @@ Cette étape comprend :
 
 <img src="images/correction_manuelle_masque_hydro.jpg" alt="Contrôle et nettoyage des masques hydrographiques à l'échelle du chantier" width="800">
 
-* 3- Création automatiques des tronçons hydrographiques - les "squelettes hydrographiques" des masques hydrographiques - c'est-à-dire les lignes internes indiquant le sens de l'écoulement de l'eau.
 
-* 4- Création de points virtuels correspondant à une grille régulière (paramétrable) à l'intérieur des masques hydrographiques.
-
-
-### Détails du process de créations des points virtuels pour les grands cours d'eaux (>5m de large)
+### Détails du processus de création des points virtuels pour les grands cours d'eau (>5m de large)
 ![Chaine de traitement des points virtuels](images/process_points_virtuels.jpg)
 
 A l'échelle de l'entité hydrographique, soit du masque hydrographique, la création des points virtuels consiste à :
@@ -69,8 +85,8 @@ Pour les cours d'eau SUPERIEURS A 150 M de long, il existe des étapes interméd
 Pour les cours d'eau INFERIEURS A 150 m de long, le modèle de régression linéaire ne fonctionne pas. La valeur du premier quartile sera calculée sur l'ensemble des points d'altitudes du LIDAR "SOL" (étape 2) et affectée pour ces entités hydrographiques (< 150m de long) : aplanissement.
 
 * 2- Création de points virtuels nécessitant plusieurs étapes intermédiaires :
-  *2.1 Création des points virtuels 2D espacés selon une grille régulière tous les N mètres (paramétrable) à l'intérieur du masque hydrographique "écoulement"
-  *2.2 Affecter une valeur d'altitude à ces points virtuels en fonction des "Z" calculés à l'étape précédente (interpolation linéaire ou aplanissement)
+  * 2.1 Création des points virtuels 2D espacés selon une grille régulière tous les N mètres (paramétrable) à l'intérieur du masque hydrographique "écoulement"
+  * 2.2 Affecter une valeur d'altitude à ces points virtuels en fonction des "Z" calculés à l'étape précédente (interpolation linéaire ou aplanissement)
 
 ### Effet de LIDRO sur les MNTs
 Ci-dessous un AVANT/APRES de la production d'un MNT SANS les points virtuels (MNT classé) / AVEC les points vrituels (MNT optimisé). 
@@ -128,7 +144,7 @@ Voir les tests fonctionnels en bas du README.
 * ``` scripts/ ```: un dossier contenant plusieurs fichiers ```.sh``` de tests fonctionnels
 * ``` test/ ```: un dossier contenant tous les tests unitaires des différentes fonctions développées dans le dossier ```lidro/```
 * ``` README ```: ce fichier
-* ``` environment.yml ```: un fichier d'environnement
+* ``` environment.yml ```: le fichier permettant de créer l'environnement conda dans lequel lidro peut être utilisé
 
 
 ## Tests
@@ -328,15 +344,15 @@ Options généralement passées en paramètres :
 ** tile_id : identifiant unique "coordonnée mimimum X" + "_" + "coordonnée maximale Y" de l'emprise de la dalle LIDAR.
 ** tilename_las : nom de la dalle LIDAR en entrée.
 ** geometry : l'emprise de la dalle LIDAR (POLYGONE).
-* Les dalles LIDAR classées avec leurs points virtuels (grille règluière tous les N mètre)
+* Les dalles LIDAR classées avec leurs points virtuels (grille règluière tous les N mètres)
 
 <img src="images/points_virtuels.jpg" alt="Points virtuels" width="700"> <figcaption>Figure 4 : Points virtuels à l'échelle de la dalle LIDAR</figcaption> </figure>
 
 ## Correction du bug "zones de cuvettes sous les ponts"
-Dans la branche ```rectify_model_under_bridge``` (https://github.com/IGNF/lidro/tree/rectify_model_under_bridge), un correctif non industriel a été développé. 
+Dans la branche ```rectify_model_under_bridge``` (https://github.com/IGNF/lidro/tree/rectify_model_under_bridge), un correctif a été développé, mais est moins abouti que le code de la branche `main` (notamment en termes de tests). 
 Ce correctif consiste à vérifier que les modèles de régréssion linéaire calculés le long du squelette s'écoulement progressivement le long du cours d'eau, c'est-à-dire éviter les zones de cuvettes sous les ponts. 
 
-D'un point de vue mathématique, cela signifie que le "Dernier point squelette AMONT < Premier point squelette AVAL = ALERTE". 
+D'un point de vue logique, cela signifie : "Si Dernier point squelette AMONT < Premier point squelette AVAL alors ALERTE". 
 
 ![Alerte](images/alerte_squelette.png)
 
