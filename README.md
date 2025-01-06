@@ -1,6 +1,6 @@
 # LIDRO (Aplanissement des surfaces d'eau pour la génération de modèles numériques de terrain à partir de données Lidar)
 
-Lidro est un outil permettant de créer automatiquement des points virtuels le long des surfaces d'eaux afin de créer des modèles numériques cohérents avec les modèles hydrologiques. 
+Lidro est un outil permettant de créer automatiquement des points virtuels le long des surfaces d'eau afin de créer des modèles numériques cohérents avec les modèles hydrologiques. 
 Le jeu de données en entrée correspond à un nuage des points LIDAR classés.
 
 Ce processus a été mis en place après plusieurs mois d'échanges (ateliers) avec le CEREMA et l'Université Gustave Eiffel afin d'améliorer la génération des Modèles Numériques de Terrains issus du projet LIDAR HD. L'IGN s'est inspiré du code développé par Frédéric PONS : https://github.com/CEREMA/filino
