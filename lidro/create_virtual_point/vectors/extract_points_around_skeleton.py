@@ -8,7 +8,7 @@ from typing import List
 
 import geopandas as gpd
 import pandas as pd
-from pdaltools.las_info import las_get_xy_bounds
+from lidro.las_info import las_get_xy_bounds
 from shapely.geometry import Point
 
 from lidro.create_virtual_point.pointcloud.crop_las import (
