@@ -45,9 +45,8 @@ def extract_points_around_skeleton_points_one_tile(
         k (int): the number of nearest neighbors to find
     """
     # Step 1 : Crop filtered pointcloud by Mask Hydro with buffer
-    input_dir_points = os.path.join(input_dir, "")
     tilename = os.path.splitext(filename)[0]  # filename to the LAS file
-    input_pointcloud = os.path.join(input_dir_points, filename)  # path to the LAS file
+    input_pointcloud = os.path.join(input_dir, filename)  # path to the LAS file
     logging.info(f"\nCroping filtered pointcloud by Mask Hydro with buffer for tile : {tilename}")
     # Croping filtered pointcloud by Mask Hydro with buffer for tile
     points_clip = read_filter_and_crop_pointcloud(input_pointcloud, str(input_mask_hydro_buffer), classes)
