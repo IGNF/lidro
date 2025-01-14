@@ -1,3 +1,7 @@
+# v0.1.1
+- Mise à jour du ReadMe
+- Dans la fonction extract_points_skeleton, les fichiers las n'ont plus besoin d'être dans un sous-dossier `pointcloud`
+
 # v0.1.0
 - Correction du bug au moment de la jonction entre les parties du squelette qui créait des
 interpolations imprévues entre des extrémités de branches qui ne devraient pas être reliées.
