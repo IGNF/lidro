@@ -309,7 +309,7 @@ Autres paramètres disponibles :
 
 <img src="images/extraction_n_points_squelette.jpg" alt="N points sur le squelette" width="700"> <figcaption>Figure 4 : Points tous les N mètres le long des squelettes hydrographiques</figcaption> </figure>
 
-### 4) étapes 2. Création des points virtuels (grille régulière tous les N mètres) à l'intérieur des grands cours d'eaux
+### 4) étape 2. Création des points virtuels (grille régulière tous les N mètres) à l'intérieur des grands cours d'eaux
 Pour fonctionner, la création des points virtuels a besoin d'une série de paramètres, certains ayant une valeur par défaut, d'autres non. Les paramètres se trouvent dans le fichier configs/configs_lidro.yaml.
 On peut soit les y modifier, soit les modifier en ligne de commande lors de l'exécution du script avec :
 ```
