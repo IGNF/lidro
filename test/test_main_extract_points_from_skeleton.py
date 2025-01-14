@@ -18,7 +18,7 @@ def setup_module(module):
 def test_main_run_okay():
 
     cmd = f"""python -m lidro.main_extract_points_from_skeleton \
-        io.input_dir={INPUT_DIR}\
+        io.input_dir={INPUT_DIR}/pointcloud \
         io.input_filename=Semis_2021_0830_6291_LA93_IGN69.laz \
         io.input_mask_hydro="{INPUT_DIR}/mask_hydro_merge/MaskHydro_merge.geojson"\
         io.input_skeleton="{INPUT_DIR}/skeleton/skeleton_hydro.geojson"\
@@ -28,7 +28,7 @@ def test_main_run_okay():
 
 
 def test_main_extract_points_skeleton_input_file():
-    input_dir = INPUT_DIR
+    input_dir = INPUT_DIR / "pointcloud"
     output_dir = OUTPUT_DIR / "main_extract_points_skeleton_input_file"
     input_filename = "Semis_2021_0830_6291_LA93_IGN69.laz"
     input_mask_hydro = INPUT_DIR / "mask_hydro_merge/MaskHydro_merge.geojson"
@@ -111,7 +111,7 @@ def test_main_extract_points_skeleton_fail_wrong_input_dir():
 
 
 def test_main_extract_points_skeleton_fail_no_output_dir():
-    input_dir = INPUT_DIR
+    input_dir = INPUT_DIR / "pointcloud"
     input_mask_hydro = INPUT_DIR / "mask_hydro_merge/MaskHydro_merge.geojson"
     input_skeleton = INPUT_DIR / "skeleton/skeleton_hydro.geojson"
     distances_meters = 5
@@ -137,7 +137,7 @@ def test_main_extract_points_skeleton_fail_no_output_dir():
 
 
 def test_main_extract_points_skeleton_fail_no_input_mask_hydro():
-    input_dir = INPUT_DIR
+    input_dir = INPUT_DIR / "pointcloud"
     output_dir = OUTPUT_DIR / "main_no_input_dir"
     input_skeleton = INPUT_DIR / "skeleton/skeleton_hydro.geojson"
     distances_meters = 5
@@ -163,7 +163,7 @@ def test_main_extract_points_skeleton_fail_no_input_mask_hydro():
 
 
 def test_main_extract_points_skeleton_fail_no_input_skeleton():
-    input_dir = INPUT_DIR
+    input_dir = INPUT_DIR / "pointcloud"
     output_dir = OUTPUT_DIR / "main_no_input_dir"
     input_mask_hydro = INPUT_DIR / "mask_hydro_merge/MaskHydro_merge.geojson"
     distances_meters = 5
