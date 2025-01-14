@@ -11,25 +11,26 @@ Pour créer des modèles numériques cohérents avec les modèles hydrologiques,
 Cette modélisation des surfaces hydrographiques se décline en 3 grands enjeux :​
 * Mise à plat des surfaces d’eau marine​
 * Mise à plat des plans d’eau intérieurs (lac, marais, etc.)​
-* Mise en plan des grands cours d’eau (>5m large) pour assurer l’écoulement​. **A noter : Pour l'instant, seule cette partie est développée dans LIDRO.**
+* Mise à plat des grands cours d’eau (>5m large) pour assurer l’écoulement​. **A noter : Pour l'instant, seule cette partie est développée dans LIDRO.**
 
 ## Traitement
 ### Objectif 
 L’écoulement de l'eau n’est pas toujours cohérent sur les MNT produits à partir des données LIDAR classées. 
 
-Par exemple dans l'image ci-dessous, le niveau d'eau en aval du barrage est supérieur à celui présent en amont. 
+Par exemple ci-dessous un AVANT/APRES de la production d'un MNT SANS les points virtuels (MNT classé) / AVEC les points vrituels (MNT optimisé). 
 
-<img src="images/erreur_modelisation.jpg" alt="Erreur de modélisation de l'eau à l'aval d'un barrage" width="700"> 
+<img src="images/mnt_avant_apres.jpg" alt="MNT classé / MNT optimisé" width="700"> 
 
-Autre phénomène observable, la présence de cuvettes artefacts le long de certains cours d’eau. 
+Ci-dessous un autre exemple d'AVANT/APRES de la production d'un MNT SANS les points virtuels / AVEC les points vrituels.
 
 <img src="images/cuvettes_artefects.jpg" alt="Cuvettes artéfacts le long d'un cours d'eau" width="700"> 
 
-Ces deux phénomènes (erreur de modélisation et cuvettes artéfacts) peuvent-être du par :
+Ces deux phénomènes (triangulation et la présence de cuvettes artéfacts) peuvent-être du par :
 * l'absence de points "sols" au niveaux des berges
 * la quasi-absence de points sur l'eau
 
-LIDRO a donc pour objectif de rendre l’écoulement cohérent (selon des altitudes décroissantes) sur les grands cours d’eaux.
+Du point de vue de l’usage métier, l’écoulement étant rendu cohérent le long des cours d’eau, les grosses triangulations et les cuvettes artefacts sont par conséquent supprimées. 
+L'objectif de LIDRO est de rendre l’écoulement cohérent (selon des altitudes décroissantes) sur les grands cours d’eaux.
 
 ### Les données en ENTREES
 
@@ -84,16 +85,8 @@ Pour les cours d'eau SUPERIEURS A 150 M de long, il existe des étapes interméd
 
 Pour les cours d'eau INFERIEURS A 150 m de long, le modèle de régression linéaire ne fonctionne pas. La valeur du premier quartile sera calculée sur l'ensemble des points d'altitudes du LIDAR "SOL" (étape 2) et affectée pour ces entités hydrographiques (< 150m de long) : aplanissement.
 
-* 2- Création de points virtuels nécessitant plusieurs étapes intermédiaires :
-  * 2.1 Création des points virtuels 2D espacés selon une grille régulière tous les N mètres (paramétrable) à l'intérieur du masque hydrographique "écoulement"
-  * 2.2 Affecter une valeur d'altitude à ces points virtuels en fonction des "Z" calculés à l'étape précédente (interpolation linéaire ou aplanissement)
-
-### Effet de LIDRO sur les MNTs
-Ci-dessous un AVANT/APRES de la production d'un MNT SANS les points virtuels (MNT classé) / AVEC les points vrituels (MNT optimisé). 
-
-Du point de vue de l’usage métier, l’écoulement étant rendu cohérent le long des cours d’eau, les cuvettes artefacts sont par conséquent supprimées.
-
-![MNT classé / MNT optimisé](images/mnt_avant_apres.jpg)
+* 2.1 Création des points virtuels 2D espacés selon une grille régulière tous les N mètres (paramétrable) à l'intérieur du masque hydrographique "écoulement"
+* 2.2 Affecter une valeur d'altitude à ces points virtuels en fonction des "Z" calculés à l'étape précédente (interpolation linéaire ou aplanissement)
 
 
 ## Installation des dépendances (conda)
@@ -214,7 +207,7 @@ Autres paramètres disponibles :
 * Les dalles LIDAR classées.
 
 ##### Données de sorties
-* Les masques HYDRO.
+* Des fichiers GeoJSON représentant les masques HYDRO à l'échelle des dalles LIDAR.
 
 <img src="images/masque_hydro_dalles.jpg" alt="Masques hydrographiques à l'échelle de la dalle LIDAR" width="700"> <figcaption>Figure 1 : Masques hydrographiques à l'échelle de la dalle LIDAR</figcaption> </figure>
 
@@ -240,7 +233,7 @@ Autres paramètres disponibles :
 * Les masques HYDRO à l'échelle des dalles LIDAR.
 
 ##### Données de sorties
-* Le masque HYDRO fusionné à l'échelle du projet, soit un masque HYDRO corrigé et nettoyé :
+* Un fichier GeoJSON représentant le masque HYDRO fusionné à l'échelle du projet, au format ".GeoJSON", soit un masque HYDRO corrigé et nettoyé :
     * hors des zones de ZICAD/ZIPVA,
     * en dehors des zones de petits/moyens cours d'eau,
     * ayant des aires > 150 m² (paramétrable).
@@ -282,12 +275,41 @@ Autres paramètres disponibles :
 * Le masque HYDRO fusionné à l'échelle du projet.
 
 ##### Données de sorties <figcaption>Figure 1 : Masques hydrographiques à l'échelle de la dalle LIDAR</figcaption> </figure>
-* Le squelette HYDRO à l'échelle du projet.
+* Un fichier GeoJSON représentant le squelette HYDRO à l'échelle du projet.
 
 <img src="images/squelette_hydro.jpg" alt="Squelette hydrographique" width="700"> <figcaption>Figure 3 : Squelettes hydrographiques à l'échelle du chantier</figcaption> </figure>
 
+### 4) étapes 1. Création des points tous les N mètres le long des squelettes hydrographiques, et réccupération les N plus proches voisins points LIDAR "SOL"
+Pour fonctionner, la création des points tous les N mètres le long des squelettes hydrographiques a besoin d'une série de paramètres, certains ayant une valeur par défaut, d'autres non. Les paramètres se trouvent dans le fichier configs/configs_lidro.yaml.
+On peut soit les y modifier, soit les modifier en ligne de commande lors de l'exécution du script avec :
+```
+python -m lidro.main_extract_points_from_skeleton [nom_paramètre_1]=[valeur_du_paramètre_1] [nom_paramètre_2]=[valeur_du_paramètre_2]
+```
+##### Paramètres
+Options généralement passées en paramètres :
+* io.input_dir : Le chemin du dossier contenant l'ensemble des données d'entrée (ex. "./data/").
+* io.input_mask_hydro : Le chemin contenant le masque HYDRO fusionné (ex."./data/merge_mask_hydro/dataset_2/MaskHydro_merge.geosjon").
+* io.input_skeleton= Le chemin contenant le squelette hydrographique (ex. "./data/skeleton_hydro/dataset_2/skeleton_hydro.geojson")
+* io.dir_points_skeleton : Le chemin contenant l'ensemble des N points du squelette créés à l'échelle des dalles LIDAR ( ex. "./tmp/point_skeleton/").
+* io.output_dir : Le chemin du dossier de sortie (les points tous les N mètres le long des squelettes hydrographiques).
 
-### 4) étapes 1 & 2. Création des points virtuels (grille régulière tous les N mètres) à l'intérieur des grands cours d'eaux
+Autres paramètres disponibles :
+* virtual_point.filter.keep_neighbors_classes : Les classes LIDAR (par défaut "sol" et "eau") à conserver pour analyser les bordures de berges le long des grands cours d'eaux.
+* virtual_point.vector.distance_meter : La distance en mètres entre deux points consécutifs le long des squelettes hydrographiques.
+* virtual_point.vector.buffer : La taille de la zone tampon en mètres pour trouver les points LIDAR.
+* virtual_point.vector.k : Le nombre de voisins les plus proches à trouver avec KNN.
+
+##### Données d'entrées
+* Le masque HYDRO fusionné à l'échelle du projet.
+* Le squelette HYDRO à l'échelle du projet.
+* Les dalles LIDAR classées.
+
+##### Données de sorties
+* Un fichier GeoJSON représentant les points tous les N mètres le long des squelettes hydrographiques.
+
+<img src="images/extraction_n_points_squelette.jpg" alt="N points sur le squelette" width="700"> <figcaption>Figure 4 : Points tous les N mètres le long des squelettes hydrographiques</figcaption> </figure>
+
+### 4) étapes 2. Création des points virtuels (grille régulière tous les N mètres) à l'intérieur des grands cours d'eaux
 Pour fonctionner, la création des points virtuels a besoin d'une série de paramètres, certains ayant une valeur par défaut, d'autres non. Les paramètres se trouvent dans le fichier configs/configs_lidro.yaml.
 On peut soit les y modifier, soit les modifier en ligne de commande lors de l'exécution du script avec :
 ```
@@ -302,10 +324,6 @@ Options généralement passées en paramètres :
 * io.output_dir :  Le chemin du dossier de sortie (les points virtuels à l'échelle du projet).
 
 Autres paramètres disponibles :
-* virtual_point.filter.keep_neighbors_classes : Les classes LIDAR (par défaut "sol" et "eau") à conserver pour analyser les bordures de berges le long des grands cours d'eaux.
-* virtual_point.vector.distance_meter : La distance en mètres entre deux points consécutifs le long des squelettes hydrographiques.
-* virtual_point.vector.buffer : La taille de la zone tampon en mètres pour trouver les points LIDAR.
-* virtual_point.vector.k : Le nombre de voisins les plus proches à trouver avec KNN.
 * virtual_point.vector.river_length : La longueur minimale en mètres d'une rivière pour utiliser le modèle de régression linéaire.
 * pointcloud.points_grid_spacing : L'espacement entre les points de la grille en mètres.
 * pointcloud.virtual_points_classes : Le choix du numéro de classification pour les points virtuels dans les nuages de points LIDAR.
@@ -316,7 +334,7 @@ Autres paramètres disponibles :
 * Les dalles LIDAR classées.
 
 ##### Données de sorties
-* Les points virtuels (grille règluière tous les N mètre) à l'échelle du projet.
+* Un nuage de point LIDAR au format ".LAZ" représentant les points virtuels (grille règluière tous les N mètre) à l'échelle du projet.
 * Un fichier GeoJSON "mask_skeletons_exclusions" indiquant spatialement quels entités HYDRO (masques) présentent un problèmes de géoémtries au niveau de squelettes HYDRO. Conséquence, dans ces entités HYDRO, aucuns points virtuels n'ont pu être calculés. (Options)
 * Un fichier GeoJSON "mask_hydro_no_virtual_points" indiquant spatialement quels entités HYDRO (masques) ne détiennent aucuns points "SOL" le long de ces berges. Conséquence, dans ces entités HYDRO, aucuns points virtuels n'ont pu être calculés. (Options)
 * Un fichier GeoJSON "mask_hydro_no_virtual_points_with_regression" indiquant spatialement quels entités HYDRO (masques) le modèle de régression linéaire n'a pas pu être calculés. Conséquence, dans ces entités HYDRO, aucuns points virtuels n'ont pu être calculés. (Options)
@@ -344,9 +362,9 @@ Options généralement passées en paramètres :
 ** tile_id : identifiant unique "coordonnée mimimum X" + "_" + "coordonnée maximale Y" de l'emprise de la dalle LIDAR.
 ** tilename_las : nom de la dalle LIDAR en entrée.
 ** geometry : l'emprise de la dalle LIDAR (POLYGONE).
-* Les dalles LIDAR classées avec leurs points virtuels (grille règluière tous les N mètres)
+* Les dalles LIDAR classées avec leurs points virtuels (grille règluière tous les N mètres) au format ".LAZ".
 
-<img src="images/points_virtuels.jpg" alt="Points virtuels" width="700"> <figcaption>Figure 4 : Points virtuels à l'échelle de la dalle LIDAR</figcaption> </figure>
+<img src="images/points_virtuels.jpg" alt="Points virtuels" width="700"> <figcaption>Figure 5 : Points virtuels à l'échelle de la dalle LIDAR</figcaption> </figure>
 
 ## Correction du bug "zones de cuvettes sous les ponts"
 Dans la branche ```rectify_model_under_bridge``` (https://github.com/IGNF/lidro/tree/rectify_model_under_bridge), un correctif a été développé, mais est moins abouti que le code de la branche `main` (notamment en termes de tests). 
