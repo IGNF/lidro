@@ -279,7 +279,7 @@ Autres paramètres disponibles :
 
 <img src="images/squelette_hydro.jpg" alt="Squelette hydrographique" width="700"> <figcaption>Figure 3 : Squelettes hydrographiques à l'échelle du chantier</figcaption> </figure>
 
-### 4) étapes 1. Création des points tous les N mètres le long des squelettes hydrographiques, et réccupération les N plus proches voisins points LIDAR "SOL"
+### 4) étape 1. Création des points tous les N mètres le long des squelettes hydrographiques, et récupération les N plus proches voisins points LIDAR "SOL"
 Pour fonctionner, la création des points tous les N mètres le long des squelettes hydrographiques a besoin d'une série de paramètres, certains ayant une valeur par défaut, d'autres non. Les paramètres se trouvent dans le fichier configs/configs_lidro.yaml.
 On peut soit les y modifier, soit les modifier en ligne de commande lors de l'exécution du script avec :
 ```
