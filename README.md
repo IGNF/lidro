@@ -65,13 +65,6 @@ Le processus mis en place se décompose en quatre parties :
 
 * 4- Création de points virtuels correspondant à une grille régulière (paramétrable) à l'intérieur des masques hydrographiques.
 
-Cette étape comprend :
-  * la suppression de ces masques dans les zones ZICAD/ZIPVA : étape manuelle, à réaliser sous QGIS par exemple
-  * la suppression des ces masques en dehors des grands cours d'eau, et leurs nettoyage : étape manuelle, à réaliser sous QGIS par exemple
-  * la suppression des aires < 150 m² (paramétrable)
-
-<img src="images/correction_manuelle_masque_hydro.jpg" alt="Contrôle et nettoyage des masques hydrographiques à l'échelle du chantier" width="800">
-
 
 ### Détails du processus de création des points virtuels pour les grands cours d'eau (>5m de large)
 ![Chaine de traitement des points virtuels](images/process_points_virtuels.jpg)
@@ -240,6 +233,21 @@ Autres paramètres disponibles :
 
 <img src="images/masque_hydro_merge.jpg" alt="Masques hydrographiques fusionnés" width="700"> <figcaption>Figure 2 : Masques hydrographiques fusionnés </figcaption> </figure>
 
+### 2) BIS / ! \ MANUEL : Contrôle et nettoyage du masque HYDRO fusionné à l'échelle du projet 
+L'objectif de ce nettoyage est d'obtenir un masque HYDRO fusionné propre et cohérent à l'échelle du projet.
+
+Cette étape comprend :
+  * la suppression de ces masques dans les zones ZICAD/ZIPVA : étape manuelle, à réaliser sous QGIS par exemple
+  * la suppression des ces masques en dehors des grands cours d'eau, et leurs nettoyage : étape manuelle, à réaliser sous QGIS par exemple
+  * la suppression des aires < 150 m² (paramétrable)
+
+<img src="images/correction_manuelle_masque_hydro.jpg" alt="Contrôle et nettoyage des masques hydrographiques à l'échelle du chantier" width="800">
+
+  * le découpage de ces masques lors des changements de direction de la rivière, notamment sur les types "chenaux en tresse" comme illustrés ci dessous. Il faut couper ces masques en cas de cassure ou de rupture forte de la pente, afin de bien segmenter les traitements automatiques qui seront réalisés dans la suite du processus. 
+
+<img src="images/decoupage_masque_fusionne.jpg" alt="Découpage du masque HYDRO fusionné" width="700">
+
+
 ### 3) Création des squelettes hydrographiques des grands cours d'eaux
 Pour fonctionner, la création de squelettes a besoin d'une série de paramètres, certains ayant une valeur par défaut, d'autres non. Les paramètres se trouvent dans le fichier configs/configs_lidro.yaml. On peut soit les y modifier, soit les modifer en ligne de commande lors de l'exécution du script avec :
 ```
@@ -279,6 +287,18 @@ Autres paramètres disponibles :
 
 <img src="images/squelette_hydro.jpg" alt="Squelette hydrographique" width="700"> <figcaption>Figure 3 : Squelettes hydrographiques à l'échelle du chantier</figcaption> </figure>
 
+
+### 3) BIS / ! \ MANUEL : Nettoyage des squelettes hydrographiques à l'échelle du projet
+L'objectif de ce nettoyage est d'obtenir un squelette par masque HYDRO.
+
+Cel qui signifie que chaque masque HYDRO détient UNE SEULE polyligne :
+  * située au milieu du masque HYDRO
+  * d'un bout à l'autre du masque
+
+<img src="images/nettoyage_squelette.jpg" alt="Nettoyage squelette hydrographique" width="700">
+
+
+
 ### 4) étape 1. Création des points tous les N mètres le long des squelettes hydrographiques, et récupération les N plus proches voisins points LIDAR "SOL"
 Pour fonctionner, la création des points tous les N mètres le long des squelettes hydrographiques a besoin d'une série de paramètres, certains ayant une valeur par défaut, d'autres non. Les paramètres se trouvent dans le fichier configs/configs_lidro.yaml.
 On peut soit les y modifier, soit les modifier en ligne de commande lors de l'exécution du script avec :
@@ -288,8 +308,8 @@ python -m lidro.main_extract_points_from_skeleton [nom_paramètre_1]=[valeur_du_
 ##### Paramètres
 Options généralement passées en paramètres :
 * io.input_dir : Le chemin du dossier contenant l'ensemble des données d'entrée (ex. "./data/").
-* io.input_mask_hydro : Le chemin contenant le masque HYDRO fusionné (ex."./data/merge_mask_hydro/dataset_2/MaskHydro_merge.geosjon").
-* io.input_skeleton= Le chemin contenant le squelette hydrographique (ex. "./data/skeleton_hydro/dataset_2/skeleton_hydro.geojson")
+* io.input_mask_hydro : Le chemin contenant le masque HYDRO fusionné (ex."./data/merge_mask_hydro/MaskHydro_merge.geosjon").
+* io.input_skeleton= Le chemin contenant le squelette hydrographique (ex. "./data/skeleton_hydro/skeleton_hydro.geojson")
 * io.dir_points_skeleton : Le chemin contenant l'ensemble des N points du squelette créés à l'échelle des dalles LIDAR ( ex. "./tmp/point_skeleton/").
 * io.output_dir : Le chemin du dossier de sortie (les points tous les N mètres le long des squelettes hydrographiques).
 
@@ -318,8 +338,8 @@ python -m lidro.main_create_virtual_points [nom_paramètre_1]=[valeur_du_paramè
 ##### Paramètres
 Options généralement passées en paramètres :
 * io.input_dir : Le chemin du dossier contenant l'ensemble des données d'entrée (ex. "./data/").
-* io.input_mask_hydro : Le chemin contenant le masque HYDRO fusionné (ex."./data/merge_mask_hydro/dataset_2/MaskHydro_merge.geosjon").
-* io.input_skeleton= Le chemin contenant le squelette hydrographique (ex. "./data/skeleton_hydro/dataset_2/skeleton_hydro.geojson")
+* io.input_mask_hydro : Le chemin contenant le masque HYDRO fusionné (ex."./data/merge_mask_hydro/MaskHydro_merge.geosjon").
+* io.input_skeleton= Le chemin contenant le squelette hydrographique (ex. "./data/skeleton_hydro/skeleton_hydro.geojson")
 * io.dir_points_skeleton : Le chemin contenant l'ensemble des N points du squelette créés à l'échelle des dalles LIDAR ( ex. "./tmp/point_skeleton/").
 * io.output_dir :  Le chemin du dossier de sortie (les points virtuels à l'échelle du projet).
 
