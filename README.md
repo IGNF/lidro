@@ -233,10 +233,10 @@ Autres paramètres disponibles :
 
 <img src="images/masque_hydro_merge.jpg" alt="Masques hydrographiques fusionnés" width="700"> <figcaption>Figure 2 : Masques hydrographiques fusionnés </figcaption> </figure>
 
-### 2) BIS / ! \ MANUEL : Contrôle et nettoyage du masque HYDRO fusionné à l'échelle du projet 
+### 2 bis) Nettoyage du masque HYDRO fusionné à l'échelle du projet
 L'objectif de ce nettoyage est d'obtenir un masque HYDRO fusionné propre et cohérent à l'échelle du projet.
 
-Cette étape comprend :
+Pas encore implémenté, cette étape est manuelle pour l'instant, voici la marche à suivre :
   * la suppression de ces masques dans les zones ZICAD/ZIPVA : étape manuelle, à réaliser sous QGIS par exemple
   * la suppression des ces masques en dehors des grands cours d'eau, et leurs nettoyage : étape manuelle, à réaliser sous QGIS par exemple
   * la suppression des aires < 150 m² (paramétrable)
@@ -288,10 +288,11 @@ Autres paramètres disponibles :
 <img src="images/squelette_hydro.jpg" alt="Squelette hydrographique" width="700"> <figcaption>Figure 3 : Squelettes hydrographiques à l'échelle du chantier</figcaption> </figure>
 
 
-### 3) BIS / ! \ MANUEL : Nettoyage des squelettes hydrographiques à l'échelle du projet
-L'objectif de ce nettoyage est d'obtenir un squelette par masque HYDRO.
+### 3 bis) Nettoyage des squelettes hydrographiques à l'échelle du projet
+Pas encore implémenté, cette étape est manuelle pour l'instant.
 
-Cel qui signifie que chaque masque HYDRO détient UNE SEULE polyligne :
+L'objectif de ce nettoyage est d'obtenir un squelette par masque HYDRO.
+Ce qui signifie que chaque masque HYDRO contient UNE SEULE polyligne :
   * située au milieu du masque HYDRO
   * d'un bout à l'autre du masque
 
@@ -308,9 +309,9 @@ python -m lidro.main_extract_points_from_skeleton [nom_paramètre_1]=[valeur_du_
 ##### Paramètres
 Options généralement passées en paramètres :
 * io.input_dir : Le chemin du dossier contenant l'ensemble des données d'entrée (ex. "./data/").
-* io.input_mask_hydro : Le chemin contenant le masque HYDRO fusionné (ex."./data/merge_mask_hydro/MaskHydro_merge.geosjon").
-* io.input_skeleton= Le chemin contenant le squelette hydrographique (ex. "./data/skeleton_hydro/skeleton_hydro.geojson")
-* io.dir_points_skeleton : Le chemin contenant l'ensemble des N points du squelette créés à l'échelle des dalles LIDAR ( ex. "./tmp/point_skeleton/").
+* io.input_mask_hydro : Le chemin contenant le masque HYDRO fusionné (ex."./data/tile_0830_6291/mask_hydro_merge/MaskHydro_merge.geojson").
+* io.input_skeleton= Le chemin contenant le squelette hydrographique (ex. "./data/tile_0830_6291/skeleton/skeleton_hydro.geojson").
+* io.dir_points_skeleton : Le chemin contenant l'ensemble des N points du squelette créés à l'échelle des dalles LIDAR (ex. "./data/tile_0830_6291/virtual_points/").
 * io.output_dir : Le chemin du dossier de sortie (les points tous les N mètres le long des squelettes hydrographiques).
 
 Autres paramètres disponibles :
@@ -338,9 +339,9 @@ python -m lidro.main_create_virtual_points [nom_paramètre_1]=[valeur_du_paramè
 ##### Paramètres
 Options généralement passées en paramètres :
 * io.input_dir : Le chemin du dossier contenant l'ensemble des données d'entrée (ex. "./data/").
-* io.input_mask_hydro : Le chemin contenant le masque HYDRO fusionné (ex."./data/merge_mask_hydro/MaskHydro_merge.geosjon").
-* io.input_skeleton= Le chemin contenant le squelette hydrographique (ex. "./data/skeleton_hydro/skeleton_hydro.geojson")
-* io.dir_points_skeleton : Le chemin contenant l'ensemble des N points du squelette créés à l'échelle des dalles LIDAR ( ex. "./tmp/point_skeleton/").
+* io.input_mask_hydro : Le chemin contenant le masque HYDRO fusionné (ex."./data/tile_0830_6291/mask_hydro_merge/MaskHydro_merge.geojson").
+* io.input_skeleton= Le chemin contenant le squelette hydrographique (ex. "./data/tile_0830_6291/skeleton/skeleton_hydro.geojson").
+* io.dir_points_skeleton : Le chemin contenant l'ensemble des N points du squelette créés à l'échelle des dalles LIDAR (ex. "./data/tile_0830_6291/virtual_points/").
 * io.output_dir :  Le chemin du dossier de sortie (les points virtuels à l'échelle du projet).
 
 Autres paramètres disponibles :
@@ -369,8 +370,8 @@ python -m lidro.main_clip_virtual_point_by_tile [nom_paramètre_1]=[valeur_du_pa
 ```
 ##### Paramètres
 Options généralement passées en paramètres :
-* io.input_dir : Le chemin du dossier contenant l'ensemble des dalles LIDAR classées (ex. "./data/pointcloud").
-* io.input_dir_virtual_point : Le chemin du dosiser contenant les points virtueks générés à l'échelle du projet.
+* io.input_dir : Le chemin du dossier contenant l'ensemble des dalles LIDAR classées (ex. "./data/tile_0830_6291/pointcloud").
+* io.input_dir_virtual_point : Le chemin du dosiser contenant les points virtuels générés à l'échelle du projet.
 * io.output_dir :  Le chemin du dossier de sortie (les points virtuels intégrés dans chaque dalle LIDAR).
 
 ##### Données d'entrées
